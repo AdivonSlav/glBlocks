@@ -32,5 +32,7 @@ namespace Utils
 		case LogLevel::ERROR:
 			return "ERROR: ";
 		}
+
+		return "UNKNOWN: ";
 	}
 }
