@@ -2,6 +2,7 @@
 
 #include "Window.h"
 #include "../utils/Logger.h"
+#include "../utils/GLErrorCallback.h"
 
 namespace Window
 {
@@ -47,6 +48,9 @@ namespace Window
 		}
 
 		LOG_INFO("OpenGL " << glGetString(GL_VERSION))
+
+		glEnable(GL_DEBUG_OUTPUT);
+		glDebugMessageCallback(ErrorMessageCallback, nullptr);
 	}
 
 	int Window::ShouldClose()

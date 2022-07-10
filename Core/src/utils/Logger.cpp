@@ -18,7 +18,7 @@ namespace Utils
 
 	void Logger::Log()
 	{
-		std::cout << GetLevel() << m_Stream.str() << std::endl;
+		std::cout << "glBlocksCore " << GetLevel() << m_Stream.str() << std::endl;
 	}
 
 	std::string Logger::GetLevel()

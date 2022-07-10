@@ -4,3 +4,4 @@
 
 #include "utils/Logger.h"
 #include "window/Window.h"
+#include "graphics/Shader.h"
