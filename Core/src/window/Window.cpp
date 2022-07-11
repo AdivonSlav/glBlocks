@@ -29,6 +29,7 @@ namespace Window
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		// To maintain compatibility with MacOS systems
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 		m_Window = glfwCreateWindow(width, height, title, nullptr, nullptr);
@@ -48,6 +49,8 @@ namespace Window
 		}
 
 		LOG_INFO("OpenGL " << glGetString(GL_VERSION))
+
+		glfwSetErrorCallback(GLFWErrorCallback);
 
 		glEnable(GL_DEBUG_OUTPUT);
 		glDebugMessageCallback(ErrorMessageCallback, nullptr);

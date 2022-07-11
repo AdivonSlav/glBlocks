@@ -5,35 +5,34 @@
 
 namespace CoreGraphics
 {
-	class Buffer
+	class CORE_API Buffer
 	{
 	private:
 		GLuint m_BufferID;
-		GLenum m_Type;
+		GLenum m_Target;
+		GLint m_Size;
+		GLint m_ComponentCount;
 	public:
 		/**
-		 * \brief
+		 * \brief Creates a new buffer object and fills it with data
 		 * \param type Target to which the buffer is bound (e.g. GL_ARRAY_BUFFER)
 		 */
-		Buffer(GLenum type);
+		Buffer(GLenum target, GLint size, GLint componentCount, const void* data, GLenum usage);
 		~Buffer();
 
-		/**
-		 * \brief Stores data into the buffer
-		 * \param size Size in bytes of the data passed to the buffer
-		 * \param data Pointer to the buffer data
-		 * \param usage Usage pattern (e.g. GL_STATIC_DRAW)
-		 */
-		void BufferData(unsigned int size, const void* data, GLenum usage);
+
+		GLuint GetID() const { return m_BufferID; }
+		GLint GetSize() const { return m_Size; }
+		GLint GetComponentCount() const { return m_ComponentCount; }
 
 		/**
 		 * \brief Binds the buffer object
 		 */
-		void Bind();
+		void Bind() const;
 
 		/**
 		 * \brief Unbinds the buffer object
 		 */
-		void Unbind();
+		void Unbind() const;
 	};
 }
