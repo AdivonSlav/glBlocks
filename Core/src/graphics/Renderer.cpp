@@ -11,6 +11,6 @@ namespace CoreGraphics
 	void Renderer::Draw()
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
 	}
 }

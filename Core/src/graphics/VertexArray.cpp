@@ -28,7 +28,7 @@ namespace CoreGraphics
 			delete buffer;
 	}
 
-	void VertexArray::AddBuffer(Buffer* buffer, GLint index, GLenum type)
+	void VertexArray::AddBuffer(Buffers::VertexBuffer* buffer, GLint index, GLenum type)
 	{
 		m_Buffers.push_back(buffer);
 

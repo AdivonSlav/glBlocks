@@ -1,5 +1,7 @@
 #include <Core.h>
 
+using namespace CoreGraphics;
+
 int main()
 {
 	auto& instance = Window::Window::Get();
@@ -9,26 +11,35 @@ int main()
 	CoreGraphics::Shader testShader("src\\shaders\\vertex.shader", "src\\shaders\\fragment.shader");
 	testShader.CreateShaderProgram();
 
-	float posBuffer[] = {
-		-0.5f, -0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f,
-		 0.0f,  0.5f, 0.0f
+	float positions[] = {
+		-0.5f, 0.5f, 1.0f,
+		-0.5f,-0.5f, 1.0f,
+		 0.5f, 0.5f, 1.0f,
+		 0.5f,-0.5f, 1.0f,
 	};
 
-	float colorBuffer[] = {
+	float colors[] = {
+		1.0f, 1.0f, 0.2f, 1.0f,
 		1.0f, 1.0f, 0.2f, 1.0f,
 		1.0f, 1.0f, 0.2f, 1.0f,
 		1.0f, 1.0f, 0.2f, 1.0f
 	};
 
-	CoreGraphics::VertexArray vao;
-	auto posVBO = new CoreGraphics::Buffer(GL_ARRAY_BUFFER, sizeof(posBuffer), 3, posBuffer, GL_STATIC_DRAW);
-	auto colorVBO = new CoreGraphics::Buffer(GL_ARRAY_BUFFER, sizeof(colorBuffer), 4, colorBuffer, GL_STATIC_DRAW);
+	unsigned int indices[] = {
+		0, 2, 1,
+		2, 1, 3
+	};
 
-	vao.AddBuffer(posVBO, 0, GL_FLOAT);
-	vao.AddBuffer(colorVBO, 1, GL_FLOAT);
+	VertexArray vao;
+	vao.Bind();
+	auto posBuffer = new Buffers::VertexBuffer(sizeof(positions), 3, positions, GL_STATIC_DRAW);
+	auto colorBuffer = new Buffers::VertexBuffer(sizeof(colors), 4, colors, GL_STATIC_DRAW);
+	Buffers::IndexBuffer indexBuffer(sizeof(indices), 3, indices, GL_STATIC_DRAW);
 
-	CoreGraphics::Renderer renderer;
+	vao.AddBuffer(posBuffer, 0, GL_FLOAT);
+	vao.AddBuffer(colorBuffer, 1, GL_FLOAT);
+
+	Renderer renderer;
 
 	while (!instance.ShouldClose())
 	{
