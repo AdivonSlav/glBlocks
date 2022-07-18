@@ -1,4 +1,3 @@
-
 #include <fstream>
 #include <sstream>
 #include "Shader.h"
@@ -129,6 +128,7 @@ namespace CoreGraphics
 
 		if (vertexShader == 0 || fragmentShader == 0)
 		{
+			glDeleteProgram(m_ProgramID);
 			LOG_ERROR("Ending shader program creation...")
 			return;
 		}
@@ -141,10 +141,15 @@ namespace CoreGraphics
 		{
 			LOG_ERROR("Ending shader program linking...")
 			glDeleteProgram(m_ProgramID);
+			glDeleteShader(vertexShader);
+			glDeleteShader(fragmentShader);
 			return;
 		}
 
 		glValidateProgram(m_ProgramID);
+
+		glDetachShader(m_ProgramID, vertexShader);
+		glDetachShader(m_ProgramID, fragmentShader);
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
 	}
