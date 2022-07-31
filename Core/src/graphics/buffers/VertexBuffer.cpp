@@ -24,6 +24,6 @@ namespace CoreGraphics::Buffers
 
 	void VertexBuffer::Unbind() const
 	{
-		glBindBuffer(0, m_BufferID);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 }

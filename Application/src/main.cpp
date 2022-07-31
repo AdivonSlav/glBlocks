@@ -1,33 +1,64 @@
 #include <Core.h>
 
 using namespace CoreGraphics;
+using namespace CoreWindow;
+
+// main.cpp is only used for testing purposes. It will be revamped later for the actual application
 
 int main()
 {
-	auto& instance = Window::Window::Get();
+	auto& instance = Window::Get();
 
 	instance.Init(800, 600, "Test");
 
-	CoreGraphics::Shader testShader("src\\shaders\\vertex.shader", "src\\shaders\\fragment.shader");
+	Shader testShader("src\\shaders\\vertex.shader", "src\\shaders\\fragment.shader");
 	testShader.CreateShaderProgram();
 
 	float positions[] = {
-		-0.5f, 0.5f, 1.0f,
-		-0.5f,-0.5f, 1.0f,
-		 0.5f, 0.5f, 1.0f,
-		 0.5f,-0.5f, 1.0f,
+		// front
+		-1.0f, -1.0f,  1.0,
+		 1.0f, -1.0f,  1.0,
+		 1.0f,  1.0f,  1.0,
+		-1.0f,  1.0f,  1.0,
+		// back
+		-1.0f, -1.0f, -1.0,
+		 1.0f, -1.0f, -1.0,
+		 1.0f,  1.0f, -1.0,
+		-1.0f,  1.0f, -1.0
 	};
 
 	float colors[] = {
-		1.0f, 1.0f, 0.2f, 1.0f,
-		1.0f, 1.0f, 0.2f, 1.0f,
-		1.0f, 1.0f, 0.2f, 1.0f,
-		1.0f, 1.0f, 0.2f, 1.0f
+		// front colors
+		1.0, 0.0, 0.0,
+		0.0, 1.0, 0.0,
+		0.0, 0.0, 1.0,
+		1.0, 1.0, 1.0,
+		// back colors
+		1.0, 0.0, 0.0,
+		0.0, 1.0, 0.0,
+		0.0, 0.0, 1.0,
+		1.0, 1.0, 1.0
 	};
 
 	unsigned int indices[] = {
-		0, 2, 1,
-		2, 1, 3
+		// front
+		0, 1, 2,
+		2, 3, 0,
+		// right
+		1, 5, 6,
+		6, 2, 1,
+		// back
+		7, 6, 5,
+		5, 4, 7,
+		// left
+		4, 0, 3,
+		3, 7, 4,
+		// bottom
+		4, 5, 1,
+		1, 0, 4,
+		// top
+		3, 2, 6,
+		6, 7, 3
 	};
 
 	VertexArray vao;
@@ -40,11 +71,16 @@ int main()
 	vao.AddBuffer(colorBuffer, 1, GL_FLOAT);
 
 	Renderer renderer;
+	Camera camera({0.0f, 0.0f, 2.0f});
 
 	while (!instance.ShouldClose())
 	{
 		testShader.Bind();
 		vao.Bind();
+		indexBuffer.Bind();
+
+		camera.SetMatrix(100.0f, 0.1f, 100.0f, testShader, "camMatrix");
+		camera.CheckInput();
 
 		renderer.Draw();
 

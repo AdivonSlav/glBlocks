@@ -53,5 +53,7 @@ namespace CoreGraphics
 
 		void Bind();
 		void Unbind();
+
+		GLuint GetID() const { return m_ProgramID; }
 	};
 }

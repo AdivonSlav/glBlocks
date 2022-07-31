@@ -23,6 +23,6 @@ namespace CoreGraphics::Buffers
 
 	void IndexBuffer::Unbind() const
 	{
-		glBindBuffer(0, m_BufferID);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 }
