@@ -60,6 +60,7 @@ namespace CoreWindow
 		glEnable(GL_DEBUG_OUTPUT);
 		glDebugMessageCallback(ErrorMessageCallback, nullptr);
 
+		// Sets the corresponding callback methods for keyboard and mouse events
 		glfwSetKeyCallback(m_Window, KeyCallback);
 		glfwSetMouseButtonCallback(m_Window, MouseCallback);
 	}

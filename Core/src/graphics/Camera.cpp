@@ -13,18 +13,21 @@ namespace CoreGraphics
 
 	void Camera::SetMatrix(float fov, float nearPlane, float farPlane, const Shader& shader, const char* uniform)
 	{
+		// Initializing view and projection matrices as identity matrices
 		auto view = glm::identity<glm::mat4>();
 		auto projection = glm::identity<glm::mat4>();
 
+		// Calculates the view and projection matrices
 		view = glm::lookAt(m_Position, m_Position + m_Orientation, m_UpDir);
 		projection = glm::perspective(glm::radians(fov), (float)(Window::GetWidth() / Window::GetHeight()), nearPlane, farPlane);
 
+		// Sends the matrices to the uniform variable located in the vertex shader
 		glUniformMatrix4fv(glGetUniformLocation(shader.GetID(), uniform), 1, GL_FALSE, glm::value_ptr(projection * view));
 	}
 
 	void Camera::CheckInput(double deltaTime)
 	{
-		// To do: Implemented delta time between frames in order to slow down the movements
+		// To do: Implement delta time between frames in order to slow down the movements
 
 		if (Window::IsKeyPressed(GLFW_KEY_W))
 		{
@@ -65,6 +68,7 @@ namespace CoreGraphics
 		{
 			glfwSetInputMode(Window::GetWindowPtr(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
+			// If the first click is the current one, reset the mouse position to the center in order to prevent an accidental rotation
 			if (m_FirstClick)
 			{
 				glfwSetCursorPos(Window::GetWindowPtr(), Window::GetWidth() / 2, Window::GetHeight() / 2);
@@ -92,6 +96,7 @@ namespace CoreGraphics
 		}
 		if (Window::IsMouseButtonReleased(GLFW_MOUSE_BUTTON_RIGHT))
 		{
+			// Simply shows the cursor again when the button for rotation has been released
 			glfwSetInputMode(Window::GetWindowPtr(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			m_FirstClick = true;
 		}
