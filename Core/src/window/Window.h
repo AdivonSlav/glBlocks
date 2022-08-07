@@ -16,6 +16,7 @@ namespace CoreWindow
 		int m_Height;
 
 		static bool m_Keys[GLFW_KEY_LAST];
+		static bool m_MouseButtons[GLFW_MOUSE_BUTTON_LAST];
 
 		Window() = default;
 	public:
@@ -44,11 +45,20 @@ namespace CoreWindow
 		void PollAndSwapBuffers();
 
 		/**
-		 * \brief Function that gets called any time a key has been pressed
+		 * \brief Function that gets called any time a key has been pressed or released
 		 */
 		static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
+		/**
+		 * \brief Function that gets called any time a mouse button has been pressed or released
+		 */
+		static void MouseCallback(GLFWwindow* window, int button, int action, int mods);
+
 		static bool IsKeyPressed(unsigned int key);
 		static bool IsKeyReleased(unsigned int key);
+		static bool IsMouseButtonPressed(unsigned int button);
+		static bool IsMouseButtonReleased(unsigned int button);
+
+		static void GetCursorPos(double& x, double& y);
 	};
 }

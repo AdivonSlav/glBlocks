@@ -6,7 +6,7 @@ using namespace CoreWindow;
 namespace CoreGraphics
 {
 	Camera::Camera(glm::vec3 position)
-		: m_Position(position), m_Orientation(0.0f, 0.0f, -1.0f), m_UpDir(0.0f, 1.0f, 0.0f)
+		: m_Position(position), m_Orientation(0.0f, 0.0f, -1.0f), m_UpDir(0.0f, 1.0f, 0.0f), m_Sensitivity(2.5f), m_FirstClick(false)
 	{
 
 	}
@@ -22,34 +22,34 @@ namespace CoreGraphics
 		glUniformMatrix4fv(glGetUniformLocation(shader.GetID(), uniform), 1, GL_FALSE, glm::value_ptr(projection * view));
 	}
 
-	void Camera::CheckInput()
+	void Camera::CheckInput(double deltaTime)
 	{
 		// To do: Implemented delta time between frames in order to slow down the movements
 
 		if (Window::IsKeyPressed(GLFW_KEY_W))
 		{
-			m_Position += m_Speed * m_Orientation;
+			m_Position += (float)(deltaTime * m_Speed) * m_Orientation;
 		}
 		if (Window::IsKeyPressed(GLFW_KEY_A))
 		{
-			m_Position += m_Speed * -glm::normalize(glm::cross(m_Orientation, m_UpDir));
+			m_Position += (float)(deltaTime * m_Speed) * -glm::normalize(glm::cross(m_Orientation, m_UpDir));
 		}
 		if (Window::IsKeyPressed(GLFW_KEY_S))
 		{
-			m_Position += m_Speed * -m_Orientation;
+			m_Position += (float)(deltaTime * m_Speed) * -m_Orientation;
 		}
 		if (Window::IsKeyPressed(GLFW_KEY_D))
 		{
-			m_Position += m_Speed * glm::normalize(glm::cross(m_Orientation, m_UpDir));
+			m_Position += (float)(deltaTime * m_Speed) * glm::normalize(glm::cross(m_Orientation, m_UpDir));
 		}
 
 		if (Window::IsKeyPressed(GLFW_KEY_SPACE))
 		{
-			m_Position += m_Speed * m_UpDir;
+			m_Position += (float)(deltaTime * m_Speed) * m_UpDir;
 		}
 		if (Window::IsKeyPressed(GLFW_KEY_LEFT_CONTROL))
 		{
-			m_Position += m_Speed * -m_UpDir;
+			m_Position += (float)(deltaTime * m_Speed) * -m_UpDir;
 		}
 
 		if (Window::IsKeyPressed(GLFW_KEY_LEFT_SHIFT))
@@ -59,6 +59,41 @@ namespace CoreGraphics
 		if (Window::IsKeyReleased(GLFW_KEY_LEFT_SHIFT))
 		{
 			m_Speed = 0.1f;
+		}
+
+		if (Window::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
+		{
+			glfwSetInputMode(Window::GetWindowPtr(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+			if (m_FirstClick)
+			{
+				glfwSetCursorPos(Window::GetWindowPtr(), Window::GetWidth() / 2, Window::GetHeight() / 2);
+				m_FirstClick = false;
+			}
+
+			double mouseX;
+			double mouseY;
+			Window::GetCursorPos(mouseX, mouseY);
+
+			// Some mathematics mumbo jumbo
+
+			float rotationX = m_Sensitivity * (float)(mouseY - (Window::GetHeight() / 2)) / Window::GetHeight();
+			float rotationY = m_Sensitivity * (float)(mouseX - (Window::GetWidth() / 2)) / Window::GetWidth();
+
+			auto newOrientation = glm::rotate(m_Orientation, glm::radians(-rotationX), glm::normalize(glm::cross(m_Orientation, m_UpDir)));
+
+			if (!(glm::angle(newOrientation, m_UpDir) <= glm::radians(5.0f)) || glm::angle(newOrientation, -m_UpDir) <= glm::radians(5.0f))
+			{
+				m_Orientation = newOrientation;
+			}
+
+			m_Orientation = glm::rotate(m_Orientation, glm::radians(-rotationY), m_UpDir);
+			glfwSetCursorPos(Window::GetWindowPtr(), Window::GetWidth() / 2, Window::GetHeight() / 2);
+		}
+		if (Window::IsMouseButtonReleased(GLFW_MOUSE_BUTTON_RIGHT))
+		{
+			glfwSetInputMode(Window::GetWindowPtr(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			m_FirstClick = true;
 		}
 	}
 }

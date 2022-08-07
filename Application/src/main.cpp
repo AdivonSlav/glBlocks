@@ -73,6 +73,7 @@ int main()
 	Renderer renderer;
 	Camera camera({0.0f, 0.0f, 2.0f});
 
+
 	while (!instance.ShouldClose())
 	{
 		testShader.Bind();
@@ -80,7 +81,7 @@ int main()
 		indexBuffer.Bind();
 
 		camera.SetMatrix(100.0f, 0.1f, 100.0f, testShader, "camMatrix");
-		camera.CheckInput();
+		camera.CheckInput(1.0);
 
 		renderer.Draw();
 

@@ -8,6 +8,7 @@ namespace CoreWindow
 {
 	Window Window::m_Instance;
 	bool Window::m_Keys[GLFW_KEY_LAST] = { false };
+	bool Window::m_MouseButtons[GLFW_MOUSE_BUTTON_LAST] = { false };
 
 	Window::~Window()
 	{
@@ -60,6 +61,7 @@ namespace CoreWindow
 		glDebugMessageCallback(ErrorMessageCallback, nullptr);
 
 		glfwSetKeyCallback(m_Window, KeyCallback);
+		glfwSetMouseButtonCallback(m_Window, MouseCallback);
 	}
 
 	int Window::ShouldClose()
@@ -75,7 +77,14 @@ namespace CoreWindow
 
 	void Window::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
+		// If the key has been pressed, then the corresponding array member is set to true
+
 		m_Keys[key] = action != GLFW_RELEASE;
+	}
+
+	void Window::MouseCallback(GLFWwindow* window, int button, int action, int mods)
+	{
+		m_MouseButtons[button] = action != GLFW_RELEASE;
 	}
 
 	bool Window::IsKeyPressed(unsigned int key)
@@ -92,5 +101,26 @@ namespace CoreWindow
 			return false;
 
 		return !m_Keys[key];
+	}
+
+	bool Window::IsMouseButtonPressed(unsigned int button)
+	{
+		if (button >= GLFW_MOUSE_BUTTON_LAST)
+			return false;
+
+		return m_MouseButtons[button];
+	}
+
+	bool Window::IsMouseButtonReleased(unsigned int button)
+	{
+		if (button >= GLFW_MOUSE_BUTTON_LAST)
+			return false;
+
+		return !m_MouseButtons[button];
+	}
+
+	void Window::GetCursorPos(double& x, double& y)
+	{
+		glfwGetCursorPos(m_Instance.m_Window, &x, &y);
 	}
 }

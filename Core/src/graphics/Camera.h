@@ -22,6 +22,8 @@ namespace CoreGraphics
 
 		float m_Speed;
 		float m_Sensitivity;
+
+		bool m_FirstClick;
 	public:
 		Camera(glm::vec3 position);
 		~Camera() = default;
@@ -39,7 +41,7 @@ namespace CoreGraphics
 		/**
 		 * \brief Checks to see if any input toward the camera has happened and processes it
 		 */
-		void CheckInput();
+		void CheckInput(double deltaTime);
 
 		const glm::vec3& GetPosition() const { return m_Position; }
 	};
