@@ -43,6 +43,7 @@ namespace CoreGraphics
 		 */
 		std::string ParseShader(const char* source);
 	public:
+		Shader();
 		Shader(const char* vertexShader, const char* fragmentShader);
 		~Shader();
 

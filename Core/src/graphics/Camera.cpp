@@ -6,13 +6,15 @@ using namespace CoreWindow;
 namespace CoreGraphics
 {
 	Camera::Camera(glm::vec3 position)
-		: m_Position(position), m_Orientation(0.0f, 0.0f, -1.0f), m_UpDir(0.0f, 1.0f, 0.0f), m_Sensitivity(2.5f), m_FirstClick(false)
+		: m_Position(position), m_Orientation(0.0f, 0.0f, -1.0f), m_UpDir(0.0f, 1.0f, 0.0f), m_Sensitivity(6.0f), m_FirstClick(false)
 	{
 
 	}
 
-	void Camera::SetMatrix(float fov, float nearPlane, float farPlane, const Shader& shader, const char* uniform)
+	void Camera::SetMatrix(float fov, float nearPlane, float farPlane, Shader& shader, const char* uniform)
 	{
+		shader.Bind();
+
 		// Initializing view and projection matrices as identity matrices
 		auto view = glm::identity<glm::mat4>();
 		auto projection = glm::identity<glm::mat4>();
@@ -23,6 +25,8 @@ namespace CoreGraphics
 
 		// Sends the matrices to the uniform variable located in the vertex shader
 		glUniformMatrix4fv(glGetUniformLocation(shader.GetID(), uniform), 1, GL_FALSE, glm::value_ptr(projection * view));
+
+		shader.Unbind();
 	}
 
 	void Camera::CheckInput(double deltaTime)
@@ -57,11 +61,11 @@ namespace CoreGraphics
 
 		if (Window::IsKeyPressed(GLFW_KEY_LEFT_SHIFT))
 		{
-			m_Speed = 0.4f;
+			m_Speed = 1.0f;
 		}
 		if (Window::IsKeyReleased(GLFW_KEY_LEFT_SHIFT))
 		{
-			m_Speed = 0.1f;
+			m_Speed = 0.5f;
 		}
 
 		if (Window::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))

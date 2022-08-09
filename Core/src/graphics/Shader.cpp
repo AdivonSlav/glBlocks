@@ -55,6 +55,11 @@ namespace CoreGraphics
 		return true;
 	}
 
+	Shader::Shader()
+	{
+
+	}
+
 	Shader::Shader(const char* vertexShader, const char* fragmentShader)
 		: m_ProgramID(0)
 	{
@@ -93,7 +98,6 @@ namespace CoreGraphics
 
 		return ss.str();
 	}
-
 
 	GLuint Shader::CompileShader(GLenum type)
 	{

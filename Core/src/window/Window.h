@@ -60,5 +60,10 @@ namespace CoreWindow
 		static bool IsMouseButtonReleased(unsigned int button);
 
 		static void GetCursorPos(double& x, double& y);
+
+		/**
+		 * \brief Returns the time elapsed since GLFW was initialized
+		 */
+		static double GetTime() { return glfwGetTime(); }
 	};
 }
