@@ -11,7 +11,7 @@ namespace CoreGraphics
 
 	}
 
-	void Camera::SetMatrix(float fov, float nearPlane, float farPlane, Shader& shader, const char* uniform)
+	void Camera::SetMatrix(float fov, float nearPlane, float farPlane, Shader& shader, const char* viewUniform, const char* projUniform)
 	{
 		shader.Bind();
 
@@ -23,8 +23,9 @@ namespace CoreGraphics
 		view = glm::lookAt(m_Position, m_Position + m_Orientation, m_UpDir);
 		projection = glm::perspective(glm::radians(fov), (float)(Window::GetWidth() / Window::GetHeight()), nearPlane, farPlane);
 
-		// Sends the matrices to the uniform variable located in the vertex shader
-		glUniformMatrix4fv(glGetUniformLocation(shader.GetID(), uniform), 1, GL_FALSE, glm::value_ptr(projection * view));
+		// Sends the matrix to the uniform variable located in the vertex shader
+		shader.SetMat4<float>(viewUniform, view);
+		shader.SetMat4<float>(projUniform, projection);
 
 		shader.Unbind();
 	}

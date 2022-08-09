@@ -36,7 +36,7 @@ namespace CoreGraphics
 		 * \param shader The shader to be used
 		 * \param uniform The uniform to which the matrix will be sent in the shader
 		 */
-		void SetMatrix(float fov, float nearPlane, float farPlane, Shader& shader, const char* uniform);
+		void SetMatrix(float fov, float nearPlane, float farPlane, Shader& shader, const char* viewUniform, const char* projUniform);
 
 		/**
 		 * \brief Checks to see if any input toward the camera has happened and processes it

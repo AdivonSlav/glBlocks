@@ -1,8 +1,13 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 #include <glad/glad.h>
 #include "../CoreAPI.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace CoreGraphics
 {
@@ -18,6 +23,7 @@ namespace CoreGraphics
 	private:
 		GLuint m_ProgramID;
 		ShaderSource m_Source;
+		std::unordered_map<const char*, int> m_Uniforms;
 
 		/**
 		 * \brief Checks the compilation status of the shader object
@@ -51,6 +57,18 @@ namespace CoreGraphics
 		 * \brief Creates and links the shader program
 		 */
 		void CreateShaderProgram();
+
+		/**
+		 * \brief Calls glUniform and sends the provided matrix to the uniform in the shader
+		 * \tparam T Type of values in matrix
+		 * \param uniform The uniform that will receive the matrix
+		 * \param matrix The matrix that is to be sent
+		 */
+		template<typename T>
+		void SetMat4(const char* uniform, glm::mat4& matrix);
+
+		template<>
+		void SetMat4<float>(const char* uniform, glm::mat4& matrix);
 
 		void Bind();
 		void Unbind();

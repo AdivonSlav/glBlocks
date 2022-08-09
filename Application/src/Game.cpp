@@ -83,7 +83,7 @@ void Game::Run()
 		
 		vao.Bind();
 		indexBuffer.Bind();
-		m_Camera.SetMatrix(65.0f, 0.1f, 1000.0f, basicShader, "camMatrix");
+		m_Camera.SetMatrix(40.0f, 0.1f, 1000.0f, basicShader, "uView", "uProjection");
 		m_Camera.CheckInput(m_DeltaTime);
 		m_Renderer->Draw();
 

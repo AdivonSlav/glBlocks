@@ -158,6 +158,24 @@ namespace CoreGraphics
 		glDeleteShader(fragmentShader);
 	}
 
+	template <typename T>
+	void Shader::SetMat4(const char* uniform, glm::mat4& matrix)
+	{
+		
+	}
+
+	template <>
+	void Shader::SetMat4<float>(const char* uniform, glm::mat4& matrix)
+	{
+		// Simple shader caching to prevent OpenGL from querying already known uniforms with glGetUniformLocation
+		if (m_Uniforms.find(uniform) == m_Uniforms.end())
+		{
+			m_Uniforms.insert(std::pair(uniform, glGetUniformLocation(m_ProgramID, uniform)));
+		}
+
+		glUniformMatrix4fv(m_Uniforms[uniform], 1, GL_FALSE, glm::value_ptr(matrix));
+	}
+
 	void Shader::Bind()
 	{
 		glUseProgram(m_ProgramID);
