@@ -99,6 +99,14 @@ namespace CoreGraphics
 		return ss.str();
 	}
 
+	void Shader::CacheUniform(const char* uniform)
+	{
+		if (m_Uniforms.find(uniform) == m_Uniforms.end())
+		{
+			m_Uniforms.insert(std::pair(uniform, glGetUniformLocation(m_ProgramID, uniform)));
+		}
+	}
+
 	GLuint Shader::CompileShader(GLenum type)
 	{
 		GLuint shaderObject = glCreateShader(type);
@@ -167,13 +175,14 @@ namespace CoreGraphics
 	template <>
 	void Shader::SetMat4<float>(const char* uniform, glm::mat4& matrix)
 	{
-		// Simple shader caching to prevent OpenGL from querying already known uniforms with glGetUniformLocation
-		if (m_Uniforms.find(uniform) == m_Uniforms.end())
-		{
-			m_Uniforms.insert(std::pair(uniform, glGetUniformLocation(m_ProgramID, uniform)));
-		}
-
+		CacheUniform(uniform);
 		glUniformMatrix4fv(m_Uniforms[uniform], 1, GL_FALSE, glm::value_ptr(matrix));
+	}
+
+	void Shader::SetFloat(const char* uniform, GLfloat value)
+	{
+		CacheUniform(uniform);
+		glUniform1f(m_Uniforms[uniform], value);
 	}
 
 	void Shader::Bind()

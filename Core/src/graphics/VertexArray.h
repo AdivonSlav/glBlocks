@@ -19,6 +19,12 @@ namespace CoreGraphics
 		VertexArray();
 		~VertexArray();
 
+		/**
+		 * \brief 
+		 * \param buffer Buffer to be added
+		 * \param index The layout index to which the buffer attributes will be bound
+		 * \param m_Type The type of data that is held in the buffer
+		 */
 		void AddBuffer(Buffers::VertexBuffer* buffer, GLint index, GLenum m_Type);
 
 		void Bind() const;

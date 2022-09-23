@@ -48,6 +48,12 @@ namespace CoreGraphics
 		 * \return The shader file parsed as a string
 		 */
 		std::string ParseShader(const char* source);
+
+		/**
+		 * \brief Simple shader caching to prevent OpenGL from querying already known uniforms with glGetUniformLocation
+		 * \param uniform Name of the uniform variable in the shader
+		 */
+		void CacheUniform(const char* uniform);
 	public:
 		Shader();
 		Shader(const char* vertexShader, const char* fragmentShader);
@@ -69,6 +75,8 @@ namespace CoreGraphics
 
 		template<>
 		void SetMat4<float>(const char* uniform, glm::mat4& matrix);
+
+		void SetFloat(const char* uniform, GLfloat value);
 
 		void Bind();
 		void Unbind();

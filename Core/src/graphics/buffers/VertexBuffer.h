@@ -13,8 +13,11 @@ namespace CoreGraphics::Buffers
 		GLint m_ComponentCount;
 	public:
 		/**
-		 * \brief Creates a new VertexBuffer object and fills it with data
-		 * \param type Target to which the VertexBuffer is bound (e.g. GL_ARRAY_VertexBuffer)
+		 * \brief 
+		 * \param size The size in bytes of the buffer
+		 * \param componentCount Component count per vertex
+		 * \param data Pointer to the buffer data
+		 * \param usage Hint to OpenGL on how the buffer will be used (e.g. GL_STATIC_DRAW)
 		 */
 		VertexBuffer(GLint size, GLint componentCount, const void* data, GLenum usage);
 		~VertexBuffer();
