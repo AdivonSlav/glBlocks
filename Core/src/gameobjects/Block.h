@@ -26,6 +26,7 @@ namespace CoreGameObjects
 		Block(BlockType type, const glm::vec3& position, float scale);
 		~Block();
 
+		BlockType GetType() const { return m_Type; }
 		VertexArray* GetVAO() { return m_VAO; }
 		IndexBuffer* GetIBO() { return m_IBO; }
 	};

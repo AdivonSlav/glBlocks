@@ -44,39 +44,6 @@ namespace CoreGameObjects
             m_Scale *  1.0f, m_Scale * -1.0f, m_Scale * -1.0f,
         };
 
-        GLfloat colors[]
-        {
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f, 1.0f,
-        };
-
         GLushort indices[]
         {
             //Front face
@@ -112,12 +79,86 @@ namespace CoreGameObjects
         // Multiplied by sizeof(GLfloat) it yields the entire size in bytes of the vertices container.
         auto m_PosBuffer = new VertexBuffer(6 * 4 * 3 * sizeof(GLfloat), 3, vertices, GL_STATIC_DRAW);
         m_PosBuffer->Bind();
-
-        auto m_ColorBuffer = new VertexBuffer(6 * 4 * 4 * sizeof(GLfloat), 4, colors, GL_STATIC_DRAW);
-        m_ColorBuffer->Bind();
-
         m_VAO->AddBuffer(m_PosBuffer, 0, GL_FLOAT);
-        m_VAO->AddBuffer(m_ColorBuffer, 1, GL_FLOAT);
+
+        if (m_Type == BlockType::AIR)
+        {
+            GLfloat colors[]
+            {
+                1.0f, 1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                                  
+                1.0f, 1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                                  
+                1.0f, 1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                                  
+                1.0f, 1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                                  
+                1.0f, 1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                                  
+                1.0f, 1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f, 0.0f,
+            };
+
+	        auto m_ColorBuffer = new VertexBuffer(6 * 4 * 4 * sizeof(GLfloat), 4, colors, GL_STATIC_DRAW);
+	        m_ColorBuffer->Bind();
+			m_VAO->AddBuffer(m_ColorBuffer, 1, GL_FLOAT);
+        }
+        else
+        {
+            GLfloat uv[]
+            {
+                1.0f, 1.0f,
+                0.0f, 1.0f,
+                0.0f, 0.0f,
+                1.0f, 0.0f,
+
+                1.0f, 1.0f,
+                0.0f, 1.0f,
+                0.0f, 0.0f,
+                1.0f, 0.0f,
+
+                1.0f, 1.0f,
+                0.0f, 1.0f,
+                0.0f, 0.0f,
+                1.0f, 0.0f,
+
+                1.0f, 1.0f,
+                0.0f, 1.0f,
+                0.0f, 0.0f,
+                1.0f, 0.0f,
+
+                1.0f, 1.0f,
+                0.0f, 1.0f,
+                0.0f, 0.0f,
+                1.0f, 0.0f,
+
+                1.0f, 1.0f,
+                0.0f, 1.0f,
+                0.0f, 0.0f,
+                1.0f, 0.0f
+            };
+
+            auto m_UVBuffer = new VertexBuffer(6 * 4 * 2 * sizeof(GLfloat), 2, uv, GL_STATIC_DRAW);
+            m_UVBuffer->Bind();
+            m_VAO->AddBuffer(m_UVBuffer, 1, GL_FLOAT);
+        }
 
         m_IBO = new IndexBuffer(6 * 2 * 3 * sizeof(GLushort), 3, indices, GL_STATIC_DRAW);
 	}

@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Shader.h"
+#include "../gameobjects/Block.h"
+#include "Texture.h"
 #include "../CoreAPI.h"
 
 namespace CoreGraphics
 {
-	enum class ShaderType { BASIC_SHADER };
+	enum class ShaderType { BASIC_SHADER, AIR_SHADER };
 
 	class CORE_API Renderer
 	{
@@ -15,7 +17,7 @@ namespace CoreGraphics
 		Renderer();
 		~Renderer() = default;
 
-		void Draw();
+		void Draw(const CoreGameObjects::Block& block, const Texture& tex);
 
 		/**
 		 * \brief Loads the specified shader so it can be used by the renderer

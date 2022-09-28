@@ -77,6 +77,7 @@ namespace CoreGraphics
 		void SetMat4<float>(const char* uniform, glm::mat4& matrix);
 
 		void SetFloat(const char* uniform, GLfloat value);
+		void SetInt(const char* uniform, GLint value);
 
 		void Bind();
 		void Unbind();

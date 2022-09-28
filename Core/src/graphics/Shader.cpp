@@ -185,6 +185,12 @@ namespace CoreGraphics
 		glUniform1f(m_Uniforms[uniform], value);
 	}
 
+	void Shader::SetInt(const char* uniform, GLint value)
+	{
+		CacheUniform(uniform);
+		glUniform1i(m_Uniforms[uniform], value);
+	}
+
 	void Shader::Bind()
 	{
 		glUseProgram(m_ProgramID);
