@@ -16,18 +16,20 @@ void Game::Run()
 {
 	Shader basicShader("src\\shaders\\vertex.shader", "src\\shaders\\fragment.shader");
 	basicShader.CreateShaderProgram();
-	Shader airShader("src\\shaders\\air_vertex.shader", "src\\shaders\\air_fragment.shader");
-	airShader.CreateShaderProgram();
+	//Shader airShader("src\\shaders\\air_vertex.shader", "src\\shaders\\air_fragment.shader");
+	//airShader.CreateShaderProgram();
 
 	m_Renderer->LoadShader(basicShader, ShaderType::BASIC_SHADER);
-	m_Renderer->LoadShader(airShader, ShaderType::AIR_SHADER);
+	//m_Renderer->LoadShader(airShader, ShaderType::AIR_SHADER);
 
-	CoreGameObjects::Block testBlock(CoreGameObjects::BlockType::DIRT, { 1.0f, 1.0f, 1.0f }, 1.0f);
-	Texture dirtBlock(GL_TEXTURE_2D, "src\\textures\\grass_block_bottom.png");
+	//Texture dirtBlock(GL_TEXTURE_2D, "src\\textures\\grass_block_bottom.png");
+	//dirtBlock.Load();
 
-	dirtBlock.Load();
+	auto modelMat = glm::identity<glm::mat4>();
 
 	double lastTime = Window::GetTime();
+
+	CoreGameObjects::Chunk testChunk;
 
 	while (!m_Window.ShouldClose())
 	{
@@ -35,12 +37,12 @@ void Game::Run()
 		m_DeltaTime = currentTime - lastTime;
 		lastTime = currentTime;
 
-		testBlock.GetVAO()->Bind();
-		testBlock.GetIBO()->Bind();
-
 		m_Camera.SetMatrix(40.0f, 0.1f, 1000.0f, basicShader, "uView", "uProjection");
+		basicShader.Bind();
+		basicShader.SetMat4<float>("uModel", modelMat);
 		m_Camera.CheckInput(m_DeltaTime);
-		m_Renderer->Draw(testBlock, dirtBlock);
+
+		m_Renderer->Draw(testChunk);
 
 		m_Window.PollAndSwapBuffers();
 	}

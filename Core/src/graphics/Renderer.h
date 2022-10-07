@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Shader.h"
-#include "../gameobjects/Block.h"
 #include "Texture.h"
 #include "../CoreAPI.h"
+
+#include "../gameobjects/Chunk.h"
 
 namespace CoreGraphics
 {
@@ -17,7 +18,7 @@ namespace CoreGraphics
 		Renderer();
 		~Renderer() = default;
 
-		void Draw(const CoreGameObjects::Block& block, const Texture& tex);
+		void Draw(CoreGameObjects::Chunk& chunk);
 
 		/**
 		 * \brief Loads the specified shader so it can be used by the renderer
