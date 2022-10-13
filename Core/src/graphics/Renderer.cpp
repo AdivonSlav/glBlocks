@@ -1,6 +1,10 @@
 #include <glad/glad.h>	
+
 #include "Renderer.h"
 #include "../utils/Logger.h"
+#include "../gameobjects/ChunkManager.h"
+
+using namespace CoreGameObjects;
 
 namespace CoreGraphics
 {
@@ -17,19 +21,26 @@ namespace CoreGraphics
 		LOG_INFO("Renderer initialized. Number of texture units: " << textureUnits);
 	}
 
-	void Renderer::Draw(CoreGameObjects::Chunk& chunk)
+	void Renderer::Draw(ChunkManager& chunkManager)
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
 
-		if (chunk.GetRebuild())
-			chunk.Build();
+		for (auto& chunk : chunkManager.GetLoadedChunks())
+		{
+			auto identity = glm::identity<glm::mat4>();
+			auto model = glm::translate(identity, chunk.first);
 
-		if (chunk.GetVertCount() == 0)
-			return;
+			if (chunk.second->GetRebuild())
+				chunk.second->Build();
 
-		chunk.GetVAO()->Bind();
-		glDrawArrays(GL_TRIANGLES, 0, chunk.GetVertCount());
+			m_Shader[(int)ShaderType::BASIC_SHADER]->Bind();
+			m_Shader[(int)ShaderType::BASIC_SHADER]->SetMat4<float>("uModel", model);
+
+			chunk.second->GetVAO()->Bind();
+			glDrawArrays(GL_TRIANGLES, 0, chunk.second->GetVertCount());
+		}
+
 	}
 
 	void Renderer::LoadShader(Shader& shader, ShaderType type)

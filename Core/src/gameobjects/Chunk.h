@@ -2,9 +2,9 @@
 
 #include "../graphics/VertexArray.h"
 
-#define CHUNK_X 8
-#define CHUNK_Y 32
-#define CHUNK_Z 8
+#define CHUNK_X 16
+#define CHUNK_Y 64
+#define CHUNK_Z 16
 
 using namespace CoreGraphics;
 using namespace CoreGraphics::Buffers;
@@ -30,7 +30,7 @@ namespace CoreGameObjects
 
 		void Build();
 
-		VertexArray* GetVAO() { return m_VAO; }
+		VertexArray* GetVAO() const { return m_VAO; }
 		bool GetRebuild() const { return m_Rebuild; }
 		int GetVertCount() const { return m_VertexCount; }
 	};

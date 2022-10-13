@@ -7,8 +7,6 @@ namespace CoreGameObjects
 	Chunk::Chunk()
 		: m_VAO(new VertexArray()), m_Rebuild(false), m_VertexCount(0)
 	{
-		srand(unsigned(time(NULL)));
-
 		for (int x = 0; x < CHUNK_X; x++)
 		{
 			for (int y = 0; y < CHUNK_Y; y++)
@@ -20,7 +18,6 @@ namespace CoreGameObjects
 				}
 			}
 		}
-
 	}
 
 	Chunk::~Chunk()
@@ -43,8 +40,8 @@ namespace CoreGameObjects
 	{
 		m_Rebuild = false;
 
-		glm::tvec3<GLbyte> positions[CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6];
-		GLbyte types[CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6];
+		auto positions = new glm::tvec3<GLbyte>[CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6];
+		auto types = new GLbyte[CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6];
 
 		int counter = 0;
 
@@ -143,8 +140,8 @@ namespace CoreGameObjects
 			}
 		}
 
-		int posBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * 3 * sizeof(GLbyte);
-		int typeBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * sizeof(GLbyte);
+		unsigned int posBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * 3 * sizeof(GLbyte);
+		unsigned int typeBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * sizeof(GLbyte);
 
 		m_VAO->Bind();
 		auto posBuffer = new VertexBuffer(posBufferSize, 3, positions, GL_STATIC_DRAW);
@@ -155,5 +152,8 @@ namespace CoreGameObjects
 		m_VAO->Unbind();
 
 		m_VertexCount = counter;
+
+		delete[] positions;
+		delete[] types;
 	}
 }

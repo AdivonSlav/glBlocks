@@ -4,7 +4,7 @@
 #include "Texture.h"
 #include "../CoreAPI.h"
 
-#include "../gameobjects/Chunk.h"
+#include "../gameobjects/ChunkManager.h"
 
 namespace CoreGraphics
 {
@@ -18,7 +18,7 @@ namespace CoreGraphics
 		Renderer();
 		~Renderer() = default;
 
-		void Draw(CoreGameObjects::Chunk& chunk);
+		void Draw(CoreGameObjects::ChunkManager& chunkManager);
 
 		/**
 		 * \brief Loads the specified shader so it can be used by the renderer

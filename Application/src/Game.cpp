@@ -5,11 +5,13 @@ Game::Game()
 {
 	m_Window.Init(800, 600, "glBlocks");
 	m_Renderer = new Renderer();
+	m_ChunkManager = new ChunkManager();
 }
 
 Game::~Game()
 {
 	delete m_Renderer;
+	delete m_ChunkManager;
 }
 
 void Game::Run()
@@ -29,7 +31,6 @@ void Game::Run()
 
 	double lastTime = Window::GetTime();
 
-	CoreGameObjects::Chunk testChunk;
 
 	while (!m_Window.ShouldClose())
 	{
@@ -42,7 +43,7 @@ void Game::Run()
 		basicShader.SetMat4<float>("uModel", modelMat);
 		m_Camera.CheckInput(m_DeltaTime);
 
-		m_Renderer->Draw(testChunk);
+		m_Renderer->Draw(*m_ChunkManager);
 
 		m_Window.PollAndSwapBuffers();
 	}
