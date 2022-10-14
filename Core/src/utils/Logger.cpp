@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-namespace Utils
+namespace CoreUtils
 {
 
 	Logger::Logger(LogLevel level)

@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include "../utils/Logger.h"
+#include "../vendor/imgui/imgui.h"
 
 using namespace CoreWindow;
 
@@ -72,6 +73,7 @@ namespace CoreGraphics
 		if (Window::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
 		{
 			glfwSetInputMode(Window::GetWindowPtr(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+			ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
 			// If the first click is the current one, reset the mouse position to the center in order to prevent an accidental rotation
 			if (m_FirstClick)
@@ -103,6 +105,7 @@ namespace CoreGraphics
 		{
 			// Simply shows the cursor again when the button for rotation has been released
 			glfwSetInputMode(Window::GetWindowPtr(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
 			m_FirstClick = true;
 		}
 	}

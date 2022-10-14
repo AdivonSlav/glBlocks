@@ -1,9 +1,9 @@
-#include "Game.h"
+#include "Application.h"
 
 int main()
 {
 	srand(unsigned(time(NULL)));
 
-	Game game;
-	game.Run();
+	Application glBlocks;
+	glBlocks.Run();
 }

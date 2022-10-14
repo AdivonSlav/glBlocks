@@ -48,7 +48,6 @@ namespace CoreGraphics
 			LOG_ERROR("Failed to link shader program!")
 			LOG_ERROR(error)
 
-
 			return false;
 		}
 

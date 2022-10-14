@@ -9,6 +9,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#define BLOCKS_GLSL_VERSION "#version 460"
+
 namespace CoreGraphics
 {
 	struct ShaderSource
