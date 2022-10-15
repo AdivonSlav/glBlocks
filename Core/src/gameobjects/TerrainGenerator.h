@@ -4,7 +4,7 @@
 
 namespace CoreGameObjects
 {
-	class TerrainGenerator
+	class CORE_API TerrainGenerator
 	{
 	private:
 		ChunkManager& m_ChunkManager;
@@ -13,5 +13,7 @@ namespace CoreGameObjects
 		~TerrainGenerator() = default;
 
 		void Generate();
+
+		void WriteToFile(std::pair<glm::vec3, Chunk*> chunk);
 	};
 }

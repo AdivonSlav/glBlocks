@@ -7,6 +7,7 @@ Application::Application()
 	m_Renderer = new Renderer();
 	m_ChunkManager = new ChunkManager();
 	m_Dashboard = new Dashboard(true);
+	m_Generator = new TerrainGenerator(*m_ChunkManager);
 }
 
 Application::~Application()
@@ -14,20 +15,17 @@ Application::~Application()
 	delete m_Renderer;
 	delete m_ChunkManager;
 	delete m_Dashboard;
+	delete m_Generator;
 }
 
 void Application::Run()
 {
 	Shader basicShader("src\\shaders\\vertex.shader", "src\\shaders\\fragment.shader");
 	basicShader.CreateShaderProgram();
-	//Shader airShader("src\\shaders\\air_vertex.shader", "src\\shaders\\air_fragment.shader");
-	//airShader.CreateShaderProgram();
 
 	m_Renderer->LoadShader(basicShader, ShaderType::BASIC_SHADER);
-	//m_Renderer->LoadShader(airShader, ShaderType::AIR_SHADER);
 
-	//Texture dirtBlock(GL_TEXTURE_2D, "src\\textures\\grass_block_bottom.png");
-	//dirtBlock.Load();
+	m_Generator->Generate();
 
 	auto modelMat = glm::identity<glm::mat4>();
 
@@ -46,7 +44,6 @@ void Application::Run()
 
 		m_Dashboard->SendData(m_FrameRate, m_AverageFrameTime);
 		m_Dashboard->Render();
-
 
 		m_Window.PollAndSwapBuffers();
 	}

@@ -14,3 +14,4 @@
 #include "graphics/Texture.h"
 #include "gameobjects/Chunk.h"
 #include "gameobjects/ChunkManager.h"
+#include "gameobjects/TerrainGenerator.h"

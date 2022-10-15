@@ -21,6 +21,7 @@ private:
 	Camera m_Camera;
 	ChunkManager* m_ChunkManager;
 	Dashboard* m_Dashboard;
+	TerrainGenerator* m_Generator;
 
 	time_point<steady_clock> m_LastTime;
 	double m_DeltaTime;

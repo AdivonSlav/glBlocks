@@ -1,5 +1,6 @@
 #include "TerrainGenerator.h"
 
+#include <fstream>
 #include <glm/gtc/noise.hpp>
 
 namespace CoreGameObjects
@@ -18,9 +19,17 @@ namespace CoreGameObjects
 			{
 				auto chunk = new Chunk();
 				glm::vec3 chunkPos(i * CHUNK_X, -CHUNK_Y, j * CHUNK_Z);
+				auto pair = std::pair(chunkPos, chunk);
 
-				m_ChunkManager.GetLoadedChunks().insert(std::pair(chunkPos, chunk));
+				WriteToFile(pair);
+
+				m_ChunkManager.GetLoadedChunks().insert(pair);
 			}
 		}
+	}
+
+	void TerrainGenerator::WriteToFile(std::pair<glm::vec3, Chunk*> chunk)
+	{
+
 	}
 }
