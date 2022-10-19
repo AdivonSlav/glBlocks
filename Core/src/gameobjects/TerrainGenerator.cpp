@@ -10,13 +10,13 @@
 #define MAX_SEED 9999999999
 #define MIN_SEED 1
 
-#define CHUNKS 32
+#define CHUNKS 16
 #define SEA_LEVEL 8
 
 namespace CoreGameObjects
 {
-	TerrainGenerator::TerrainGenerator(ChunkManager* chunkManager, unsigned long long seed)
-		: m_ChunkManager(chunkManager), m_Seed(seed)
+	TerrainGenerator::TerrainGenerator(unsigned long long seed)
+		: m_Seed(seed)
 	{
 		if (m_Seed == 0)
 			m_Seed = GetRand<unsigned long long>(1000000000, MAX_SEED);
@@ -52,7 +52,7 @@ namespace CoreGameObjects
 
 				//m_ChunkManager.WriteToFile(chunkPos, *chunk);
 
-				m_ChunkManager->GetLoadedChunks().insert(std::pair(chunkPos, chunk));
+				ChunkManager::GetLoadedChunks().insert(std::pair(chunkPos, chunk));
 				chunkIndex++;
 			}
 		}
@@ -82,7 +82,7 @@ namespace CoreGameObjects
 				{
 					if (y < surfaceY)
 					{
-						auto type = rand() % 4 + 1;
+						auto type = GetRand(2,7);
 						chunk.SetBlock(x, y, z, (BlockType)type);
 					}
 					else

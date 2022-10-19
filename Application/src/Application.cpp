@@ -11,15 +11,13 @@ Application::Application()
 {
 	m_Window.Init(800, 600, "glBlocks");
 	m_Renderer = new Renderer();
-	m_ChunkManager = new ChunkManager();
 	m_Dashboard = new Dashboard(true);
-	m_Generator = new TerrainGenerator(m_ChunkManager);
+	m_Generator = new TerrainGenerator();
 }
 
 Application::~Application()
 {
 	delete m_Renderer;
-	delete m_ChunkManager;
 	delete m_Dashboard;
 	delete m_Generator;
 }
@@ -50,7 +48,7 @@ void Application::Run()
 		basicShader.SetMat4<float>("uModel", modelMat);
 		m_Camera.CheckInput(m_DeltaTime);
 
-		m_Renderer->Draw(*m_ChunkManager);
+		m_Renderer->Draw();
 
 		CalcTime();
 

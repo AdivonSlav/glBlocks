@@ -13,7 +13,7 @@ using namespace CoreGraphics::Buffers;
 
 namespace CoreGameObjects
 {
-	enum class BlockType { AIR, WATER, GRASS, DIRT, SAND, STONE, IRON_ORE };
+	enum class BlockType { UNDEFINED, AIR, WATER, GRASS, DIRT, SAND, STONE, IRON_ORE };
 
 	class CORE_API Chunk
 	{

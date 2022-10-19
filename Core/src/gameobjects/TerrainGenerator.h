@@ -7,13 +7,11 @@ namespace CoreGameObjects
 	class CORE_API TerrainGenerator
 	{
 	private:
-		ChunkManager* m_ChunkManager;
-
 		unsigned long long m_Seed;
 
 		double Lerp(unsigned long long val);
 	public:
-		TerrainGenerator(ChunkManager* chunkManager, unsigned long long seed = 0);
+		TerrainGenerator(unsigned long long seed = 0);
 		~TerrainGenerator() = default;
 
 		void Generate();

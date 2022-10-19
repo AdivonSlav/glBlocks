@@ -21,12 +21,12 @@ namespace CoreGraphics
 		LOG_INFO("Renderer initialized. Number of texture units: " << textureUnits);
 	}
 
-	void Renderer::Draw(ChunkManager& chunkManager)
+	void Renderer::Draw()
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.5f, 0.75f, 0.93f, 1.0f);
 
-		for (auto& chunk : chunkManager.GetLoadedChunks())
+		for (auto& chunk : ChunkManager::GetLoadedChunks())
 		{
 			auto identity = glm::identity<glm::mat4>();
 			auto model = glm::translate(identity, chunk.first);

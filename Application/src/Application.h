@@ -19,7 +19,6 @@ private:
 	Window& m_Window;
 	Renderer* m_Renderer;
 	Camera m_Camera;
-	ChunkManager* m_ChunkManager;
 	Dashboard* m_Dashboard;
 	TerrainGenerator* m_Generator;
 

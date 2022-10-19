@@ -18,7 +18,7 @@ namespace CoreGraphics
 		Renderer();
 		~Renderer() = default;
 
-		void Draw(CoreGameObjects::ChunkManager& chunkManager);
+		void Draw();
 
 		/**
 		 * \brief Loads the specified shader so it can be used by the renderer

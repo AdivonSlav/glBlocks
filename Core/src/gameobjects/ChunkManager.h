@@ -14,19 +14,20 @@ namespace CoreGameObjects
 	class CORE_API ChunkManager
 	{
 	private:
-		std::unordered_map<glm::vec3, Chunk*>* m_LoadedChunks;
-		std::unordered_map<glm::vec3, std::string>* m_UnloadedChunks;
+		static std::unordered_map<glm::vec3, Chunk*>* m_LoadedChunks;
+		static std::unordered_map<glm::vec3, std::string>* m_UnloadedChunks;
+
+		ChunkManager() = default;
 	public:
-		ChunkManager();
-		~ChunkManager();
+		static void WriteToFile(glm::vec3 position, const Chunk& chunk);
+		static Chunk* ReadFromFile(glm::vec3 position);
 
-		void WriteToFile(glm::vec3 position, const Chunk& chunk);
+		static void LoadChunks();
 
-		Chunk* ReadFromFile(glm::vec3 position);
+		static bool IsLoaded(const glm::vec3& coordinates) { return m_LoadedChunks->contains(coordinates); }
+		static Chunk* GetLoadedChunk(const glm::vec3& coordinates);
 
-		void LoadChunks();
-
-		std::unordered_map<glm::vec3, Chunk*>& GetLoadedChunks() { return *m_LoadedChunks; }
-		std::unordered_map<glm::vec3, std::string>& GetUnloadedChunks() { return *m_UnloadedChunks; }
+		static std::unordered_map<glm::vec3, Chunk*>& GetLoadedChunks() { return *m_LoadedChunks; }
+		static std::unordered_map<glm::vec3, std::string>& GetUnloadedChunks() { return *m_UnloadedChunks; }
 	};
 }

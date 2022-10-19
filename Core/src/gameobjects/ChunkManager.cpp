@@ -13,22 +13,8 @@
 
 namespace CoreGameObjects
 {
-	ChunkManager::ChunkManager()
-	{
-		m_LoadedChunks = new std::unordered_map<glm::vec3, Chunk*>();
-		m_UnloadedChunks = new std::unordered_map<glm::vec3, std::string>();
-	}
-
-	ChunkManager::~ChunkManager()
-	{
-		for (auto& chunk : *m_LoadedChunks)
-		{
-			delete chunk.second;
-		}
-
-		delete m_LoadedChunks;
-		delete m_UnloadedChunks;
-	}
+	std::unordered_map<glm::vec3, Chunk*>* ChunkManager::m_LoadedChunks = new std::unordered_map<glm::vec3, Chunk*>();
+	std::unordered_map < glm::vec3, std::string>* ChunkManager::m_UnloadedChunks = new std::unordered_map<glm::vec3, std::string>();
 
 	void ChunkManager::WriteToFile(glm::vec3 position, const Chunk& chunk)
 	{
@@ -108,5 +94,13 @@ namespace CoreGameObjects
 			auto generatedChunk = ReadFromFile(chunk.first);
 			m_LoadedChunks->insert(std::pair(chunk.first, generatedChunk));
 		}
+	}
+
+	Chunk* ChunkManager::GetLoadedChunk(const glm::vec3& coordinates)
+	{
+		if (!IsLoaded(coordinates))
+			return nullptr;
+
+		return m_LoadedChunks->at(coordinates);
 	}
 }
