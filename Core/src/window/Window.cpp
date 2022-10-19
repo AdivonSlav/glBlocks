@@ -33,8 +33,13 @@ namespace CoreWindow
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 		// To maintain compatibility with MacOS systems
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+		// Temporarily disables resizing of the window
+		glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
 		// For debug logging
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 
@@ -57,9 +62,11 @@ namespace CoreWindow
 		LOG_INFO("OpenGL " << glGetString(GL_VERSION))
 
 		// Enables OpenGL debug output and sets the callback function for any errors so they can be logged to the console
-		glfwSetErrorCallback(GLFWErrorCallback);
 		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glfwSetErrorCallback(GLFWErrorCallback);
 		glDebugMessageCallback(ErrorMessageCallback, nullptr);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
 		// Sets the corresponding callback methods for keyboard and mouse events
 		glfwSetKeyCallback(m_Window, KeyCallback);

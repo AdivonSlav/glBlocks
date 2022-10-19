@@ -2,12 +2,15 @@
 #include "../utils/Logger.h"
 #include "../vendor/imgui/imgui.h"
 
+#include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/vector_angle.hpp>
+
 using namespace CoreWindow;
 
 namespace CoreGraphics
 {
 	Camera::Camera(glm::vec3 position)
-		: m_Position(position), m_Orientation(0.0f, 0.0f, -1.0f), m_UpDir(0.0f, 1.0f, 0.0f), m_Sensitivity(14.0f), m_FirstClick(false)
+		: m_Position(position), m_Orientation(0.0f, 0.0f, -1.0f), m_UpDir(0.0f, 1.0f, 0.0f), m_Sensitivity(20.0f), m_FirstClick(false)
 	{
 
 	}
@@ -63,11 +66,11 @@ namespace CoreGraphics
 
 		if (Window::IsKeyPressed(GLFW_KEY_LEFT_SHIFT))
 		{
-			m_Speed = 2.5f;
+			m_Speed = 15.0f;
 		}
 		if (Window::IsKeyReleased(GLFW_KEY_LEFT_SHIFT))
 		{
-			m_Speed = 1.5f;
+			m_Speed = 5.0f;
 		}
 
 		if (Window::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))

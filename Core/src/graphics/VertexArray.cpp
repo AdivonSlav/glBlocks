@@ -38,7 +38,10 @@ namespace CoreGraphics
 		int stride = buffer->GetComponentCount() * GetTypeSize(type);
 
 		glEnableVertexAttribArray(index);
-		glVertexAttribPointer(index, buffer->GetComponentCount(), type, GL_FALSE, 0, (const void*)0);
+		if (type == GL_FLOAT)
+			glVertexAttribPointer(index, buffer->GetComponentCount(), type, GL_FALSE, 0, (const void*)0);
+		else if (type == GL_BYTE || type == GL_INT || type == GL_UNSIGNED_INT || type == GL_SHORT)
+			glVertexAttribIPointer(index, buffer->GetComponentCount(), type, 0, (const void*)0);
 
 		buffer->Unbind();
 		Unbind();

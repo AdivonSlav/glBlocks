@@ -401,3 +401,9 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Ignore chunk files
+*.ch
+
+# Ignore any generated log files
+Application/*.txt

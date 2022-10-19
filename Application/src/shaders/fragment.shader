@@ -1,7 +1,7 @@
 #version 460 core
 
-in vec3 texCoord;
-in float type;
+flat in ivec3 texCoord;
+flat in uint type;
 
 out vec4 fragColor;
 

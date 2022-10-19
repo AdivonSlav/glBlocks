@@ -1,5 +1,11 @@
 #include "Application.h"
 
+#ifdef BLOCKS_DEBUG
+#define SHADER_PATH "src/shaders/"
+#else
+#define SHADER_PATH "shaders/"
+#endif
+
 Application::Application()
 	: m_Window(Window::Get()), m_Camera({0.0f, 0.0f, 2.0f}), m_DeltaTime(0.0), m_ElapsedTime(0.0), m_FrameRate(0.0), m_AverageFrameTime(0.0), m_FrameCount(0)
 {
@@ -7,7 +13,7 @@ Application::Application()
 	m_Renderer = new Renderer();
 	m_ChunkManager = new ChunkManager();
 	m_Dashboard = new Dashboard(true);
-	m_Generator = new TerrainGenerator(*m_ChunkManager);
+	m_Generator = new TerrainGenerator(m_ChunkManager);
 }
 
 Application::~Application()
@@ -20,12 +26,18 @@ Application::~Application()
 
 void Application::Run()
 {
-	Shader basicShader("src\\shaders\\vertex.shader", "src\\shaders\\fragment.shader");
+	std::string vertexPath = SHADER_PATH;
+	vertexPath += "vertex.shader";
+	std::string fragmentPath = SHADER_PATH;
+	fragmentPath += "fragment.shader";
+	Shader basicShader(vertexPath.c_str(), fragmentPath.c_str());
 	basicShader.CreateShaderProgram();
 
 	m_Renderer->LoadShader(basicShader, ShaderType::BASIC_SHADER);
 
 	m_Generator->Generate();
+	//m_ChunkManager->LoadChunks();
+	m_Camera.SetPosition(0, 130.0f, 0);
 
 	auto modelMat = glm::identity<glm::mat4>();
 
@@ -47,6 +59,8 @@ void Application::Run()
 
 		m_Window.PollAndSwapBuffers();
 	}
+
+	LOG_INFO("Ending...");
 }
 
 void Application::CalcTime()

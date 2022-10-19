@@ -27,16 +27,15 @@ namespace CoreUtils
 		Logger(LogLevel level);
 		~Logger();
 
+		std::string GetCurrentTime(bool onlyDate = false);
+
+		void LogToFile(const std::string& logMessage);
+
 		std::stringstream& GetStream() { return m_Stream; }
 	};
 
-#ifdef BLOCKS_DEBUG
-	#define LOG_INFO(Message_) CoreUtils::Logger(CoreUtils::LogLevel::INFO).GetStream() << Message_;
-	#define LOG_WARN(Message_) CoreUtils::Logger(CoreUtils::LogLevel::WARN).GetStream() << Message_;
-	#define LOG_ERROR(Message_) CoreUtils::Logger(CoreUtils::LogLevel::ERROR).GetStream() << Message_;
-#else
-	#define LOG_INFO(_)
-	#define LOG_WARN(_)
-	#define LOG_ERROR(_) 
-#endif
+
+#define LOG_INFO(Message_) CoreUtils::Logger(CoreUtils::LogLevel::INFO).GetStream() << Message_;
+#define LOG_WARN(Message_) CoreUtils::Logger(CoreUtils::LogLevel::WARN).GetStream() << Message_;
+#define LOG_ERROR(Message_) CoreUtils::Logger(CoreUtils::LogLevel::ERROR).GetStream() << Message_;
 }

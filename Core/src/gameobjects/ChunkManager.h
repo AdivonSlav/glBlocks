@@ -15,12 +15,18 @@ namespace CoreGameObjects
 	{
 	private:
 		std::unordered_map<glm::vec3, Chunk*>* m_LoadedChunks;
-		std::unordered_map<glm::vec3, const char*>* m_UnloadedChunks;
+		std::unordered_map<glm::vec3, std::string>* m_UnloadedChunks;
 	public:
 		ChunkManager();
 		~ChunkManager();
 
+		void WriteToFile(glm::vec3 position, const Chunk& chunk);
+
+		Chunk* ReadFromFile(glm::vec3 position);
+
+		void LoadChunks();
+
 		std::unordered_map<glm::vec3, Chunk*>& GetLoadedChunks() { return *m_LoadedChunks; }
-		std::unordered_map<glm::vec3, const char*>& GetUnloadedChunks() { return *m_UnloadedChunks; }
+		std::unordered_map<glm::vec3, std::string>& GetUnloadedChunks() { return *m_UnloadedChunks; }
 	};
 }
