@@ -33,6 +33,12 @@ void Application::Run()
 
 	m_Renderer->LoadShader(basicShader, ShaderType::BASIC_SHADER);
 
+	Texture atlas(GL_TEXTURE_2D, "src/textures/texture_atlas.png");
+	atlas.Load();
+	atlas.Bind(GL_TEXTURE0);
+	basicShader.Bind();
+	basicShader.SetInt("uAtlasSize", 4);
+
 	m_Generator->Generate();
 	//m_ChunkManager->LoadChunks();
 	m_Camera.SetPosition(0, 130.0f, 0);

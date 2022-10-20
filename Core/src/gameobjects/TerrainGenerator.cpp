@@ -10,7 +10,7 @@
 #define MAX_SEED 9999999999
 #define MIN_SEED 1
 
-#define CHUNKS 16
+#define CHUNKS 32
 #define SEA_LEVEL 8
 
 namespace CoreGameObjects
@@ -80,11 +80,10 @@ namespace CoreGameObjects
 
 				for (int y = 0; y < CHUNK_Y; y++)
 				{
-					if (y < surfaceY)
-					{
-						auto type = GetRand(2,7);
-						chunk.SetBlock(x, y, z, (BlockType)type);
-					}
+					if (y == surfaceY - 1)
+						chunk.SetBlock(x, y, z, BlockType::GRASS);
+					else if (y < surfaceY)
+						chunk.SetBlock(x, y, z, BlockType::DIRT);
 					else
 						chunk.SetBlock(x, y, z, BlockType::AIR);
 				}

@@ -7,6 +7,7 @@ namespace CoreGraphics
 	Texture::Texture(GLenum texTarget, const std::string& fileName)
 		: m_FileName(fileName), m_TexTarget(texTarget)
 	{
+		glGenTextures(1, &m_TexObj);
 	}
 
 	bool Texture::Load()
@@ -17,9 +18,9 @@ namespace CoreGraphics
 
 		int width = 0;
 		int height = 0;
-		int bpp = 0; // Bits per pixel
+		int channels = 0; // Bits per pixel
 
-		unsigned char* image = stbi_load(m_FileName.c_str(), &width, &height, &bpp, 0);
+		unsigned char* image = stbi_load(m_FileName.c_str(), &width, &height, &channels, 0);
 
 		if (image == nullptr)
 		{
@@ -29,7 +30,6 @@ namespace CoreGraphics
 
 		LOG_INFO("Loaded texture " << m_FileName);
 
-		glGenTextures(1, &m_TexObj);
 		glBindTexture(m_TexTarget, m_TexObj);
 
 		if (m_TexTarget == GL_TEXTURE_3D)
@@ -38,12 +38,13 @@ namespace CoreGraphics
 			return false;
 		}
 
-		glTexImage2D(m_TexTarget, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		glTexImage2D(m_TexTarget, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+		glGenerateMipmap(m_TexTarget);
 
 		glTexParameterf(m_TexTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameterf(m_TexTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameterf(m_TexTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameterf(m_TexTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameterf(m_TexTarget, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameterf(m_TexTarget, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 		glBindTexture(m_TexTarget, 0);
 		stbi_image_free(image);

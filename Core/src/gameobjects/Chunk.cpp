@@ -49,6 +49,7 @@ namespace CoreGameObjects
 		// Could probably change around the data types in order to maximize usage
 
 		auto positions = new glm::tvec4<GLbyte>[CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6];
+		auto uv = new glm::tvec2<GLfloat>[CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6];
 		auto types = new GLbyte[CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6];
 
 		int counter = 0;
@@ -96,16 +97,27 @@ namespace CoreGameObjects
 					{
 						positions[counter++] = { x + 1, y + 1, z + 1, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 1,1 };
+
 						positions[counter++] = { x, y + 1, z + 1, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 0, 1 };
+
 						positions[counter++] = { x, y, z + 1, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 0, 0 };
+
 						positions[counter++] = { x, y, z + 1, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 0, 0 };
+
 						positions[counter++] = { x + 1, y, z + 1, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 1, 0 };
+
 						positions[counter++] = { x + 1, y + 1, z + 1, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 1, 1 };
 					}
 
 					// Back
@@ -113,16 +125,27 @@ namespace CoreGameObjects
 					{
 						positions[counter++] = { x, y + 1, z, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 1, 1 };
+
 						positions[counter++] = { x + 1, y + 1, z, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 0, 1};
+
 						positions[counter++] = { x + 1, y, z, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 0, 0 };;
+
 						positions[counter++] = { x + 1, y, z, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 0, 0 };;
+
 						positions[counter++] = { x, y, z, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 1, 0 };
+
 						positions[counter++] = { x, y + 1, z, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 1, 1 };
 					}
 
 					// Left
@@ -130,16 +153,27 @@ namespace CoreGameObjects
 					{
 						positions[counter++] = { x, y + 1, z + 1, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 1, 1 };
+
 						positions[counter++] = { x, y + 1, z, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 0, 1 };
+
 						positions[counter++] = { x, y, z, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 0, 0 };
+
 						positions[counter++] = { x, y, z, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 0, 0 };
+
 						positions[counter++] = { x, y, z + 1, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 1, 0 };
+
 						positions[counter++] = { x, y + 1, z + 1, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 1, 1 };
 					}
 
 					// Right
@@ -147,69 +181,107 @@ namespace CoreGameObjects
 					{
 						positions[counter++] = { x + 1, y + 1, z, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 1, 1 };
+
 						positions[counter++] = { x + 1, y + 1, z + 1, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 0, 1 };
+
 						positions[counter++] = { x + 1, y, z + 1, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 0, 0 };
+
 						positions[counter++] = { x + 1, y, z + 1, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 0, 0 };
+
 						positions[counter++] = { x + 1, y, z, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 1, 0 };
+
 						positions[counter++] = { x + 1, y + 1, z, 0 };
 						types[counter - 1] = (GLbyte)(type);
+						uv[counter - 1] = { 1, 1 };
 					}
 
 					// Top
 					if (topType== BlockType::UNDEFINED || topType == BlockType::AIR)
 					{
 						positions[counter++] = { x + 1, y + 1, z, 0 };
-						types[counter - 1] = (GLbyte)(type);
+						types[counter - 1] = (GLbyte)(type==BlockType::GRASS? (int)type + 1: (int)type);
+						uv[counter - 1] = { 1, 1 };
+
 						positions[counter++] = { x , y + 1, z, 0 };
-						types[counter - 1] = (GLbyte)(type);
+						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 1 : (int)type);
+						uv[counter - 1] = { 0, 1 };
+
 						positions[counter++] = { x, y + 1, z + 1, 0 };
-						types[counter - 1] = (GLbyte)(type);
+						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 1 : (int)type);
+						uv[counter - 1] = { 0, 0 };
+
 						positions[counter++] = { x, y + 1, z + 1, 0 };
-						types[counter - 1] = (GLbyte)(type);
+						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 1 : (int)type);
+						uv[counter - 1] = { 0, 0 };
+
 						positions[counter++] = { x + 1, y + 1, z + 1, 0 };
-						types[counter - 1] = (GLbyte)(type);
+						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 1 : (int)type);
+						uv[counter - 1] = { 1, 0 };
+
 						positions[counter++] = { x + 1, y + 1, z, 0 };
-						types[counter - 1] = (GLbyte)(type);
+						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 1 : (int)type);
+						uv[counter - 1] = { 1, 1 };
 					}
 
 					// Bottom
 					if (bottomType == BlockType::UNDEFINED || bottomType == BlockType::AIR)
 					{
 						positions[counter++] = { x, y, z, 0 };
-						types[counter - 1] = (GLbyte)(type);
+						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 2 : (int)type);
+						uv[counter - 1] = { 1, 1 };
+
 						positions[counter++] = { x + 1, y, z, 0 };
-						types[counter - 1] = (GLbyte)(type);
+						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 2 : (int)type);;
+						uv[counter - 1] = { 0, 1 };
+
 						positions[counter++] = { x + 1, y, z + 1, 0 };
-						types[counter - 1] = (GLbyte)(type);
+						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 2 : (int)type);
+						uv[counter - 1] = { 0, 0 };
+
 						positions[counter++] = { x + 1, y, z + 1, 0 };
-						types[counter - 1] = (GLbyte)(type);
+						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 2 : (int)type);
+						uv[counter - 1] = { 0, 0 };
+
 						positions[counter++] = { x, y, z + 1, 0 };
-						types[counter - 1] = (GLbyte)(type);
+						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 2 : (int)type);
+						uv[counter - 1] = { 1, 0 };
+
 						positions[counter++] = { x, y, z, 0 };
-						types[counter - 1] = (GLbyte)(type);
+						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 2 : (int)type);
+						uv[counter - 1] = { 1, 1 };
 					}
 				}
 			}
 		}
 
 		unsigned int posBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * 4 * sizeof(GLbyte);
+		unsigned int uvBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * 2 * sizeof(GLfloat);
 		unsigned int typeBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * sizeof(GLbyte);
 
 		m_VAO->Bind();
 		auto posBuffer = new VertexBuffer(posBufferSize, 4, positions, GL_STATIC_DRAW);
 		m_VAO->AddBuffer(posBuffer, 0, GL_BYTE);
 
+		auto uvBuffer = new VertexBuffer(uvBufferSize, 2, uv, GL_STATIC_DRAW);
+		m_VAO->AddBuffer(uvBuffer, 1, GL_FLOAT);
+
 		auto typeBuffer = new VertexBuffer(typeBufferSize, 1, types, GL_STATIC_DRAW);
-		m_VAO->AddBuffer(typeBuffer, 1, GL_BYTE);
+		m_VAO->AddBuffer(typeBuffer, 2, GL_BYTE);
 		m_VAO->Unbind();
 
 		m_VertexCount = counter;
 
 		delete[] positions;
+		delete[] uv;
 		delete[] types;
 	}
 }
