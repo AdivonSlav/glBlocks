@@ -1,9 +1,9 @@
-#include "ChunkManager.h"
-#include "../utils/Logger.h"
-
 #include <string>
 #include <fstream>
 #include <iostream>
+
+#include "ChunkManager.h"
+#include "../utils/Logger.h"
 
 #ifdef BLOCKS_DEBUG
 #define WRITE_PATH "src/chunks/"
@@ -18,6 +18,7 @@ namespace CoreGameObjects
 
 	void ChunkManager::WriteToFile(glm::vec3 position, const Chunk& chunk)
 	{
+		// e.g. 32_0_32.ch
 		std::string chunkName = std::to_string((int)position.x) + "_" + std::to_string((int)position.y) + "_" + std::to_string((int)position.z) + ".ch";
 		std::string filePath = WRITE_PATH + chunkName;
 
@@ -44,14 +45,16 @@ namespace CoreGameObjects
 
 		stream.close();
 
-		m_UnloadedChunks->insert(std::pair(position, filePath));
+		if (!IsUnloaded(position))
+			m_UnloadedChunks->insert(std::pair(position, filePath));
 	}
 
 	Chunk* ChunkManager::ReadFromFile(glm::vec3 position)
 	{
-		auto chunk = new Chunk();
+		auto chunk = new Chunk(position);
 		std::string filePath = m_UnloadedChunks->at(position);
 		std::ifstream stream(filePath, std::ifstream::in);
+		bool airBlock = false;
 
 		if (stream.fail())
 		{
@@ -76,7 +79,15 @@ namespace CoreGameObjects
 					{
 						// Need to subtract 48 to convert from ASCII
 						char type = fileContents[counter++];
-						chunk->SetBlock(x, y, z, (BlockType)(type - 48));
+
+						if (type == '-')
+						{
+							type = fileContents[counter++];
+							airBlock = true;
+						}
+
+						chunk->SetBlock(x, y, z, !airBlock?(BlockType)(type - 48): BlockType::AIR);
+						airBlock = false;
 					}
 				}
 			}

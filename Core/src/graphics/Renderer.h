@@ -1,10 +1,7 @@
 #pragma once
 
 #include "Shader.h"
-#include "Texture.h"
 #include "../CoreAPI.h"
-
-#include "../gameobjects/ChunkManager.h"
 
 namespace CoreGraphics
 {
@@ -17,6 +14,7 @@ namespace CoreGraphics
 	public:
 		Renderer();
 		~Renderer() = default;
+
 
 		void Draw();
 

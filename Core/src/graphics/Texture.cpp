@@ -1,5 +1,6 @@
-#include "Texture.h"
 #include <stb/stb_image.h>
+
+#include "Texture.h"
 #include "../utils/Logger.h"
 
 namespace CoreGraphics
@@ -8,6 +9,11 @@ namespace CoreGraphics
 		: m_FileName(fileName), m_TexTarget(texTarget)
 	{
 		glGenTextures(1, &m_TexObj);
+	}
+
+	Texture::~Texture()
+	{
+		glDeleteTextures(1, &m_TexObj);
 	}
 
 	bool Texture::Load()
@@ -58,7 +64,7 @@ namespace CoreGraphics
 		glBindTexture(m_TexTarget, m_TexObj);
 	}
 
-	void Texture::Unbind(GLenum texUnit) const
+	void Texture::Unbind() const
 	{
 		glBindTexture(m_TexTarget, 0);
 	}

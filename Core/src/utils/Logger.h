@@ -27,8 +27,17 @@ namespace CoreUtils
 		Logger(LogLevel level);
 		~Logger();
 
+		/**
+		 * \brief Gets the current date/time
+		 * \param onlyDate Whether to format as only date
+		 * \return A string containing the current date/time
+		 */
 		std::string GetCurrentTime(bool onlyDate = false);
 
+		/**
+		 * \brief Writes the log to a file
+		 * \param logMessage The log message to log
+		 */
 		void LogToFile(const std::string& logMessage);
 
 		std::stringstream& GetStream() { return m_Stream; }

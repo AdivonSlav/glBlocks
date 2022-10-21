@@ -1,9 +1,9 @@
-#include "Camera.h"
-#include "../utils/Logger.h"
-#include "../vendor/imgui/imgui.h"
-
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
+
+#include "Camera.h"
+#include "../vendor/imgui/imgui.h"
+#include "../utils/Logger.h"
 
 using namespace CoreWindow;
 

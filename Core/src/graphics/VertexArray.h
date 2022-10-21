@@ -20,14 +20,21 @@ namespace CoreGraphics
 		~VertexArray();
 
 		/**
-		 * \brief 
+		 * \brief Stores the buffer pointer to the array vector, sets the needed vertex attribute pointers
 		 * \param buffer Buffer to be added
 		 * \param index The layout index to which the buffer attributes will be bound
-		 * \param m_Type The type of data that is held in the buffer
+		 * \param type The type of data that is held in the buffer
 		 */
-		void AddBuffer(Buffers::VertexBuffer* buffer, GLint index, GLenum m_Type);
+		void AddBuffer(Buffers::VertexBuffer* buffer, GLint index, GLenum type);
 
+		/**
+		 * \brief Binds the VAO
+		 */
 		void Bind() const;
+
+		/**
+		 * \brief Unbinds the VAO
+		 */
 		void Unbind() const;
 	};
 }

@@ -13,7 +13,7 @@ namespace CoreGraphics::Buffers
 		GLint m_ComponentCount;
 	public:
 		/**
-		 * \brief 
+		 * \brief Constructs an empty vertex buffer object
 		 * \param size The size in bytes of the buffer
 		 * \param componentCount Component count per vertex
 		 * \param data Pointer to the buffer data

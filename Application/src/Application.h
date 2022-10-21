@@ -33,7 +33,7 @@ public:
 	~Application();
 
 	/**
-	 * \brief Starts the game loop
+	 * \brief Starts the main window loop
 	 */
 	void Run();
 

@@ -20,6 +20,9 @@ namespace CoreGraphics
 	VertexArray::VertexArray()
 	{
 		glGenVertexArrays(1, &m_VAO);
+
+		// Reserves immediately enough memory for three buffers
+		m_Buffers.reserve(3);
 	}
 
 	VertexArray::~VertexArray() 

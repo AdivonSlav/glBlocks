@@ -3,11 +3,11 @@
 #include <string>
 #include <unordered_map>
 #include <glad/glad.h>
-#include "../CoreAPI.h"
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include "../CoreAPI.h"
 
 #define BLOCKS_GLSL_VERSION "#version 460"
 
@@ -57,7 +57,6 @@ namespace CoreGraphics
 		 */
 		void CacheUniform(const char* uniform);
 	public:
-		Shader();
 		Shader(const char* vertexShader, const char* fragmentShader);
 		~Shader();
 
@@ -78,12 +77,27 @@ namespace CoreGraphics
 		template<>
 		void SetMat4<float>(const char* uniform, glm::mat4& matrix);
 
+		/**
+		 * \brief Calls glUniform and sends the provided float to the uniform in the shader
+		 * \param uniform The uniform that will receive the float
+		 * \param value The value that is to be sent
+		 */
 		void SetFloat(const char* uniform, GLfloat value);
+
+		/**
+		 * \brief Calls glUniform and sends the provided integer to the uniform in the shader
+		 * \param uniform The uniform that will receive the integer 
+		 * \param value The value that is to be sent
+		 */
 		void SetInt(const char* uniform, GLint value);
 
 		void Bind();
 		void Unbind();
 
+		/**
+		 * \brief Returns the shader ID
+		 * \return Unsigned integer representing the shader
+		 */
 		GLuint GetID() const { return m_ProgramID; }
 	};
 }

@@ -1,6 +1,9 @@
 #pragma once
 
+#include <glm/vec3.hpp>
+
 #include "../CoreAPI.h"
+#include "../graphics/Camera.h"
 
 namespace CoreUtils
 {
@@ -11,8 +14,10 @@ namespace CoreUtils
 
 		double m_FPS;
 		double m_AverageFrameTime;
+
+		CoreGraphics::Camera* m_Camera;
 	public:
-		Dashboard(bool show);
+		Dashboard(bool show, CoreGraphics::Camera* camera);
 		~Dashboard();
 
 		/**
@@ -31,6 +36,8 @@ namespace CoreUtils
 		 * \param avgFrameTime Average frametime to display
 		 */
 		void SendData(double fps, double avgFrameTime);
+
+
 	};
 
 

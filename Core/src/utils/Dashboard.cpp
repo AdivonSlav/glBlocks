@@ -8,8 +8,8 @@
 
 namespace CoreUtils
 {
-	Dashboard::Dashboard(bool show)
-		: m_Show(show)
+	Dashboard::Dashboard(bool show, CoreGraphics::Camera* camera)
+		: m_Show(show), m_Camera(camera)
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -50,6 +50,7 @@ namespace CoreUtils
 		ImGui::Text("FPS: %.2f", m_FPS);
 		ImGui::SameLine();
 		ImGui::Text("Average frametime: %.3f ms", m_AverageFrameTime);
+		ImGui::Text("Camera position (XYZ): %.2f %.2f %.2f", m_Camera->GetPosition().x, m_Camera->GetPosition().y, m_Camera->GetPosition().z);
 
 		ImGui::End();
 	}

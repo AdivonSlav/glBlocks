@@ -1,5 +1,6 @@
 #include <fstream>
 #include <sstream>
+
 #include "Shader.h"
 #include "../utils/Logger.h"
 
@@ -15,7 +16,7 @@ namespace CoreGraphics
 			int logLength;
 			glGetShaderiv(shaderObject, GL_INFO_LOG_LENGTH, &logLength);
 
-			auto error = new GLchar[logLength];
+			char error[512];
 			glGetShaderInfoLog(shaderObject, logLength, &logLength, error);
 
 			int shaderType;
@@ -23,8 +24,6 @@ namespace CoreGraphics
 
 			LOG_ERROR("Failed to compile " << (shaderType == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader!")
 			LOG_ERROR(error)
-
-			delete[] error;
 
 			return false;
 		}
@@ -42,7 +41,7 @@ namespace CoreGraphics
 			int logLength;
 			glGetProgramiv(m_ProgramID, GL_INFO_LOG_LENGTH, &logLength);
 
-			auto error = new GLchar[logLength];
+			char error[512];
 			glGetProgramInfoLog(m_ProgramID, logLength, &logLength, error);
 
 			LOG_ERROR("Failed to link shader program!")
@@ -52,11 +51,6 @@ namespace CoreGraphics
 		}
 
 		return true;
-	}
-
-	Shader::Shader()
-	{
-
 	}
 
 	Shader::Shader(const char* vertexShader, const char* fragmentShader)
@@ -168,7 +162,7 @@ namespace CoreGraphics
 	template <typename T>
 	void Shader::SetMat4(const char* uniform, glm::mat4& matrix)
 	{
-		
+
 	}
 
 	template <>

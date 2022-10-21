@@ -32,6 +32,9 @@ namespace CoreWindow
 
 		/**
 		 * \brief Initializes GLFW, GLAD and creates the window
+		 * \param width Width of the window
+		 * \param height Height of the window
+		 * \param title Title of the window
 		 */
 		void Init(int width, int height, const char* title);
 

@@ -1,4 +1,3 @@
-#include <iostream>
 
 #include "Window.h"
 #include "../utils/Logger.h"
@@ -29,13 +28,13 @@ namespace CoreWindow
 		m_Width = width;
 		m_Height = height;
 
-		// Sets the OpenGL version that will be used (4.6) and selects the core profile (without deprecated features)
+		// Sets the OpenGL version that will be used and selects the core profile (without deprecated features)
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 		// To maintain compatibility with MacOS systems
-		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+		//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 		// Temporarily disables resizing of the window
 		glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
@@ -87,7 +86,6 @@ namespace CoreWindow
 	void Window::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		// If the key has been pressed, then the corresponding array member is set to true
-
 		m_Keys[key] = action != GLFW_RELEASE;
 	}
 

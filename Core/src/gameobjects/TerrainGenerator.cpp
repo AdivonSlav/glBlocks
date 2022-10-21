@@ -32,8 +32,6 @@ namespace CoreGameObjects
 
 	void TerrainGenerator::Generate()
 	{
-		int chunkIndex = 0;
-
 		// For chunk counts of 2^4 and up
 		int start = 0 - CHUNKS / 8;
 		int end = 0 + CHUNKS / 8;
@@ -50,10 +48,7 @@ namespace CoreGameObjects
 
 				Noisify(*chunk);
 
-				//m_ChunkManager.WriteToFile(chunkPos, *chunk);
-
-				ChunkManager::GetLoadedChunks().insert(std::pair(chunkPos, chunk));
-				chunkIndex++;
+				ChunkManager::WriteToFile(chunkPos, *chunk);
 			}
 		}
 	}
@@ -75,7 +70,7 @@ namespace CoreGameObjects
 				float blockZ = z + chunkPos.z + lerpedSeed;
 
 				// The coordinates are divided by an increment to get smaller steps
-				float noise2D = Noise(glm::vec2(blockX / increment, blockZ / increment), m_Seed, 6, 0.9f);
+				float noise2D = Noise(glm::vec2(blockX / increment, blockZ / increment), 6, 0.9f);
 				surfaceY += noise2D * 10.0f;
 
 				for (int y = 0; y < CHUNK_Y; y++)
@@ -113,7 +108,7 @@ namespace CoreGameObjects
 		return -255.0 + x * (255.0 - -255.0);
 	}
 
-	float TerrainGenerator::Noise(glm::vec2 coordinates, int seed, int octaves, float persistence)
+	float TerrainGenerator::Noise(const glm::vec2& coordinates, int octaves, float persistence)
 	{
 		float sum = 0.0f;
 		float strength = 1.0f;
@@ -129,7 +124,7 @@ namespace CoreGameObjects
 		return sum;
 	}
 
-	float TerrainGenerator::Noise(glm::vec3 coordinates, int seed, int octaves, float persistence)
+	float TerrainGenerator::Noise(const glm::vec3& coordinates, int octaves, float persistence)
 	{
 		float sum = 0.0f;
 		float strength = 1.0f;

@@ -2,8 +2,10 @@
 
 #ifdef BLOCKS_DEBUG
 #define SHADER_PATH "src/shaders/"
+#define TEXTURE_PATH "src/textures/"
 #else
 #define SHADER_PATH "shaders/"
+#define TEXTURE_PATH "textures/"
 #endif
 
 Application::Application()
@@ -11,7 +13,7 @@ Application::Application()
 {
 	m_Window.Init(800, 600, "glBlocks");
 	m_Renderer = new Renderer();
-	m_Dashboard = new Dashboard(true);
+	m_Dashboard = new Dashboard(true, &m_Camera);
 	m_Generator = new TerrainGenerator();
 }
 
@@ -33,14 +35,17 @@ void Application::Run()
 
 	m_Renderer->LoadShader(basicShader, ShaderType::BASIC_SHADER);
 
-	Texture atlas(GL_TEXTURE_2D, "src/textures/texture_atlas.png");
+	std::string texturePath = TEXTURE_PATH;
+	texturePath += "texture_atlas.png";
+	Texture atlas(GL_TEXTURE_2D, texturePath);
 	atlas.Load();
 	atlas.Bind(GL_TEXTURE0);
 	basicShader.Bind();
 	basicShader.SetInt("uAtlasSize", 4);
 
 	m_Generator->Generate();
-	//m_ChunkManager->LoadChunks();
+	ChunkManager::LoadChunks();
+
 	m_Camera.SetPosition(0, 130.0f, 0);
 
 	auto modelMat = glm::identity<glm::mat4>();
@@ -48,7 +53,7 @@ void Application::Run()
 	m_LastTime = steady_clock::now();
 
 	while (!m_Window.ShouldClose())
-	{
+	{ 
 		m_Camera.SetMatrix(40.0f, 0.1f, 1000.0f, basicShader, "uView", "uProjection");
 		basicShader.Bind();
 		basicShader.SetMat4<float>("uModel", modelMat);

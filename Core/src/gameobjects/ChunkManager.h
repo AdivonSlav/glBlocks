@@ -19,12 +19,27 @@ namespace CoreGameObjects
 
 		ChunkManager() = default;
 	public:
+		/**
+		 * \brief Writes the chunk layout information to a file
+		 * \param position The position of the chunk
+		 * \param chunk A reference to the chunk being written
+		 */
 		static void WriteToFile(glm::vec3 position, const Chunk& chunk);
+
+		/**
+		 * \brief Reads the chunk layout information from a file and constructs the chunk
+		 * \param position The position of the chunk
+		 * \return A newly allocated chunk on the heap from the layout information in the chunk file
+		 */
 		static Chunk* ReadFromFile(glm::vec3 position);
 
+		/**
+		 * \brief Loads any unloaded chunks
+		 */
 		static void LoadChunks();
 
-		static bool IsLoaded(const glm::vec3& coordinates) { return m_LoadedChunks->contains(coordinates); }
+		static bool IsLoaded(const glm::vec3& position) { return m_LoadedChunks->contains(position); }
+		static bool IsUnloaded(const glm::vec3& position) { return m_UnloadedChunks->contains(position); }
 		static Chunk* GetLoadedChunk(const glm::vec3& coordinates);
 
 		static std::unordered_map<glm::vec3, Chunk*>& GetLoadedChunks() { return *m_LoadedChunks; }

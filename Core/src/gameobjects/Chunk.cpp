@@ -1,13 +1,19 @@
+#include <glm/glm.hpp>
+
 #include "Chunk.h"
 #include "../utils/Logger.h"
 #include "ChunkManager.h"
-
-#include <glm/glm.hpp>
 
 namespace CoreGameObjects
 {
 	Chunk::Chunk()
 		: m_VAO(new VertexArray()), m_Position(0.0f, 0.0f, 0.0f), m_Rebuild(false), m_VertexCount(0)
+	{
+
+	}
+
+	Chunk::Chunk(const glm::vec3& position)
+		: m_VAO(new VertexArray()), m_Position(position), m_Rebuild(false), m_VertexCount(0)
 	{
 
 	}
@@ -88,7 +94,7 @@ namespace CoreGameObjects
 					if (obscuringChunkRight)
 						obscuringChunkRight = obscuringChunkRight->GetBlock(0, y, z) == BlockType::AIR ? nullptr : obscuringChunkRight;
 
-					// Vertex data).
+					// Vertex data.
 					// Can probably be shortened in some way (too lazy to find out how atm)
 					// Each voxel face is only created if there is no adjacent face obscuring it
 
