@@ -26,4 +26,4 @@ The libraries that I used are:
 
 ## Build instructions
 
-Simply run 'genproj.bat' which will generate the necessary project files for Visual Studio 2022. For now I'm only supporting Visual Studio 2022 and the MSVC Compiler.
+Simply run genproj.bat which will generate the necessary project files for Visual Studio 2022. For now I'm only sup
