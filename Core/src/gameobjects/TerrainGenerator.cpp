@@ -10,7 +10,7 @@
 #define MAX_SEED 9999999999
 #define MIN_SEED 1
 
-#define CHUNKS 32
+#define CHUNKS 16
 #define SEA_LEVEL 8
 
 namespace CoreGameObjects
@@ -26,8 +26,10 @@ namespace CoreGameObjects
 			m_Seed = GetRand<unsigned long long>(1000000000, MAX_SEED);
 		}
 
+		m_LerpedSeed = Lerp(m_Seed);
+
 		LOG_INFO("World seed: " << m_Seed);
-		LOG_INFO("World seed after interpolation: " << Lerp(m_Seed));
+		LOG_INFO("World seed after interpolation: " << m_LerpedSeed);
 	}
 
 	void TerrainGenerator::Generate()
@@ -57,7 +59,6 @@ namespace CoreGameObjects
 	{
 		glm::vec3 chunkPos = chunk.GetPos();
 		const float increment = 1000.0f;
-		const double lerpedSeed = Lerp(m_Seed);
 
 		for (int x = 0; x < CHUNK_X; x++)
 		{
@@ -66,8 +67,8 @@ namespace CoreGameObjects
 				int surfaceY = 100;
 
 				// Getting block coordinates in world space and adding a seed value lerped between -255.0 and 255.0
-				float blockX = x + chunkPos.x + lerpedSeed;
-				float blockZ = z + chunkPos.z + lerpedSeed;
+				float blockX = x + chunkPos.x + m_LerpedSeed;
+				float blockZ = z + chunkPos.z + m_LerpedSeed;
 
 				// The coordinates are divided by an increment to get smaller steps
 				float noise2D = Noise(glm::vec2(blockX / increment, blockZ / increment), 6, 0.9f);

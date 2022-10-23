@@ -69,6 +69,7 @@ void Application::Run()
 		m_Window.PollAndSwapBuffers();
 	}
 
+	ChunkManager::Cleanup();
 	LOG_INFO("Ending...");
 }
 

@@ -8,7 +8,8 @@ namespace CoreGameObjects
 	{
 	private:
 		unsigned long long m_Seed;
-
+		double m_LerpedSeed;
+	private:
 		double Lerp(unsigned long long val);
 
 		/**

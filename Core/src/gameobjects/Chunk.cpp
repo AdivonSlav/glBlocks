@@ -101,27 +101,27 @@ namespace CoreGameObjects
 					// Front
 					if (frontType == BlockType::UNDEFINED && !obscuringChunkFront || frontType == BlockType::AIR)
 					{
-						positions[counter++] = { x + 1, y + 1, z + 1, 0 };
+						positions[counter++] = { x + 1, y + 1, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1,1 };
 
-						positions[counter++] = { x, y + 1, z + 1, 0 };
+						positions[counter++] = { x, y + 1, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 1 };
 
-						positions[counter++] = { x, y, z + 1, 0 };
+						positions[counter++] = { x, y, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 0 };
 
-						positions[counter++] = { x, y, z + 1, 0 };
+						positions[counter++] = { x, y, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 0 };
 
-						positions[counter++] = { x + 1, y, z + 1, 0 };
+						positions[counter++] = { x + 1, y, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 0 };
 
-						positions[counter++] = { x + 1, y + 1, z + 1, 0 };
+						positions[counter++] = { x + 1, y + 1, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 1 };
 					}
@@ -129,27 +129,27 @@ namespace CoreGameObjects
 					// Back
 					if (backType == BlockType::UNDEFINED && !obscuringChunkBack || backType == BlockType::AIR)
 					{
-						positions[counter++] = { x, y + 1, z, 0 };
+						positions[counter++] = { x, y + 1, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 1 };
 
-						positions[counter++] = { x + 1, y + 1, z, 0 };
+						positions[counter++] = { x + 1, y + 1, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 1};
 
-						positions[counter++] = { x + 1, y, z, 0 };
+						positions[counter++] = { x + 1, y, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 0 };;
 
-						positions[counter++] = { x + 1, y, z, 0 };
+						positions[counter++] = { x + 1, y, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 0 };;
 
-						positions[counter++] = { x, y, z, 0 };
+						positions[counter++] = { x, y, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 0 };
 
-						positions[counter++] = { x, y + 1, z, 0 };
+						positions[counter++] = { x, y + 1, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 1 };
 					}
@@ -157,27 +157,27 @@ namespace CoreGameObjects
 					// Left
 					if (leftType == BlockType::UNDEFINED && !obscuringChunkLeft || leftType == BlockType::AIR)
 					{
-						positions[counter++] = { x, y + 1, z + 1, 0 };
+						positions[counter++] = { x, y + 1, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 1 };
 
-						positions[counter++] = { x, y + 1, z, 0 };
+						positions[counter++] = { x, y + 1, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 1 };
 
-						positions[counter++] = { x, y, z, 0 };
+						positions[counter++] = { x, y, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 0 };
 
-						positions[counter++] = { x, y, z, 0 };
+						positions[counter++] = { x, y, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 0 };
 
-						positions[counter++] = { x, y, z + 1, 0 };
+						positions[counter++] = { x, y, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 0 };
 
-						positions[counter++] = { x, y + 1, z + 1, 0 };
+						positions[counter++] = { x, y + 1, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 1 };
 					}
@@ -185,27 +185,27 @@ namespace CoreGameObjects
 					// Right
 					if (rightType == BlockType::UNDEFINED && !obscuringChunkRight || rightType == BlockType::AIR)
 					{
-						positions[counter++] = { x + 1, y + 1, z, 0 };
+						positions[counter++] = { x + 1, y + 1, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 1 };
 
-						positions[counter++] = { x + 1, y + 1, z + 1, 0 };
+						positions[counter++] = { x + 1, y + 1, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 1 };
 
-						positions[counter++] = { x + 1, y, z + 1, 0 };
+						positions[counter++] = { x + 1, y, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 0 };
 
-						positions[counter++] = { x + 1, y, z + 1, 0 };
+						positions[counter++] = { x + 1, y, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 0 };
 
-						positions[counter++] = { x + 1, y, z, 0 };
+						positions[counter++] = { x + 1, y, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 0 };
 
-						positions[counter++] = { x + 1, y + 1, z, 0 };
+						positions[counter++] = { x + 1, y + 1, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 1 };
 					}

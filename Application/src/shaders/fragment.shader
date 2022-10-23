@@ -1,6 +1,6 @@
 #version 460 core
 
-flat in ivec3 posCoords;
+in float isSide;
 in vec2 texCoords;
 flat in uint type;
 

@@ -38,6 +38,11 @@ namespace CoreGameObjects
 		 */
 		static void LoadChunks();
 
+		/**
+		 * \brief Deallocates all chunk arrays
+		 */
+		static void Cleanup();
+
 		static bool IsLoaded(const glm::vec3& position) { return m_LoadedChunks->contains(position); }
 		static bool IsUnloaded(const glm::vec3& position) { return m_UnloadedChunks->contains(position); }
 		static Chunk* GetLoadedChunk(const glm::vec3& coordinates);

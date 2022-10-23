@@ -107,6 +107,13 @@ namespace CoreGameObjects
 		}
 	}
 
+	void ChunkManager::Cleanup()
+	{
+		LOG_INFO("Cleaning up chunk arrays...");
+		delete m_LoadedChunks;
+		delete m_UnloadedChunks;
+	}
+
 	Chunk* ChunkManager::GetLoadedChunk(const glm::vec3& coordinates)
 	{
 		if (!IsLoaded(coordinates))
