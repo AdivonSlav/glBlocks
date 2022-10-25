@@ -7,17 +7,24 @@
 
 namespace CoreUtils
 {
+	struct CORE_API Payload
+	{
+		float timeStepMultiplier = 1.0f;
+	};
+
 	class CORE_API Dashboard
 	{
 	private:
-		bool m_Show;
+		static bool m_Show;
 
 		double m_FPS;
 		double m_AverageFrameTime;
 
+		static Payload m_Payload;
+
 		CoreGraphics::Camera* m_Camera;
 	public:
-		Dashboard(bool show, CoreGraphics::Camera* camera);
+		Dashboard(CoreGraphics::Camera* camera);
 		~Dashboard();
 
 		/**
@@ -35,9 +42,16 @@ namespace CoreUtils
 		 * \param fps FPS to display
 		 * \param avgFrameTime Average frametime to display
 		 */
-		void SendData(double fps, double avgFrameTime);
+		void GetData(double fps, double avgFrameTime);
 
+		/**
+		 * \brief Sends data from the dashboard
+		 * \return Data from the Dashboard
+		 */
+		static Payload& GetPayload() { return m_Payload; }
 
+		static void SetShown(bool shown) { m_Show = shown; }
+		static bool IsShown() { return m_Show;}
 	};
 
 

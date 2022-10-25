@@ -94,7 +94,7 @@ namespace CoreGraphics
 
 	void Shader::CacheUniform(const char* uniform)
 	{
-		if (m_Uniforms.find(uniform) == m_Uniforms.end())
+		if (!m_Uniforms.contains(uniform))
 		{
 			m_Uniforms.insert(std::pair(uniform, glGetUniformLocation(m_ProgramID, uniform)));
 		}
@@ -160,16 +160,29 @@ namespace CoreGraphics
 	}
 
 	template <typename T>
-	void Shader::SetMat4(const char* uniform, glm::mat4& matrix)
+	void Shader::SetMat4(const char* uniform, const glm::mat4& matrix)
+	{
+
+	}
+
+	template <typename T>
+	void Shader::SetVec3(const char* uniform, const glm::vec3& vec)
 	{
 
 	}
 
 	template <>
-	void Shader::SetMat4<float>(const char* uniform, glm::mat4& matrix)
+	void Shader::SetMat4<float>(const char* uniform, const glm::mat4& matrix)
 	{
 		CacheUniform(uniform);
 		glUniformMatrix4fv(m_Uniforms[uniform], 1, GL_FALSE, glm::value_ptr(matrix));
+	}
+
+	template <>
+	void Shader::SetVec3<float>(const char* uniform, const glm::vec3& vec)
+	{
+		CacheUniform(uniform);
+		glUniform3fv(m_Uniforms[uniform], 1, glm::value_ptr(vec));
 	}
 
 	void Shader::SetFloat(const char* uniform, GLfloat value)

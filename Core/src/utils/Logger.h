@@ -1,12 +1,5 @@
 #pragma once
 
-// Disables the warning relating to exporting an STL class (in this case std::stringstream) to a DLL.
-// Would proabably be better to implement a different Logger class which has an interface that does not declare any STL templates
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable: 4251)
-#endif
-
 #include <sstream>
 
 #include "../CoreAPI.h"

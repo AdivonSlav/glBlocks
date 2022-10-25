@@ -2,16 +2,20 @@
 #include "Window.h"
 #include "../utils/Logger.h"
 #include "../utils/GLErrorCallback.h"
+#include "../graphics/Camera.h"
+#include "../utils/Dashboard.h"
 
 namespace CoreWindow
 {
 	Window Window::m_Instance;
 	bool Window::m_Keys[GLFW_KEY_LAST] = { false };
 	bool Window::m_MouseButtons[GLFW_MOUSE_BUTTON_LAST] = { false };
+	float Window::m_LastPosX = Window::GetWidth() / 2.0f;
+	float Window::m_LastPosY = Window::GetHeight() / 2.0f;
+	bool Window::m_FirstClick = true;
 
 	Window::~Window()
 	{
-		glfwDestroyWindow(m_Window);
 		glfwTerminate();
 	}
 
@@ -69,7 +73,7 @@ namespace CoreWindow
 
 		// Sets the corresponding callback methods for keyboard and mouse events
 		glfwSetKeyCallback(m_Window, KeyCallback);
-		glfwSetMouseButtonCallback(m_Window, MouseCallback);
+		glfwSetMouseButtonCallback(m_Window, MouseButtonCallback);
 	}
 
 	int Window::ShouldClose()
@@ -85,11 +89,14 @@ namespace CoreWindow
 
 	void Window::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
+		if (key == GLFW_KEY_ESCAPE && action != GLFW_RELEASE)
+			CoreUtils::Dashboard::SetShown(!CoreUtils::Dashboard::IsShown());
+
 		// If the key has been pressed, then the corresponding array member is set to true
 		m_Keys[key] = action != GLFW_RELEASE;
 	}
 
-	void Window::MouseCallback(GLFWwindow* window, int button, int action, int mods)
+	void Window::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
 		m_MouseButtons[button] = action != GLFW_RELEASE;
 	}
@@ -112,9 +119,9 @@ namespace CoreWindow
 
 	bool Window::IsMouseButtonPressed(unsigned int button)
 	{
-		if (button >= GLFW_MOUSE_BUTTON_LAST)
+		if (button >=  GLFW_MOUSE_BUTTON_LAST)
 			return false;
-
+		 
 		return m_MouseButtons[button];
 	}
 

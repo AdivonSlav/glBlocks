@@ -72,10 +72,16 @@ namespace CoreGraphics
 		 * \param matrix The matrix that is to be sent
 		 */
 		template<typename T>
-		void SetMat4(const char* uniform, glm::mat4& matrix);
+		void SetMat4(const char* uniform, const glm::mat4& matrix);
 
 		template<>
-		void SetMat4<float>(const char* uniform, glm::mat4& matrix);
+		void SetMat4<float>(const char* uniform, const glm::mat4& matrix);
+
+		template<typename T>
+		void SetVec3(const char* uniform, const glm::vec3& vec);
+
+		template<>
+		void SetVec3<float>(const char* uniform, const glm::vec3& vec);
 
 		/**
 		 * \brief Calls glUniform and sends the provided float to the uniform in the shader

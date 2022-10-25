@@ -1,39 +1,32 @@
 #include "Application.h"
-
-#ifdef BLOCKS_DEBUG
-#define SHADER_PATH "src/shaders/"
-#define TEXTURE_PATH "src/textures/"
-#else
-#define SHADER_PATH "shaders/"
-#define TEXTURE_PATH "textures/"
-#endif
+#include "Config.h"
 
 Application::Application()
-	: m_Window(Window::Get()), m_Camera({0.0f, 0.0f, 2.0f}), m_DeltaTime(0.0), m_ElapsedTime(0.0), m_FrameRate(0.0), m_AverageFrameTime(0.0), m_FrameCount(0)
+	: m_Window(Window::Get()), m_Camera({ 0.0f, 0.0f, 2.0f }), m_FrameRate(0.0), m_AverageFrameTime(0.0), m_FrameCount(0), m_LastUpdate(0.0)
 {
 	m_Window.Init(800, 600, "glBlocks");
 	m_Renderer = new Renderer();
-	m_Dashboard = new Dashboard(true, &m_Camera);
-	m_Generator = new TerrainGenerator();
+	m_Dashboard = new Dashboard(&m_Camera);
+	m_World = new World();
 }
 
 Application::~Application()
 {
 	delete m_Renderer;
 	delete m_Dashboard;
-	delete m_Generator;
+	delete m_World;
 }
 
 void Application::Run()
 {
-	std::string vertexPath = SHADER_PATH;
-	vertexPath += "vertex.shader";
-	std::string fragmentPath = SHADER_PATH;
-	fragmentPath += "fragment.shader";
-	Shader basicShader(vertexPath.c_str(), fragmentPath.c_str());
+	Shader basicShader(VERTEX_SHADER, FRAGMENT_SHADER);
 	basicShader.CreateShaderProgram();
 
+	Shader lightSourceShader(LIGHT_VERTEX_SHADER, LIGHT_FRAGMENT_SHADER);
+	lightSourceShader.CreateShaderProgram();
+
 	m_Renderer->LoadShader(basicShader, ShaderType::BASIC_SHADER);
+	m_Renderer->LoadShader(lightSourceShader, ShaderType::LIGHTSOURCE_SHADER);
 
 	std::string texturePath = TEXTURE_PATH;
 	texturePath += "texture_atlas.png";
@@ -43,28 +36,30 @@ void Application::Run()
 	basicShader.Bind();
 	basicShader.SetInt("uAtlasSize", 4);
 
-	m_Generator->Generate();
+	m_World->GetGenerator().Generate();
 	ChunkManager::LoadChunks();
 
 	m_Camera.SetPosition(0, 130.0f, 0);
+	m_Camera.SendShader(basicShader);
+	m_Camera.SendShader(lightSourceShader);
 
 	auto modelMat = glm::identity<glm::mat4>();
 
-	m_LastTime = steady_clock::now();
+	m_Timer.Start();
 
 	while (!m_Window.ShouldClose())
-	{ 
-		m_Camera.SetMatrix(40.0f, 0.1f, 1000.0f, basicShader, "uView", "uProjection");
-		basicShader.Bind();
-		basicShader.SetMat4<float>("uModel", modelMat);
-		m_Camera.CheckInput(m_DeltaTime);
+	{
+		m_Camera.SetMatrix(40.0f, 0.1f, 1000.0f);
+		m_Camera.CheckInput(m_Timer.GetDelta());
 
-		m_Renderer->Draw();
+		m_World->StepTime(m_Timer);
+		m_Renderer->Draw(*m_World, m_Camera);
 
-		CalcTime();
-
-		m_Dashboard->SendData(m_FrameRate, m_AverageFrameTime);
+		m_Dashboard->GetData(m_FrameRate, m_AverageFrameTime);
 		m_Dashboard->Render();
+
+		m_Timer.RecordLapse();
+		CalcPerf();
 
 		m_Window.PollAndSwapBuffers();
 	}
@@ -73,21 +68,17 @@ void Application::Run()
 	LOG_INFO("Ending...");
 }
 
-void Application::CalcTime()
+void Application::CalcPerf()
 {
-	time_point<steady_clock> currentTime = steady_clock::now();
-
-	m_DeltaTime = duration_cast<nanoseconds>(currentTime - m_LastTime).count() / NANO_TO_SECOND;
-	m_ElapsedTime += m_DeltaTime;
-	m_LastTime = currentTime;
 	m_FrameCount++;
+	m_LastUpdate += m_Timer.GetDelta();
 
-	if (m_ElapsedTime >= 1.0)
+	if (m_LastUpdate >= 1.0)
 	{
 		m_FrameRate = (double)m_FrameCount * 0.5 + m_FrameRate * 0.5;
 		m_FrameCount = 0;
-		m_ElapsedTime -= 1.0;
 		m_AverageFrameTime = 1000.0 / (m_FrameRate == 0.0 ? 0.001 : m_FrameRate);
+		m_LastUpdate = 0.0;
 	}
 }
 

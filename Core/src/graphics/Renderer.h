@@ -2,10 +2,12 @@
 
 #include "Shader.h"
 #include "../CoreAPI.h"
+#include "../gameobjects/World.h"
+#include "../graphics/Camera.h"
 
 namespace CoreGraphics
 {
-	enum class ShaderType { BASIC_SHADER, AIR_SHADER };
+	enum class ShaderType { BASIC_SHADER, LIGHTSOURCE_SHADER };
 
 	class CORE_API Renderer
 	{
@@ -16,7 +18,7 @@ namespace CoreGraphics
 		~Renderer() = default;
 
 
-		void Draw();
+		void Draw(CoreGameObjects::World& world, Camera& camera);
 
 		/**
 		 * \brief Loads the specified shader so it can be used by the renderer

@@ -6,10 +6,15 @@
 #include "../vendor/imgui/imgui_impl_glfw.h"
 #include "../vendor/imgui/imgui_impl_opengl3.h"
 
+using namespace CoreWindow;
+
 namespace CoreUtils
 {
-	Dashboard::Dashboard(bool show, CoreGraphics::Camera* camera)
-		: m_Show(show), m_Camera(camera)
+	bool Dashboard::m_Show = false;
+	Payload Dashboard::m_Payload;
+
+	Dashboard::Dashboard(CoreGraphics::Camera* camera)
+		: m_Camera(camera)
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -51,11 +56,12 @@ namespace CoreUtils
 		ImGui::SameLine();
 		ImGui::Text("Average frametime: %.3f ms", m_AverageFrameTime);
 		ImGui::Text("Camera position (XYZ): %.2f %.2f %.2f", m_Camera->GetPosition().x, m_Camera->GetPosition().y, m_Camera->GetPosition().z);
+		ImGui::SliderFloat("Time step multiplier:", &m_Payload.timeStepMultiplier, 0.0f, 5.0f);
 
 		ImGui::End();
 	}
 
-	void Dashboard::SendData(double fps, double avgFrameTime)
+	void Dashboard::GetData(double fps, double avgFrameTime)
 	{
 		m_FPS = fps;
 		m_AverageFrameTime = avgFrameTime;

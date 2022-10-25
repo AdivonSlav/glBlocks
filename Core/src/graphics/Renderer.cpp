@@ -1,3 +1,4 @@
+
 #include <glad/glad.h>	
 
 #include "Renderer.h"
@@ -21,7 +22,7 @@ namespace CoreGraphics
 		LOG_INFO("Renderer initialized. Number of texture units: " << textureUnits);
 	}
 
-	void Renderer::Draw()
+	void Renderer::Draw(World& world, Camera& camera)
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.5f, 0.75f, 0.93f, 1.0f);
@@ -36,11 +37,30 @@ namespace CoreGraphics
 
 			m_Shader[(int)ShaderType::BASIC_SHADER]->Bind();
 			m_Shader[(int)ShaderType::BASIC_SHADER]->SetMat4<float>("uModel", model);
+			m_Shader[(int)ShaderType::BASIC_SHADER]->SetVec3<float>("uLightPos", world.GetLightSource(LightSourceType::SUN).GetPosition());
+			m_Shader[(int)ShaderType::BASIC_SHADER]->SetVec3<float>("uCamPos", camera.GetPosition());
 
 			chunk.second->GetVAO()->Bind();
 			glDrawArrays(GL_TRIANGLES, 0, chunk.second->GetVertCount());
+
+			m_Shader[(int)ShaderType::BASIC_SHADER]->Unbind();
+			chunk.second->GetVAO()->Unbind();
 		}
 
+		m_Shader[(int)ShaderType::LIGHTSOURCE_SHADER]->Bind();
+		m_Shader[(int)ShaderType::LIGHTSOURCE_SHADER]->SetVec3<float>("uCamRight", camera.GetWorldRight());
+		m_Shader[(int)ShaderType::LIGHTSOURCE_SHADER]->SetVec3<float>("uCamUp", camera.GetWorldUp());
+		for (int i = 0; i < 2; i++)
+		{
+			m_Shader[(int)ShaderType::LIGHTSOURCE_SHADER]->SetVec3<float>("uWorldPos",world.GetLightSource((LightSourceType)i).GetPosition());
+			m_Shader[(int)ShaderType::LIGHTSOURCE_SHADER]->SetFloat("uSize", world.GetLightSource((LightSourceType)i).GetSize());
+			world.GetLightSource((LightSourceType)i).GetVAO().Bind();
+			world.GetLightSource((LightSourceType)i).GetIBO()->Bind();
+			glDrawElements(GL_TRIANGLES, world.GetLightSource((LightSourceType)i).GetIndexCount(), GL_UNSIGNED_SHORT, (const void*)0);
+			world.GetLightSource((LightSourceType)i).GetIBO()->Unbind();
+			world.GetLightSource((LightSourceType)i).GetVAO().Unbind();
+		}
+		m_Shader[(int)ShaderType::LIGHTSOURCE_SHADER]->Unbind();
 	}
 
 	void Renderer::LoadShader(Shader& shader, ShaderType type)

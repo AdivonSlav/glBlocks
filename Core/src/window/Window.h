@@ -2,9 +2,13 @@
 
 #define GLFW_INCLUDE_NONE
 
+#include <glm/vec2.hpp>
+#include <functional>
+
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "../CoreAPI.h"
+#include "../graphics/Camera.h"
 
 namespace CoreWindow
 {
@@ -19,6 +23,11 @@ namespace CoreWindow
 
 		static bool m_Keys[GLFW_KEY_LAST];
 		static bool m_MouseButtons[GLFW_MOUSE_BUTTON_LAST];
+
+		static float m_LastPosX;
+		static float m_LastPosY;
+
+		static bool m_FirstClick;
 
 		Window() = default;
 	public:
@@ -57,7 +66,7 @@ namespace CoreWindow
 		/**
 		 * \brief Function that gets called any time a mouse button has been pressed or released
 		 */
-		static void MouseCallback(GLFWwindow* window, int button, int action, int mods);
+		static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 
 		static bool IsKeyPressed(unsigned int key);
 		static bool IsKeyReleased(unsigned int key);

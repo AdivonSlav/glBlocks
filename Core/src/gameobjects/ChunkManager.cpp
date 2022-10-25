@@ -110,6 +110,10 @@ namespace CoreGameObjects
 	void ChunkManager::Cleanup()
 	{
 		LOG_INFO("Cleaning up chunk arrays...");
+
+		for (auto& chunk : *m_LoadedChunks)
+			delete chunk.second;
+
 		delete m_LoadedChunks;
 		delete m_UnloadedChunks;
 	}

@@ -57,6 +57,7 @@ namespace CoreGameObjects
 		auto positions = new glm::tvec4<GLbyte>[CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6];
 		auto uv = new glm::tvec2<GLfloat>[CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6];
 		auto types = new GLbyte[CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6];
+		auto normals = new glm::tvec3<GLfloat>[CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6];
 
 		int counter = 0;
 
@@ -104,26 +105,32 @@ namespace CoreGameObjects
 						positions[counter++] = { x + 1, y + 1, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1,1 };
+						normals[counter - 1] = { 0.0f, 0.0f, 1.0f };
 
 						positions[counter++] = { x, y + 1, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 1 };
+						normals[counter - 1] = { 0.0f, 0.0f, 1.0f };
 
 						positions[counter++] = { x, y, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 0 };
+						normals[counter - 1] = { 0.0f, 0.0f, 1.0f };
 
 						positions[counter++] = { x, y, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 0 };
+						normals[counter - 1] = { 0.0f, 0.0f, 1.0f };
 
 						positions[counter++] = { x + 1, y, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 0 };
+						normals[counter - 1] = { 0.0f, 0.0f, 1.0f };
 
 						positions[counter++] = { x + 1, y + 1, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 1 };
+						normals[counter - 1] = { 0.0f, 0.0f, 1.0f };
 					}
 
 					// Back
@@ -132,26 +139,32 @@ namespace CoreGameObjects
 						positions[counter++] = { x, y + 1, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 1 };
+						normals[counter - 1] = { 0.0f, 0.0f, -1.0f };
 
 						positions[counter++] = { x + 1, y + 1, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 1};
+						normals[counter - 1] = { 0.0f, 0.0f, -1.0f };
 
 						positions[counter++] = { x + 1, y, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
-						uv[counter - 1] = { 0, 0 };;
+						uv[counter - 1] = { 0, 0 };
+						normals[counter - 1] = { 0.0f, 0.0f, -1.0f };
 
 						positions[counter++] = { x + 1, y, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
-						uv[counter - 1] = { 0, 0 };;
+						uv[counter - 1] = { 0, 0 };
+						normals[counter - 1] = { 0.0f, 0.0f, -1.0f };
 
 						positions[counter++] = { x, y, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 0 };
+						normals[counter - 1] = { 0.0f, 0.0f, -1.0f };
 
 						positions[counter++] = { x, y + 1, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 1 };
+						normals[counter - 1] = { 0.0f, 0.0f, -1.0f };
 					}
 
 					// Left
@@ -160,26 +173,32 @@ namespace CoreGameObjects
 						positions[counter++] = { x, y + 1, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 1 };
+						normals[counter - 1] = { -1.0f, 0.0f, 0.0f };
 
 						positions[counter++] = { x, y + 1, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 1 };
+						normals[counter - 1] = { -1.0f, 0.0f, 0.0f };
 
 						positions[counter++] = { x, y, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 0 };
+						normals[counter - 1] = { -1.0f, 0.0f, 0.0f };
 
 						positions[counter++] = { x, y, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 0 };
+						normals[counter - 1] = { -1.0f, 0.0f, 0.0f };
 
 						positions[counter++] = { x, y, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 0 };
+						normals[counter - 1] = { -1.0f, 0.0f, 0.0f };
 
 						positions[counter++] = { x, y + 1, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 1 };
+						normals[counter - 1] = { -1.0f, 0.0f, 0.0f };
 					}
 
 					// Right
@@ -188,26 +207,32 @@ namespace CoreGameObjects
 						positions[counter++] = { x + 1, y + 1, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 1 };
+						normals[counter - 1] = { 1.0f, 0.0f, 0.0f };
 
 						positions[counter++] = { x + 1, y + 1, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 1 };
+						normals[counter - 1] = { 1.0f, 0.0f, 0.0f };
 
 						positions[counter++] = { x + 1, y, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 0 };
+						normals[counter - 1] = { 1.0f, 0.0f, 0.0f };
 
 						positions[counter++] = { x + 1, y, z + 1, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 0, 0 };
+						normals[counter - 1] = { 1.0f, 0.0f, 0.0f };
 
 						positions[counter++] = { x + 1, y, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 0 };
+						normals[counter - 1] = { 1.0f, 0.0f, 0.0f };
 
 						positions[counter++] = { x + 1, y + 1, z, 1 };
 						types[counter - 1] = (GLbyte)(type);
 						uv[counter - 1] = { 1, 1 };
+						normals[counter - 1] = { 1.0f, 0.0f, 0.0f };
 					}
 
 					// Top
@@ -216,26 +241,32 @@ namespace CoreGameObjects
 						positions[counter++] = { x + 1, y + 1, z, 0 };
 						types[counter - 1] = (GLbyte)(type==BlockType::GRASS? (int)type + 1: (int)type);
 						uv[counter - 1] = { 1, 1 };
+						normals[counter - 1] = { 0.0f, 1.0f, 0.0f };
 
 						positions[counter++] = { x , y + 1, z, 0 };
 						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 1 : (int)type);
 						uv[counter - 1] = { 0, 1 };
+						normals[counter - 1] = { 0.0f, 1.0f, 0.0f };
 
 						positions[counter++] = { x, y + 1, z + 1, 0 };
 						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 1 : (int)type);
 						uv[counter - 1] = { 0, 0 };
+						normals[counter - 1] = { 0.0f, 1.0f, 0.0f };
 
 						positions[counter++] = { x, y + 1, z + 1, 0 };
 						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 1 : (int)type);
 						uv[counter - 1] = { 0, 0 };
+						normals[counter - 1] = { 0.0f, 1.0f, 0.0f };
 
 						positions[counter++] = { x + 1, y + 1, z + 1, 0 };
 						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 1 : (int)type);
 						uv[counter - 1] = { 1, 0 };
+						normals[counter - 1] = { 0.0f, 1.0f, 0.0f };
 
 						positions[counter++] = { x + 1, y + 1, z, 0 };
 						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 1 : (int)type);
 						uv[counter - 1] = { 1, 1 };
+						normals[counter - 1] = { 0.0f, 1.0f, 0.0f };
 					}
 
 					// Bottom
@@ -244,26 +275,32 @@ namespace CoreGameObjects
 						positions[counter++] = { x, y, z, 0 };
 						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 2 : (int)type);
 						uv[counter - 1] = { 1, 1 };
+						normals[counter - 1] = { 0.0f, -1.0f, 0.0f };
 
 						positions[counter++] = { x + 1, y, z, 0 };
 						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 2 : (int)type);;
 						uv[counter - 1] = { 0, 1 };
+						normals[counter - 1] = { 0.0f, -1.0f, 0.0f };
 
 						positions[counter++] = { x + 1, y, z + 1, 0 };
 						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 2 : (int)type);
 						uv[counter - 1] = { 0, 0 };
+						normals[counter - 1] = { 0.0f, -1.0f, 0.0f };
 
 						positions[counter++] = { x + 1, y, z + 1, 0 };
 						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 2 : (int)type);
 						uv[counter - 1] = { 0, 0 };
+						normals[counter - 1] = { 0.0f, -1.0f, 0.0f };
 
 						positions[counter++] = { x, y, z + 1, 0 };
 						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 2 : (int)type);
 						uv[counter - 1] = { 1, 0 };
+						normals[counter - 1] = { 0.0f, -1.0f, 0.0f };
 
 						positions[counter++] = { x, y, z, 0 };
 						types[counter - 1] = (GLbyte)(type == BlockType::GRASS ? (int)type + 2 : (int)type);
 						uv[counter - 1] = { 1, 1 };
+						normals[counter - 1] = { 0.0f, -1.0f, 0.0f };
 					}
 				}
 			}
@@ -272,6 +309,7 @@ namespace CoreGameObjects
 		unsigned int posBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * 4 * sizeof(GLbyte);
 		unsigned int uvBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * 2 * sizeof(GLfloat);
 		unsigned int typeBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * sizeof(GLbyte);
+		unsigned int normalsBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * sizeof(GLfloat);
 
 		m_VAO->Bind();
 		auto posBuffer = new VertexBuffer(posBufferSize, 4, positions, GL_STATIC_DRAW);
@@ -282,6 +320,9 @@ namespace CoreGameObjects
 
 		auto typeBuffer = new VertexBuffer(typeBufferSize, 1, types, GL_STATIC_DRAW);
 		m_VAO->AddBuffer(typeBuffer, 2, GL_BYTE);
+
+		auto normalsBuffer = new VertexBuffer(normalsBufferSize, 3, normals, GL_STATIC_DRAW);
+		m_VAO->AddBuffer(normalsBuffer, 3, GL_FLOAT);
 		m_VAO->Unbind();
 
 		m_VertexCount = counter;
@@ -289,5 +330,6 @@ namespace CoreGameObjects
 		delete[] positions;
 		delete[] uv;
 		delete[] types;
+		delete[] normals;
 	}
 }

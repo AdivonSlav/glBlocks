@@ -1,17 +1,11 @@
 #pragma once
 
-#include <chrono>
-
 #include "Core.h"
 
 using namespace CoreGraphics;
 using namespace CoreWindow;
 using namespace CoreGameObjects;
 using namespace CoreUtils;
-
-using namespace std::chrono;
-
-#define NANO_TO_SECOND 1000000000.0
 
 class Application
 {
@@ -20,14 +14,13 @@ private:
 	Renderer* m_Renderer;
 	Camera m_Camera;
 	Dashboard* m_Dashboard;
-	TerrainGenerator* m_Generator;
+	World* m_World;
+	Timer m_Timer;
 
-	time_point<steady_clock> m_LastTime;
-	double m_DeltaTime;
-	double m_ElapsedTime;
 	double m_FrameRate;
 	double m_AverageFrameTime; // in milliseconds
 	unsigned int m_FrameCount;
+	double m_LastUpdate;
 public:
 	Application();
 	~Application();
@@ -38,7 +31,7 @@ public:
 	void Run();
 
 	/**
-	 * \brief Calculates the completion time since the last frame
+	 * \brief Calculates the performance at the end of each frame
 	 */
-	void CalcTime();
+	void CalcPerf();
 };
