@@ -32,7 +32,7 @@ namespace CoreGameObjects
 			return;
 		}
 
-		m_Blocks[x][y][z] = type;
+		m_Blocks[x + CHUNK_X * (y + CHUNK_Y * z)] = type;
 		m_Rebuild = true;
 	}
 
@@ -44,7 +44,7 @@ namespace CoreGameObjects
 			return BlockType::UNDEFINED;
 		}
 
-		return m_Blocks[x][y][z];
+		return m_Blocks[x + CHUNK_X * (y + CHUNK_Y * z)];
 	}
 
 	void Chunk::Build()
@@ -67,7 +67,7 @@ namespace CoreGameObjects
 			{
 				for (int z = 0; z < CHUNK_Z; z++)
 				{
-					auto type = m_Blocks[x][y][z];
+					auto type = GetBlock(x, y, z);
 
 					if (type == BlockType::AIR)
 						continue;

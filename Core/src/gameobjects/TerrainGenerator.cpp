@@ -4,6 +4,7 @@
 #include <random>
 #include <glm/gtc/noise.hpp>
 #include <filesystem>
+#include <iterator>
 
 #include "TerrainGenerator.h"
 #include "../utils/Logger.h"
@@ -40,15 +41,14 @@ namespace CoreGameObjects
 		int start = 0 - CHUNKS / 8;
 		int end = 0 + CHUNKS / 8;
 
-		if (std::filesystem::is_directory(WRITE_PATH))
+		if (CheckIfGenerated())
 		{
 			LOG_INFO("Folder with chunks already found, mapping existing chunks...");
 			ChunkManager::MapChunks();
-
 			return;
 		}
 
-		LOG_INFO("No chunk folder found, generating new world...")
+		LOG_INFO("No chunks found, generating new world...")
 		std::filesystem::create_directory(WRITE_PATH);
 
 		for (int z = start; z < end; z++)
@@ -65,6 +65,19 @@ namespace CoreGameObjects
 				ChunkManager::WriteToFile(chunkPos, *chunk);
 			}
 		}
+	}
+
+	bool TerrainGenerator::CheckIfGenerated()
+	{
+		if (!std::filesystem::is_directory(WRITE_PATH))
+			return false;
+
+		size_t fileCount = std::distance(std::filesystem::directory_iterator(WRITE_PATH), std::filesystem::directory_iterator());
+
+		if (fileCount == 0)
+			return false;
+
+		return true;
 	}
 
 	void TerrainGenerator::Noisify(Chunk& chunk)

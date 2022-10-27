@@ -26,7 +26,7 @@ namespace CoreGameObjects
 	{
 	private:
 		VertexArray* m_VAO;
-		BlockType m_Blocks[CHUNK_X][CHUNK_Y][CHUNK_Z];
+		BlockType m_Blocks[CHUNK_X * CHUNK_Y * CHUNK_Z];
 
 		glm::vec3 m_Position;
 

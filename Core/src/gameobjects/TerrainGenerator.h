@@ -31,6 +31,12 @@ namespace CoreGameObjects
 		void Generate();
 
 		/**
+		 * \brief Checks whether a world is already generated. If generated, Generate() is skipped
+		 * \return True if there are chunks present on disk
+		 */
+		bool CheckIfGenerated();
+
+		/**
 		 * \brief Randomly generates a number. Is thread safe
 		 * \tparam Numeral The type of number to be randomly generated 
 		 * \param start Start of the range of numbers that can be randomly generated
