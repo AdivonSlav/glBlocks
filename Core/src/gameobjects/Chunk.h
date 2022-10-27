@@ -5,7 +5,7 @@
 #include "../graphics/VertexArray.h"
 
 #define CHUNK_X 16
-#define CHUNK_Y 128
+#define CHUNK_Y 384
 #define CHUNK_Z 16
 
 using namespace CoreGraphics;

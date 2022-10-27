@@ -54,7 +54,7 @@ namespace CoreGameObjects
 		// The position layout contains one extra byte per vertex in order to have 4-byte alignment which is unused.
 		// Could probably change around the data types in order to maximize usage
 
-		auto positions = new glm::tvec4<GLbyte>[CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6];
+		auto positions = new glm::tvec4<GLshort>[CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6]{};
 		auto uv = new glm::tvec2<GLfloat>[CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6];
 		auto types = new GLbyte[CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6];
 		auto normals = new glm::tvec3<GLfloat>[CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6];
@@ -84,6 +84,15 @@ namespace CoreGameObjects
 					auto obscuringChunkBack = ChunkManager::GetLoadedChunk({ m_Position.x, 0.0f, m_Position.z - CHUNK_Z });
 					auto obscuringChunkLeft = ChunkManager::GetLoadedChunk({ m_Position.x - CHUNK_X, 0.0f, m_Position.z });
 					auto obscuringChunkRight = ChunkManager::GetLoadedChunk({ m_Position.x + CHUNK_X, 0.0f, m_Position.z });
+
+					if (obscuringChunkFront == this)
+						obscuringChunkFront = nullptr;
+					if (obscuringChunkBack == this)
+						obscuringChunkBack = nullptr;
+					if (obscuringChunkLeft == this)
+						obscuringChunkLeft = nullptr;
+					if (obscuringChunkRight == this)
+						obscuringChunkRight = nullptr;
 
 					// Incase a bordering chunk exists, check whether its neighboring block is obscuring the current one
 					if (obscuringChunkFront)
@@ -306,14 +315,14 @@ namespace CoreGameObjects
 			}
 		}
 
-		unsigned int posBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * 4 * sizeof(GLbyte);
-		unsigned int uvBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * 2 * sizeof(GLfloat);
-		unsigned int typeBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * sizeof(GLbyte);
-		unsigned int normalsBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * sizeof(GLfloat);
+		GLuint posBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * 4 * sizeof(GLshort);
+		GLuint uvBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * 2 * sizeof(GLfloat);
+		GLuint typeBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * sizeof(GLbyte);
+		GLuint normalsBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * 3 * sizeof(GLfloat);
 
 		m_VAO->Bind();
 		auto posBuffer = new VertexBuffer(posBufferSize, 4, positions, GL_STATIC_DRAW);
-		m_VAO->AddBuffer(posBuffer, 0, GL_BYTE);
+		m_VAO->AddBuffer(posBuffer, 0, GL_SHORT);
 
 		auto uvBuffer = new VertexBuffer(uvBufferSize, 2, uv, GL_STATIC_DRAW);
 		m_VAO->AddBuffer(uvBuffer, 1, GL_FLOAT);

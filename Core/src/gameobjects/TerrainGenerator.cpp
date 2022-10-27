@@ -38,7 +38,6 @@ namespace CoreGameObjects
 		int start = 0 - CHUNKS / 8;
 		int end = 0 + CHUNKS / 8;
 
-
 		for (int z = start; z < end; z++)
 		{
 			for (int x = start; x < end; x++)
@@ -64,7 +63,7 @@ namespace CoreGameObjects
 		{
 			for (int z = 0; z < CHUNK_Z; z++)
 			{
-				int surfaceY = 100;
+				int surfaceY = 256;
 
 				// Getting block coordinates in world space and adding a seed value lerped between -255.0 and 255.0
 				float blockX = x + chunkPos.x + m_LerpedSeed;
@@ -72,7 +71,7 @@ namespace CoreGameObjects
 
 				// The coordinates are divided by an increment to get smaller steps
 				float noise2D = Noise(glm::vec2(blockX / increment, blockZ / increment), 6, 0.9f);
-				surfaceY += noise2D * 10.0f;
+				surfaceY += noise2D * 15.0f;
 
 				for (int y = 0; y < CHUNK_Y; y++)
 				{

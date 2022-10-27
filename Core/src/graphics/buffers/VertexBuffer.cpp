@@ -2,7 +2,7 @@
 
 namespace CoreGraphics::Buffers
 {
-	VertexBuffer::VertexBuffer(GLint size, GLint componentCount, const void* data, GLenum usage)
+	VertexBuffer::VertexBuffer(GLuint size, GLint componentCount, const void* data, GLenum usage)
 		: m_BufferID(0), m_Size(size), m_ComponentCount(componentCount)
 	{
 		glGenBuffers(1, &m_BufferID);

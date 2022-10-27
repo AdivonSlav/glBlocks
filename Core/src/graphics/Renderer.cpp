@@ -27,6 +27,7 @@ namespace CoreGraphics
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.5f, 0.75f, 0.93f, 1.0f);
 
+		m_Shader[(int)ShaderType::BASIC_SHADER]->Bind();
 		for (auto& chunk : ChunkManager::GetLoadedChunks())
 		{
 			auto identity = glm::identity<glm::mat4>();
@@ -35,7 +36,6 @@ namespace CoreGraphics
 			if (chunk.second->GetRebuild())
 				chunk.second->Build();
 
-			m_Shader[(int)ShaderType::BASIC_SHADER]->Bind();
 			m_Shader[(int)ShaderType::BASIC_SHADER]->SetMat4<float>("uModel", model);
 			m_Shader[(int)ShaderType::BASIC_SHADER]->SetVec3<float>("uLightPos", world.GetLightSource(LightSourceType::SUN).GetPosition());
 			m_Shader[(int)ShaderType::BASIC_SHADER]->SetVec3<float>("uCamPos", camera.GetPosition());
@@ -43,9 +43,9 @@ namespace CoreGraphics
 			chunk.second->GetVAO()->Bind();
 			glDrawArrays(GL_TRIANGLES, 0, chunk.second->GetVertCount());
 
-			m_Shader[(int)ShaderType::BASIC_SHADER]->Unbind();
 			chunk.second->GetVAO()->Unbind();
 		}
+		m_Shader[(int)ShaderType::BASIC_SHADER]->Unbind();
 
 		m_Shader[(int)ShaderType::LIGHTSOURCE_SHADER]->Bind();
 		m_Shader[(int)ShaderType::LIGHTSOURCE_SHADER]->SetVec3<float>("uCamRight", camera.GetWorldRight());

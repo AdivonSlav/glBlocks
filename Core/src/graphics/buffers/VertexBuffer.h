@@ -9,7 +9,7 @@ namespace CoreGraphics::Buffers
 	{
 	private:
 		GLuint m_BufferID;
-		GLint m_Size;
+		GLuint m_Size;
 		GLint m_ComponentCount;
 	public:
 		/**
@@ -19,7 +19,7 @@ namespace CoreGraphics::Buffers
 		 * \param data Pointer to the buffer data
 		 * \param usage Hint to OpenGL on how the buffer will be used (e.g. GL_STATIC_DRAW)
 		 */
-		VertexBuffer(GLint size, GLint componentCount, const void* data, GLenum usage);
+		VertexBuffer(GLuint size, GLint componentCount, const void* data, GLenum usage);
 		~VertexBuffer();
 
 
