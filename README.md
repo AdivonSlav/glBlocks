@@ -7,7 +7,7 @@ This is a voxel engine I've been working on to advance my knowledge in OpenGL. F
 - Breaking and placing of blocks
 - Day/night cycle
 - Multithreaded chunk generation and loading
-- Chunk persistence between application runs (stored as files)
+- ~~Chunk persistence between application runs (stored as files)~~ **(Implemented on 27.10.2022)**
 - Fog and lighting effects
 
 The libraries that I used are:
