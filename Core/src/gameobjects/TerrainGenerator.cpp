@@ -1,11 +1,13 @@
-#include "TerrainGenerator.h"
 
 #include <iostream>
 #include <cmath>
 #include <random>
 #include <glm/gtc/noise.hpp>
+#include <filesystem>
 
+#include "TerrainGenerator.h"
 #include "../utils/Logger.h"
+#include "ChunkManager.h"
 
 #define MAX_SEED 9999999999
 #define MIN_SEED 1
@@ -38,6 +40,17 @@ namespace CoreGameObjects
 		int start = 0 - CHUNKS / 8;
 		int end = 0 + CHUNKS / 8;
 
+		if (std::filesystem::is_directory(WRITE_PATH))
+		{
+			LOG_INFO("Folder with chunks already found, mapping existing chunks...");
+			ChunkManager::MapChunks();
+
+			return;
+		}
+
+		LOG_INFO("No chunk folder found, generating new world...")
+		std::filesystem::create_directory(WRITE_PATH);
+
 		for (int z = start; z < end; z++)
 		{
 			for (int x = start; x < end; x++)
@@ -63,19 +76,24 @@ namespace CoreGameObjects
 		{
 			for (int z = 0; z < CHUNK_Z; z++)
 			{
-				int surfaceY = 256;
+				int16_t surfaceY = 256;
+				int16_t stoneY = 250;
 
 				// Getting block coordinates in world space and adding a seed value lerped between -255.0 and 255.0
 				float blockX = x + chunkPos.x + m_LerpedSeed;
 				float blockZ = z + chunkPos.z + m_LerpedSeed;
 
 				// The coordinates are divided by an increment to get smaller steps
-				float noise2D = Noise(glm::vec2(blockX / increment, blockZ / increment), 6, 0.9f);
-				surfaceY += noise2D * 15.0f;
+				float height = Noise(glm::vec2(blockX / increment, blockZ / increment), 7, 0.9f);
+				float stoneHeight = Noise(glm::vec2(blockX / increment, blockZ / increment), 7, 1.0f);
+				surfaceY += height * 15.0f;
+				stoneY += stoneHeight * 20.0f;
 
 				for (int y = 0; y < CHUNK_Y; y++)
 				{
-					if (y == surfaceY - 1)
+					if (y <= stoneY)
+						chunk.SetBlock(x, y, z, BlockType::STONE);
+					else if (y == surfaceY - 1)
 						chunk.SetBlock(x, y, z, BlockType::GRASS);
 					else if (y < surfaceY)
 						chunk.SetBlock(x, y, z, BlockType::DIRT);

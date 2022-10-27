@@ -1,15 +1,10 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <filesystem>
 
 #include "ChunkManager.h"
 #include "../utils/Logger.h"
-
-#ifdef BLOCKS_DEBUG
-#define WRITE_PATH "src/chunks/"
-#else
-#define WRITE_PATH "chunks/"
-#endif
 
 namespace CoreGameObjects
 {
@@ -96,6 +91,38 @@ namespace CoreGameObjects
 		stream.close();
 
 		return chunk;
+	}
+
+	void ChunkManager::MapChunks()
+	{
+		int chCounter = 0;
+
+		for (const auto& entry : std::filesystem::directory_iterator(WRITE_PATH))
+		{
+			std::string path = entry.path().string();
+			path = path.substr(path.find_last_of('/') + 1);
+			path = path.substr(0, path.find('.'));
+
+			size_t position = 0;
+			int counter = 0;
+			float coordinates[3];
+
+			while ((position = path.find('_')) != std::string::npos)
+			{
+				coordinates[counter] = std::stof(path.substr(0, position));
+				path.erase(0, position + 1);
+				counter++;
+			}
+
+			coordinates[counter] = std::stof(path);
+			std::string path_temp = entry.path().string();
+
+			m_UnloadedChunks->insert(std::pair(glm::vec3(coordinates[0], coordinates[1], coordinates[2]), path_temp.c_str()));
+
+			chCounter++;
+		}
+
+		LOG_INFO("Mapped " << chCounter << " chunks from disk");
 	}
 
 	void ChunkManager::LoadChunks()

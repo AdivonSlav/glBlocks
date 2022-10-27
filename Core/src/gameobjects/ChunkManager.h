@@ -9,6 +9,12 @@
 #include "../CoreAPI.h"
 #include "Chunk.h"
 
+#ifdef BLOCKS_DEBUG
+#define WRITE_PATH "src/chunks/"
+#else
+#define WRITE_PATH "chunks/"
+#endif
+
 namespace CoreGameObjects
 {
 	class CORE_API ChunkManager
@@ -32,6 +38,8 @@ namespace CoreGameObjects
 		 * \return A newly allocated chunk on the heap from the layout information in the chunk file
 		 */
 		static Chunk* ReadFromFile(glm::vec3 position);
+
+		static void MapChunks();
 
 		/**
 		 * \brief Loads any unloaded chunks
