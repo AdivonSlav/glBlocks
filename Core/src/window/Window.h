@@ -16,7 +16,7 @@ namespace CoreWindow
 	class CORE_API Window
 	{
 	private:
-		static Window m_Instance;
+		static Window* m_Instance;
 		GLFWwindow* m_Window;
 		int m_Width;
 		int m_Height;
@@ -32,12 +32,12 @@ namespace CoreWindow
 		Window() = default;
 	public:
 		Window(const Window& obj) = delete;
-		~Window();
+		~Window() = default;
 
-		static Window& Get() { return m_Instance; }
-		static GLFWwindow* GetWindowPtr() { return m_Instance.m_Window; }
-		static int GetWidth() { return m_Instance.m_Width; }
-		static int GetHeight() { return m_Instance.m_Height; }
+		static Window& Get() { return *m_Instance; }
+		static GLFWwindow* GetWindowPtr() { return m_Instance->m_Window; }
+		static int GetWidth() { return m_Instance->m_Width; }
+		static int GetHeight() { return m_Instance->m_Height; }
 
 		/**
 		 * \brief Initializes GLFW, GLAD and creates the window
@@ -57,6 +57,11 @@ namespace CoreWindow
 		 * \brief Swaps the color buffer and polls for any events
 		 */
 		void PollAndSwapBuffers();
+
+		/**
+		 * \brief Terminates the GLFW application
+		 */
+		static void Cleanup();
 
 		/**
 		 * \brief Function that gets called any time a key has been pressed or released

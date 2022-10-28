@@ -25,7 +25,7 @@ namespace CoreGraphics
 	void Renderer::Draw(World& world, Camera& camera)
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.5f, 0.75f, 0.93f, 1.0f);
+		glClearColor(world.GetClearColor().r, world.GetClearColor().g, world.GetClearColor().b, 1.0f);
 
 		m_Shader[(int)ShaderType::BASIC_SHADER]->Bind();
 		for (auto& chunk : ChunkManager::GetLoadedChunks())
@@ -37,8 +37,10 @@ namespace CoreGraphics
 				chunk.second->Build();
 
 			m_Shader[(int)ShaderType::BASIC_SHADER]->SetMat4<float>("uModel", model);
-			m_Shader[(int)ShaderType::BASIC_SHADER]->SetVec3<float>("uLightPos", world.GetLightSource(LightSourceType::SUN).GetPosition());
+			m_Shader[(int)ShaderType::BASIC_SHADER]->SetVec3<float>("uLightPos", world.GetLightPosition());
 			m_Shader[(int)ShaderType::BASIC_SHADER]->SetVec3<float>("uCamPos", camera.GetPosition());
+			m_Shader[(int)ShaderType::BASIC_SHADER]->SetFloat("uLightLevel", world.GetLightLevel());
+			m_Shader[(int)ShaderType::BASIC_SHADER]->SetInt("uSunHasSet", world.GetHasSet());
 
 			chunk.second->GetVAO()->Bind();
 			glDrawArrays(GL_TRIANGLES, 0, chunk.second->GetVertCount());

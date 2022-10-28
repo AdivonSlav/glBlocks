@@ -12,9 +12,12 @@ uniform sampler2D uSampler;
 uniform int uAtlasSize;
 uniform vec3 uLightPos;
 uniform vec3 uCamPos;
+uniform float uLightLevel;
+uniform int uSunHasSet;
 
 vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
 float ambientStrength = 0.9f;
+float diffuseStrength = 1.0f;
 float specularStrength = 0.5f;
 vec3 lightDirection = normalize(uLightPos - fragPos);
 vec3 normalizedNormal = normalize(normal);
@@ -35,7 +38,7 @@ vec2 GetScaledCoords()
 // Gets an ambient light value based on a constant
 vec3 GetAmbientLight()
 {
-	return ambientStrength * lightColor;
+	return lightColor * ambientStrength;
 }
 
 // Gets the light based on the angle between the light position and the normal of the fragment
@@ -43,7 +46,7 @@ vec3 GetDiffuseLight()
 {
 	float diff = max(dot(normalizedNormal, lightDirection), 0.0f);
 
-	return diff * lightColor;
+	return diff * lightColor * diffuseStrength;
 }
 
 vec3 GetSpecularLight()
@@ -58,6 +61,20 @@ vec3 GetSpecularLight()
 
 void main()
 {
+	ambientStrength = uLightLevel;
+
+	if (uSunHasSet != 0)
+	{
+		ambientStrength *= 0.4f;
+		diffuseStrength = 0.5f;
+	}
+
+	if (ambientStrength < 0.2f)
+		ambientStrength = 0.2f;
+	else if (ambientStrength > 0.85f)
+		ambientStrength = 0.85f;
+
+
 	vec2 scaledTexCoords = GetScaledCoords();
 	vec4 tex = texture2D(uSampler, scaledTexCoords);
 

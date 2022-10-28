@@ -13,7 +13,7 @@
 #define MAX_SEED 9999999999
 #define MIN_SEED 1
 
-#define CHUNKS 16
+#define CHUNKS 64
 #define SEA_LEVEL 8
 
 namespace CoreGameObjects
@@ -37,9 +37,8 @@ namespace CoreGameObjects
 
 	void TerrainGenerator::Generate()
 	{
-		// For chunk counts of 2^4 and up
-		int start = 0 - CHUNKS / 8;
-		int end = 0 + CHUNKS / 8;
+		int start = -sqrt(CHUNKS) / 2;
+		int end = sqrt(CHUNKS) / 2;
 
 		if (CheckIfGenerated())
 		{

@@ -25,7 +25,7 @@ namespace CoreUtils
 		CoreGraphics::Camera* m_Camera;
 	public:
 		Dashboard(CoreGraphics::Camera* camera);
-		~Dashboard();
+		~Dashboard() = default;
 
 		/**
 		 * \brief Prepares a new frame and renders the prepared ImGui window
@@ -49,6 +49,11 @@ namespace CoreUtils
 		 * \return Data from the Dashboard
 		 */
 		static Payload& GetPayload() { return m_Payload; }
+
+		/**
+		 * \brief Destroys the ImGui context
+		 */
+		static void Cleanup();
 
 		static void SetShown(bool shown) { m_Show = shown; }
 		static bool IsShown() { return m_Show;}

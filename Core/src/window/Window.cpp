@@ -7,17 +7,12 @@
 
 namespace CoreWindow
 {
-	Window Window::m_Instance;
+	Window* Window::m_Instance = new Window;
 	bool Window::m_Keys[GLFW_KEY_LAST] = { false };
 	bool Window::m_MouseButtons[GLFW_MOUSE_BUTTON_LAST] = { false };
 	float Window::m_LastPosX = Window::GetWidth() / 2.0f;
 	float Window::m_LastPosY = Window::GetHeight() / 2.0f;
 	bool Window::m_FirstClick = true;
-
-	Window::~Window()
-	{
-		glfwTerminate();
-	}
 
 	void Window::Init(int width, int height, const char* title)
 	{
@@ -87,6 +82,13 @@ namespace CoreWindow
 		glfwPollEvents();
 	}
 
+	void Window::Cleanup()
+	{
+		delete m_Instance;
+		LOG_INFO("Terminating GLFW...");
+		glfwTerminate();
+	}
+
 	void Window::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		if (key == GLFW_KEY_ESCAPE && action != GLFW_RELEASE)
@@ -135,6 +137,6 @@ namespace CoreWindow
 
 	void Window::GetCursorPos(double& x, double& y)
 	{
-		glfwGetCursorPos(m_Instance.m_Window, &x, &y);
+		glfwGetCursorPos(m_Instance->m_Window, &x, &y);
 	}
 }

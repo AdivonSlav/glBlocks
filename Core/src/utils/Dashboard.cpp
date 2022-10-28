@@ -26,13 +26,6 @@ namespace CoreUtils
 		ImGui_ImplOpenGL3_Init(BLOCKS_GLSL_VERSION);
 	}
 
-	Dashboard::~Dashboard()
-	{
-		ImGui_ImplOpenGL3_Shutdown();
-		ImGui_ImplGlfw_Shutdown();
-		ImGui::DestroyContext();
-	}
-
 	void Dashboard::Render()
 	{
 		if (m_Show)
@@ -56,7 +49,7 @@ namespace CoreUtils
 		ImGui::SameLine();
 		ImGui::Text("Average frametime: %.3f ms", m_AverageFrameTime);
 		ImGui::Text("Camera position (XYZ): %.2f %.2f %.2f", m_Camera->GetPosition().x, m_Camera->GetPosition().y, m_Camera->GetPosition().z);
-		ImGui::SliderFloat("Time step multiplier:", &m_Payload.timeStepMultiplier, 0.0f, 5.0f);
+		ImGui::SliderFloat("Time step multiplier:", &m_Payload.timeStepMultiplier, 0.0f, 20.0f);
 
 		ImGui::End();
 	}
@@ -65,5 +58,12 @@ namespace CoreUtils
 	{
 		m_FPS = fps;
 		m_AverageFrameTime = avgFrameTime;
+	}
+
+	void Dashboard::Cleanup()
+	{
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
 	}
 }

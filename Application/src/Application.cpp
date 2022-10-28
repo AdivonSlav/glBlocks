@@ -39,7 +39,7 @@ void Application::Run()
 	m_World->GetGenerator().Generate();
 	ChunkManager::LoadChunks();
 
-	m_Camera.SetPosition(0, 240.0f, 0);
+	m_Camera.SetPosition(0, 260.0f, 0);
 	m_Camera.SendShader(basicShader);
 	m_Camera.SendShader(lightSourceShader);
 
@@ -65,6 +65,8 @@ void Application::Run()
 	}
 
 	ChunkManager::Cleanup();
+	Dashboard::Cleanup();
+	Window::Cleanup();
 	LOG_INFO("Ending...");
 }
 
