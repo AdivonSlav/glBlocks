@@ -7,13 +7,13 @@
 namespace CoreGameObjects
 {
 	Chunk::Chunk()
-		: m_VAO(new VertexArray()), m_Position(0.0f, 0.0f, 0.0f), m_Rebuild(false), m_VertexCount(0)
+		: m_VAO(new VertexArray()), m_Position(0.0f, 0.0f, 0.0f), m_Rebuild(true), m_VertexCount(0)
 	{
 
 	}
 
 	Chunk::Chunk(const glm::vec3& position)
-		: m_VAO(new VertexArray()), m_Position(position), m_Rebuild(false), m_VertexCount(0)
+		: m_VAO(new VertexArray()), m_Position(position), m_Rebuild(true), m_VertexCount(0)
 	{
 
 	}

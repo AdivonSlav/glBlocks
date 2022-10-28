@@ -55,6 +55,7 @@ namespace CoreGameObjects
 		void Build();
 
 		VertexArray* GetVAO() const { return m_VAO; }
+		BlockType* GetBlocksPtr() { return m_Blocks;}
 		const glm::vec3& GetPos() const { return m_Position; }
 		bool GetRebuild() const { return m_Rebuild; }
 		int GetVertCount() const { return m_VertexCount; }

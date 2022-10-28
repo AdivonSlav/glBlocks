@@ -30,7 +30,7 @@ namespace CoreGameObjects
 		 * \param position The position of the chunk
 		 * \param chunk A reference to the chunk being written
 		 */
-		static void WriteToFile(glm::vec3 position, const Chunk& chunk);
+		static void WriteToFile(glm::vec3 position, Chunk& chunk);
 
 		/**
 		 * \brief Reads the chunk layout information from a file and constructs the chunk

@@ -4,7 +4,7 @@
 Application::Application()
 	: m_Window(Window::Get()), m_Camera({ 0.0f, 0.0f, 2.0f }), m_FrameRate(0.0), m_AverageFrameTime(0.0), m_FrameCount(0), m_LastUpdate(0.0)
 {
-	m_Window.Init(800, 600, "glBlocks");
+	m_Window.Init(1366, 768, "glBlocks");
 	m_Renderer = new Renderer();
 	m_Dashboard = new Dashboard(&m_Camera);
 	m_World = new World();

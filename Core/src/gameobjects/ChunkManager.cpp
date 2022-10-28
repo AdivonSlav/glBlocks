@@ -11,13 +11,13 @@ namespace CoreGameObjects
 	std::unordered_map<glm::vec3, Chunk*>* ChunkManager::m_LoadedChunks = new std::unordered_map<glm::vec3, Chunk*>();
 	std::unordered_map < glm::vec3, std::string>* ChunkManager::m_UnloadedChunks = new std::unordered_map<glm::vec3, std::string>();
 
-	void ChunkManager::WriteToFile(glm::vec3 position, const Chunk& chunk)
+	void ChunkManager::WriteToFile(glm::vec3 position, Chunk& chunk)
 	{
 		// e.g. 32_0_32.ch
 		std::string chunkName = std::to_string((int)position.x) + "_" + std::to_string((int)position.y) + "_" + std::to_string((int)position.z) + ".ch";
 		std::string filePath = WRITE_PATH + chunkName;
 
-		std::ofstream stream(filePath, std::fstream::out | std::fstream::trunc);
+		std::ofstream stream(filePath, std::ios::trunc | std::ios::binary);
 
 		if (stream.fail())
 		{
@@ -26,16 +26,7 @@ namespace CoreGameObjects
 
 		if (stream.is_open())
 		{
-			for (int x = 0; x < CHUNK_X; x++)
-			{
-				for (int y = 0; y < CHUNK_Y; y++)
-				{
-					for (int z = 0; z < CHUNK_Z; z++)
-					{
-						stream << static_cast<int>(chunk.GetBlock(x, y, z));
-					}
-				}
-			}
+			stream.write(reinterpret_cast<char*>(chunk.GetBlocksPtr()), CHUNK_X * CHUNK_Y * CHUNK_Z * sizeof(BlockType));
 		}
 
 		stream.close();
@@ -48,8 +39,7 @@ namespace CoreGameObjects
 	{
 		auto chunk = new Chunk(position);
 		std::string filePath = m_UnloadedChunks->at(position);
-		std::ifstream stream(filePath, std::ifstream::in);
-		bool airBlock = false;
+		std::ifstream stream(filePath, std::ios::binary);
 
 		if (stream.fail())
 		{
@@ -59,33 +49,7 @@ namespace CoreGameObjects
 
 		if (stream.is_open())
 		{
-			std::stringstream ss;
-			int counter = 0;
-
-			ss << stream.rdbuf();
-
-			std::string fileContents = ss.str();
-
-			for (int x = 0; x < CHUNK_X; x++)
-			{
-				for (int y = 0; y < CHUNK_Y; y++)
-				{
-					for (int z = 0; z < CHUNK_Z; z++)
-					{
-						// Need to subtract 48 to convert from ASCII
-						char type = fileContents[counter++];
-
-						if (type == '-')
-						{
-							type = fileContents[counter++];
-							airBlock = true;
-						}
-
-						chunk->SetBlock(x, y, z, !airBlock?(BlockType)(type - 48): BlockType::AIR);
-						airBlock = false;
-					}
-				}
-			}
+			stream.read(reinterpret_cast<char*>(chunk->GetBlocksPtr()), CHUNK_X * CHUNK_Y * CHUNK_Z * sizeof(BlockType));
 		}
 
 		stream.close();
