@@ -1,6 +1,8 @@
 #pragma once
 
 #include <unordered_map>
+
+#define GLM_SWIZZLE
 #include <glm/glm.hpp>
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -8,6 +10,7 @@
 
 #include "../CoreAPI.h"
 #include "Chunk.h"
+#include "../graphics/Camera.h"
 
 #ifdef BLOCKS_DEBUG
 #define WRITE_PATH "src/chunks/"
@@ -39,12 +42,15 @@ namespace CoreGameObjects
 		 */
 		static Chunk* ReadFromFile(glm::vec3 position);
 
+		/**
+		 * \brief Maps paths to any chunks on disk to memory for later use in rendering
+		 */
 		static void MapChunks();
 
 		/**
 		 * \brief Loads any unloaded chunks
 		 */
-		static void LoadChunks();
+		static void LoadChunks(const Camera& camera);
 
 		/**
 		 * \brief Deallocates all chunk arrays

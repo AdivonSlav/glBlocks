@@ -84,7 +84,7 @@ namespace CoreGraphics
 
 		if (Window::IsKeyPressed(GLFW_KEY_LEFT_SHIFT))
 		{
-			m_Speed = 15.0f;
+			m_Speed = 25.0f;
 		}
 		if (Window::IsKeyReleased(GLFW_KEY_LEFT_SHIFT))
 		{

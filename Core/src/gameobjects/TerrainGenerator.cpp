@@ -13,7 +13,7 @@
 #define MAX_SEED 9999999999
 #define MIN_SEED 1
 
-#define CHUNKS 64
+#define CHUNKS 484
 #define SEA_LEVEL 8
 
 namespace CoreGameObjects
@@ -54,10 +54,8 @@ namespace CoreGameObjects
 		{
 			for (int x = start; x < end; x++)
 			{
-				auto chunk = new Chunk();
-
 				glm::vec3 chunkPos(x * CHUNK_X, 0, z * CHUNK_Z);
-				chunk->SetPosition(chunkPos.x, chunkPos.y, chunkPos.z);
+				auto chunk = new Chunk(chunkPos);
 
 				Noisify(*chunk);
 

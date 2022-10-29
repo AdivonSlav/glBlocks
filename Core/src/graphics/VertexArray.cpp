@@ -29,6 +29,8 @@ namespace CoreGraphics
 	{
 		for (auto& buffer : m_Buffers)
 			delete buffer;
+
+		glDeleteVertexArrays(1, &m_VAO);
 	}
 
 	void VertexArray::AddBuffer(Buffers::VertexBuffer* buffer, GLint index, GLenum type)

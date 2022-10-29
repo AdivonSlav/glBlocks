@@ -89,12 +89,39 @@ namespace CoreGameObjects
 		LOG_INFO("Mapped " << chCounter << " chunks from disk");
 	}
 
-	void ChunkManager::LoadChunks()
+	void ChunkManager::LoadChunks(const Camera& camera)
 	{
-		for (auto& chunk : *m_UnloadedChunks)
+		float loadDistance = 32.0f;
+
+		for (auto unloadedIt = m_UnloadedChunks->begin(); unloadedIt != m_UnloadedChunks->end(); )
 		{
-			auto generatedChunk = ReadFromFile(chunk.first);
-			m_LoadedChunks->insert(std::pair(chunk.first, generatedChunk));
+			glm::vec2 distance = camera.GetPosition().xz - glm::vec2(unloadedIt->first.x + CHUNK_X, unloadedIt->first.z + CHUNK_Z);
+
+			if (glm::length(distance) <= loadDistance)
+			{
+				if (!IsLoaded(unloadedIt->first))
+				{
+					m_LoadedChunks->insert(std::pair(unloadedIt->first, ReadFromFile(unloadedIt->first)));
+					unloadedIt = m_UnloadedChunks->erase(unloadedIt);
+				}
+			}
+			else
+				++unloadedIt;
+		}
+
+		for (auto loadedIt = m_LoadedChunks->begin(); loadedIt != m_LoadedChunks->end(); )
+		{
+			glm::vec2 distance = camera.GetPosition().xz - glm::vec2(loadedIt->first.x + CHUNK_X, loadedIt->first.z + CHUNK_Z);
+
+			if (glm::length(distance) > loadDistance)
+			{
+				delete loadedIt->second;
+				std::string chunkPath = std::format("{}{}_{}_{}.ch", WRITE_PATH, loadedIt->first.x, loadedIt->first.y, loadedIt->first.z);
+				m_UnloadedChunks->insert(std::pair(loadedIt->first, chunkPath));
+				loadedIt = m_LoadedChunks->erase(loadedIt);
+			}
+			else
+				++loadedIt;
 		}
 	}
 
