@@ -31,7 +31,7 @@ namespace CoreGameObjects
 		glm::vec3 m_Position;
 
 		bool m_Rebuild;
-		int m_VertexCount;
+		unsigned int m_VertexCount;
 	public:
 		/**
 		 * \brief Constructs the chunk at a default position of (0,0,0)
@@ -58,7 +58,7 @@ namespace CoreGameObjects
 		BlockType* GetBlocksPtr() { return m_Blocks;}
 		const glm::vec3& GetPos() const { return m_Position; }
 		bool GetRebuild() const { return m_Rebuild; }
-		int GetVertCount() const { return m_VertexCount; }
+		unsigned int GetVertCount() const { return m_VertexCount; }
 
 		void SetPosition(float x, float y, float z) { m_Position = glm::vec3(x, y, z); }
 	};
