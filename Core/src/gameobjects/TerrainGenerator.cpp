@@ -59,8 +59,8 @@ namespace CoreGameObjects
 			{
 				if (!ChunkManager::IsLoaded(unloadedIt->first))
 				{
-					ChunkManager::GetLoadedChunks().insert(std::pair(unloadedIt->first, ChunkManager::ReadFromFile(unloadedIt->first, m_Seed)));
-					LOG_INFO("Loaded chunk at " << unloadedIt->first.x << " " << unloadedIt->first.z);
+					auto pair = std::pair(unloadedIt->first, ChunkManager::ReadFromFile(unloadedIt->first, m_Seed));
+					ChunkManager::GetLoadedChunks().insert(pair);
 					unloadedIt = ChunkManager::GetUnloadedChunks().erase(unloadedIt);
 				}
 			}
@@ -74,10 +74,8 @@ namespace CoreGameObjects
 
 			if (glm::length(distance) > loadDistance)
 			{
-				delete loadedIt->second;
 				std::string chunkPath = std::format("{}{}_{}_{}.ch", WRITE_PATH, loadedIt->first.x, loadedIt->first.y, loadedIt->first.z);
 				ChunkManager::GetUnloadedChunks().insert(std::pair(loadedIt->first, chunkPath));
-				LOG_INFO("Unloaded chunk at " << loadedIt->first.x << " " << loadedIt->first.z);
 				loadedIt = ChunkManager::GetLoadedChunks().erase(loadedIt);
 			}
 			else
@@ -94,14 +92,14 @@ namespace CoreGameObjects
 
 		glm::ivec2 xBoundaries =
 		{
-			cameraPosInChunks.x - (8 / 2),
-			cameraPosInChunks.x + ( 8 / 2)
+			cameraPosInChunks.x - (16 / 2),
+			cameraPosInChunks.x + ( 16 / 2)
 		};
 
 		glm::ivec2 zBoundaries =
 		{
-			cameraPosInChunks.y - (8 / 2),
-			cameraPosInChunks.y + ( 8 / 2)
+			cameraPosInChunks.y - (16 / 2),
+			cameraPosInChunks.y + ( 16 / 2)
 		};
 
 		for (int z = zBoundaries.x; z <= zBoundaries.y; z++)
@@ -120,7 +118,7 @@ namespace CoreGameObjects
 					{
 						Chunk newChunk(chunkPos);
 						Noisify(newChunk);
-						ChunkManager::WriteToFile(chunkPos, newChunk, m_Seed);
+						ChunkManager::WriteToFile(chunkPos, &newChunk, m_Seed);
 					}
 				}
 			}
@@ -137,6 +135,11 @@ namespace CoreGameObjects
 		LOG_INFO("Found chunk folder with " << fileCount << " chunks");
 
 		return true;
+	}
+
+	void TerrainGenerator::ChunkWorker()
+	{
+
 	}
 
 	void TerrainGenerator::Noisify(Chunk& chunk)

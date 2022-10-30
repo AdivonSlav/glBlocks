@@ -33,7 +33,7 @@ namespace CoreGameObjects
 			return;
 		}
 
-		m_Blocks[x + CHUNK_X * (y + CHUNK_Y * z)] = type;
+		m_Blocks[x + CHUNK_X * (y + CHUNK_Y * z)] = (signed char)type;
 		m_Rebuild = true;
 	}
 
@@ -45,7 +45,7 @@ namespace CoreGameObjects
 			return BlockType::UNDEFINED;
 		}
 
-		return m_Blocks[x + CHUNK_X * (y + CHUNK_Y * z)];
+		return (BlockType)m_Blocks[x + CHUNK_X * (y + CHUNK_Y * z)];
 	}
 
 	void Chunk::Build()

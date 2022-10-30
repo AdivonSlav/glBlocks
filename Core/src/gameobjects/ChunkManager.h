@@ -22,8 +22,9 @@ namespace CoreGameObjects
 	class CORE_API ChunkManager
 	{
 	private:
-		static std::unordered_map<glm::vec3, Chunk*>* m_LoadedChunks;
-		static std::unordered_map<glm::vec3, std::string>* m_UnloadedChunks;
+		static std::unique_ptr<std::unordered_map<glm::vec3, std::shared_ptr<Chunk>>> m_LoadedChunks;
+		static std::vector<std::shared_ptr<Chunk>> m_PreparedChunks;
+		static std::unique_ptr<std::unordered_map<glm::vec3, std::string>> m_UnloadedChunks;
 
 		ChunkManager() = default;
 	public:
@@ -32,14 +33,14 @@ namespace CoreGameObjects
 		 * \param position The position of the chunk
 		 * \param chunk A reference to the chunk being written
 		 */
-		static void WriteToFile(glm::vec3 position, Chunk& chunk, unsigned long long& seed);
+		static void WriteToFile(glm::vec3 position, Chunk* chunk, unsigned long long& seed);
 
 		/**
 		 * \brief Reads the chunk layout information from a file and constructs the chunk
 		 * \param position The position of the chunk
 		 * \return A newly allocated chunk on the heap from the layout information in the chunk file
 		 */
-		static Chunk* ReadFromFile(glm::vec3 position, unsigned long long& seed);
+		static std::shared_ptr<Chunk> ReadFromFile(glm::vec3 position, unsigned long long& seed);
 
 		/**
 		 * \brief Checks whether a chunk file exists corresponding to the given position
@@ -57,7 +58,8 @@ namespace CoreGameObjects
 		static bool IsUnloaded(const glm::vec3& position) { return m_UnloadedChunks->contains(position); }
 		static Chunk* GetLoadedChunk(const glm::vec3& coordinates);
 
-		static std::unordered_map<glm::vec3, Chunk*>& GetLoadedChunks() { return *m_LoadedChunks; }
+		static std::unordered_map<glm::vec3, std::shared_ptr<Chunk>>& GetLoadedChunks() { return *m_LoadedChunks; }
+		static std::vector<std::shared_ptr<Chunk>>& GetPreparedChunks() { return m_PreparedChunks; }
 		static std::unordered_map<glm::vec3, std::string>& GetUnloadedChunks() { return *m_UnloadedChunks; }
 	};
 }

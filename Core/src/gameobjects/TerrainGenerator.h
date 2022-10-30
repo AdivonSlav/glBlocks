@@ -48,6 +48,8 @@ namespace CoreGameObjects
 		 */
 		bool CheckIfGenerated();
 
+		static void ChunkWorker();
+
 		/**
 		 * \brief Randomly generates a number. Is thread safe
 		 * \tparam Numeral The type of number to be randomly generated 

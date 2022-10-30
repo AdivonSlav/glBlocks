@@ -26,7 +26,7 @@ namespace CoreGameObjects
 	{
 	private:
 		VertexArray* m_VAO;
-		BlockType m_Blocks[CHUNK_X * CHUNK_Y * CHUNK_Z];
+		signed char m_Blocks[CHUNK_X * CHUNK_Y * CHUNK_Z];
 
 		glm::vec3 m_Position;
 
@@ -45,7 +45,7 @@ namespace CoreGameObjects
 		explicit Chunk(const glm::vec3& position);
 
 		~Chunk();
-		
+
 		void SetBlock(int x, int y, int z, BlockType type);
 		BlockType GetBlock(int x, int y, int z) const;
 
@@ -55,7 +55,7 @@ namespace CoreGameObjects
 		void Build();
 
 		VertexArray* GetVAO() const { return m_VAO; }
-		BlockType* GetBlocksPtr() { return m_Blocks;}
+		signed char* GetBlocksPtr() { return m_Blocks;}
 		const glm::vec3& GetPos() const { return m_Position; }
 		bool GetRebuild() const { return m_Rebuild; }
 		unsigned int GetVertCount() const { return m_VertexCount; }

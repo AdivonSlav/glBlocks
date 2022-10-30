@@ -8,10 +8,11 @@
 
 namespace CoreGameObjects
 {
-	std::unordered_map<glm::vec3, Chunk*>* ChunkManager::m_LoadedChunks = new std::unordered_map<glm::vec3, Chunk*>();
-	std::unordered_map < glm::vec3, std::string>* ChunkManager::m_UnloadedChunks = new std::unordered_map<glm::vec3, std::string>();
+	std::unique_ptr<std::unordered_map<glm::vec3, std::shared_ptr<Chunk>>> ChunkManager::m_LoadedChunks = std::make_unique<std::unordered_map<glm::vec3, std::shared_ptr<Chunk>>>();
+	std::vector<std::shared_ptr<Chunk>> ChunkManager::m_PreparedChunks;
+	std::unique_ptr<std::unordered_map<glm::vec3, std::string>> ChunkManager::m_UnloadedChunks = std::make_unique<std::unordered_map<glm::vec3, std::string>>();
 
-	void ChunkManager::WriteToFile(glm::vec3 position, Chunk& chunk, unsigned long long& seed)
+	void ChunkManager::WriteToFile(glm::vec3 position, Chunk* chunk, unsigned long long& seed)
 	{
 		// e.g. 32_0_32.ch
 		std::string chunkName = std::to_string((int)position.x) + "_" + std::to_string((int)position.y) + "_" + std::to_string((int)position.z) + ".ch";
@@ -27,32 +28,31 @@ namespace CoreGameObjects
 		if (stream.is_open())
 		{
 			stream.write(reinterpret_cast<char*>(&seed), sizeof(unsigned long long));
-			stream.write(reinterpret_cast<char*>(chunk.GetBlocksPtr()), CHUNK_X * CHUNK_Y * CHUNK_Z * sizeof(BlockType));
+			stream.write(reinterpret_cast<char*>(chunk->GetBlocksPtr()), CHUNK_X * CHUNK_Y * CHUNK_Z * sizeof(signed char));
 		}
 
 		stream.close();
 
 		if (!IsUnloaded(position))
-			m_UnloadedChunks->insert(std::pair(position, filePath));
+			GetUnloadedChunks().insert(std::pair(position, filePath));
 	}
 
-	Chunk* ChunkManager::ReadFromFile(glm::vec3 position, unsigned long long& seed)
+	std::shared_ptr<Chunk> ChunkManager::ReadFromFile(glm::vec3 position, unsigned long long& seed)
 	{
-		auto chunk = new Chunk(position);
-		std::string filePath = m_UnloadedChunks->at(position);
+		auto chunk = std::make_shared<Chunk>(position);
+		std::string filePath = GetUnloadedChunks().at(position);
 
 		std::ifstream stream(filePath, std::ios::binary);
 
 		if (stream.fail())
 		{
 			LOG_ERROR(strerror(errno));
-			return nullptr;
 		}
 
 		if (stream.is_open())
 		{
 			stream.read(reinterpret_cast<char*>(&seed), sizeof(unsigned long long));
-			stream.read(reinterpret_cast<char*>(chunk->GetBlocksPtr()), CHUNK_X * CHUNK_Y * CHUNK_Z * sizeof(BlockType));
+			stream.read(reinterpret_cast<char*>(chunk.get()->GetBlocksPtr()), CHUNK_X * CHUNK_Y * CHUNK_Z * sizeof(signed char));
 		}
 
 		stream.close();
@@ -91,11 +91,7 @@ namespace CoreGameObjects
 	{
 		LOG_INFO("Cleaning up chunk arrays...");
 
-		for (auto& chunk : *m_LoadedChunks)
-			delete chunk.second;
 
-		delete m_LoadedChunks;
-		delete m_UnloadedChunks;
 	}
 
 	Chunk* ChunkManager::GetLoadedChunk(const glm::vec3& coordinates)
@@ -103,6 +99,6 @@ namespace CoreGameObjects
 		if (!IsLoaded(coordinates))
 			return nullptr;
 
-		return m_LoadedChunks->at(coordinates);
+		return GetLoadedChunks().at(coordinates).get();
 	}
 }
