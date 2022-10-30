@@ -1,8 +1,6 @@
 #pragma once
 
 #include <unordered_map>
-
-#define GLM_SWIZZLE
 #include <glm/glm.hpp>
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -11,6 +9,7 @@
 #include "../CoreAPI.h"
 #include "Chunk.h"
 #include "../graphics/Camera.h"
+#include "../gameobjects/TerrainGenerator.h"
 
 #ifdef BLOCKS_DEBUG
 #define WRITE_PATH "src/chunks/"
@@ -33,24 +32,21 @@ namespace CoreGameObjects
 		 * \param position The position of the chunk
 		 * \param chunk A reference to the chunk being written
 		 */
-		static void WriteToFile(glm::vec3 position, Chunk& chunk);
+		static void WriteToFile(glm::vec3 position, Chunk& chunk, unsigned long long& seed);
 
 		/**
 		 * \brief Reads the chunk layout information from a file and constructs the chunk
 		 * \param position The position of the chunk
 		 * \return A newly allocated chunk on the heap from the layout information in the chunk file
 		 */
-		static Chunk* ReadFromFile(glm::vec3 position);
+		static Chunk* ReadFromFile(glm::vec3 position, unsigned long long& seed);
 
 		/**
-		 * \brief Maps paths to any chunks on disk to memory for later use in rendering
+		 * \brief Checks whether a chunk file exists corresponding to the given position
+		 * \param position Position of the chunk
+		 * \return Whether it is written or not
 		 */
-		static void MapChunks();
-
-		/**
-		 * \brief Loads any unloaded chunks
-		 */
-		static void LoadChunks(const Camera& camera);
+		static bool IsWritten(glm::vec3 position);
 
 		/**
 		 * \brief Deallocates all chunk arrays

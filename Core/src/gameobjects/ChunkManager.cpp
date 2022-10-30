@@ -11,7 +11,7 @@ namespace CoreGameObjects
 	std::unordered_map<glm::vec3, Chunk*>* ChunkManager::m_LoadedChunks = new std::unordered_map<glm::vec3, Chunk*>();
 	std::unordered_map < glm::vec3, std::string>* ChunkManager::m_UnloadedChunks = new std::unordered_map<glm::vec3, std::string>();
 
-	void ChunkManager::WriteToFile(glm::vec3 position, Chunk& chunk)
+	void ChunkManager::WriteToFile(glm::vec3 position, Chunk& chunk, unsigned long long& seed)
 	{
 		// e.g. 32_0_32.ch
 		std::string chunkName = std::to_string((int)position.x) + "_" + std::to_string((int)position.y) + "_" + std::to_string((int)position.z) + ".ch";
@@ -26,6 +26,7 @@ namespace CoreGameObjects
 
 		if (stream.is_open())
 		{
+			stream.write(reinterpret_cast<char*>(&seed), sizeof(unsigned long long));
 			stream.write(reinterpret_cast<char*>(chunk.GetBlocksPtr()), CHUNK_X * CHUNK_Y * CHUNK_Z * sizeof(BlockType));
 		}
 
@@ -35,10 +36,11 @@ namespace CoreGameObjects
 			m_UnloadedChunks->insert(std::pair(position, filePath));
 	}
 
-	Chunk* ChunkManager::ReadFromFile(glm::vec3 position)
+	Chunk* ChunkManager::ReadFromFile(glm::vec3 position, unsigned long long& seed)
 	{
 		auto chunk = new Chunk(position);
 		std::string filePath = m_UnloadedChunks->at(position);
+
 		std::ifstream stream(filePath, std::ios::binary);
 
 		if (stream.fail())
@@ -49,6 +51,7 @@ namespace CoreGameObjects
 
 		if (stream.is_open())
 		{
+			stream.read(reinterpret_cast<char*>(&seed), sizeof(unsigned long long));
 			stream.read(reinterpret_cast<char*>(chunk->GetBlocksPtr()), CHUNK_X * CHUNK_Y * CHUNK_Z * sizeof(BlockType));
 		}
 
@@ -57,74 +60,33 @@ namespace CoreGameObjects
 		return chunk;
 	}
 
-	void ChunkManager::MapChunks()
+	bool ChunkManager::IsWritten(glm::vec3 position)
 	{
-		int chCounter = 0;
-
 		for (const auto& entry : std::filesystem::directory_iterator(WRITE_PATH))
 		{
 			std::string path = entry.path().string();
 			path = path.substr(path.find_last_of('/') + 1);
 			path = path.substr(0, path.find('.'));
 
-			size_t position = 0;
+			size_t strPosition = 0;
 			int counter = 0;
 			float coordinates[3];
 
-			while ((position = path.find('_')) != std::string::npos)
+			while ((strPosition = path.find('_')) != std::string::npos)
 			{
-				coordinates[counter] = std::stof(path.substr(0, position));
-				path.erase(0, position + 1);
+				coordinates[counter] = std::stof(path.substr(0, strPosition));
+				path.erase(0, strPosition + 1);
 				counter++;
 			}
 
 			coordinates[counter] = std::stof(path);
-			std::string path_temp = entry.path().string();
 
-			m_UnloadedChunks->insert(std::pair(glm::vec3(coordinates[0], coordinates[1], coordinates[2]), path_temp.c_str()));
-
-			chCounter++;
+			if (position == glm::vec3(coordinates[0], coordinates[1], coordinates[2]))
+				return true;
 		}
 
-		LOG_INFO("Mapped " << chCounter << " chunks from disk");
+		return false;
 	}
-
-	void ChunkManager::LoadChunks(const Camera& camera)
-	{
-		float loadDistance = 32.0f;
-
-		for (auto unloadedIt = m_UnloadedChunks->begin(); unloadedIt != m_UnloadedChunks->end(); )
-		{
-			glm::vec2 distance = camera.GetPosition().xz - glm::vec2(unloadedIt->first.x + CHUNK_X, unloadedIt->first.z + CHUNK_Z);
-
-			if (glm::length(distance) <= loadDistance)
-			{
-				if (!IsLoaded(unloadedIt->first))
-				{
-					m_LoadedChunks->insert(std::pair(unloadedIt->first, ReadFromFile(unloadedIt->first)));
-					unloadedIt = m_UnloadedChunks->erase(unloadedIt);
-				}
-			}
-			else
-				++unloadedIt;
-		}
-
-		for (auto loadedIt = m_LoadedChunks->begin(); loadedIt != m_LoadedChunks->end(); )
-		{
-			glm::vec2 distance = camera.GetPosition().xz - glm::vec2(loadedIt->first.x + CHUNK_X, loadedIt->first.z + CHUNK_Z);
-
-			if (glm::length(distance) > loadDistance)
-			{
-				delete loadedIt->second;
-				std::string chunkPath = std::format("{}{}_{}_{}.ch", WRITE_PATH, loadedIt->first.x, loadedIt->first.y, loadedIt->first.z);
-				m_UnloadedChunks->insert(std::pair(loadedIt->first, chunkPath));
-				loadedIt = m_LoadedChunks->erase(loadedIt);
-			}
-			else
-				++loadedIt;
-		}
-	}
-
 	void ChunkManager::Cleanup()
 	{
 		LOG_INFO("Cleaning up chunk arrays...");

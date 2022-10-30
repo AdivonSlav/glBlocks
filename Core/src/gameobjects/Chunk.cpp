@@ -50,8 +50,6 @@ namespace CoreGameObjects
 
 	void Chunk::Build()
 	{
-		m_Rebuild = false;
-
 		// The position layout contains one extra byte per vertex in order to have 4-byte alignment which is unused.
 		// Could probably change around the data types in order to maximize usage
 
@@ -340,5 +338,6 @@ namespace CoreGameObjects
 		m_VAO->Unbind();
 
 		m_VertexCount = positions.size();
+		m_Rebuild = false;
 	}
 }

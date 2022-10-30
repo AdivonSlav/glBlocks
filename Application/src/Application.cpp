@@ -36,7 +36,7 @@ void Application::Run()
 	basicShader.Bind();
 	basicShader.SetInt("uAtlasSize", 4);
 
-	m_World->GetGenerator().Generate();
+	m_World->GetGenerator().Init();
 
 	m_Camera.SetPosition(0, 260.0f, 0);
 	m_Camera.SendShader(basicShader);
@@ -52,7 +52,7 @@ void Application::Run()
 		m_Camera.CheckInput(m_Timer.GetDelta());
 
 		m_World->StepTime(m_Timer);
-		ChunkManager::LoadChunks(m_Camera);
+		m_World->GetGenerator().CheckChunkStatus(m_Camera);
 		m_Renderer->Draw(*m_World, m_Camera);
 
 		m_Dashboard->GetData(m_FrameRate, m_AverageFrameTime);

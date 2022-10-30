@@ -26,9 +26,21 @@ namespace CoreGameObjects
 		~TerrainGenerator() = default;
 
 		/**
-		 * \brief Generates a defined number of chunks around the world origin point (0,0,0)
+		 * \brief Initializes a chunk folder if not already present
 		 */
-		void Generate();
+		void Init();
+
+		/**
+		 * \brief Loads or unloads any chunks as necessary based on camera positions
+		 * \param camera The camera object in the scene
+		 */
+		void CheckChunkStatus(const Camera& camera);
+
+		/**
+		 * \brief Generates a new chunk if necessary and maps it
+		 * \param camera The camera object in the scene
+		 */
+		void Generate(const Camera& camera);
 
 		/**
 		 * \brief Checks whether a world is already generated. If generated, Generate() is skipped
