@@ -31,6 +31,8 @@ namespace CoreGameObjects
 		glm::vec3 m_Position;
 
 		bool m_Rebuild;
+		bool m_ShouldDispose;
+		bool m_ShouldLoad;
 		unsigned int m_VertexCount;
 	public:
 		/**
@@ -58,8 +60,15 @@ namespace CoreGameObjects
 		signed char* GetBlocksPtr() { return m_Blocks;}
 		const glm::vec3& GetPos() const { return m_Position; }
 		bool GetRebuild() const { return m_Rebuild; }
+		bool ShouldDispose() const { return m_ShouldDispose; }
+		bool ShouldLoad() const { return m_ShouldLoad; }
 		unsigned int GetVertCount() const { return m_VertexCount; }
 
 		void SetPosition(float x, float y, float z) { m_Position = glm::vec3(x, y, z); }
+		void SetPosition(const glm::vec3& position) { m_Position = position; }
+		void SetShouldDispose(bool value) { m_ShouldDispose = value; }
+		void SetShouldLoad(bool value) { m_ShouldLoad = value; }
+
+		bool operator==(const Chunk& chunk) { return this->GetPos() == chunk.GetPos(); }
 	};
 }

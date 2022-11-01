@@ -31,10 +31,7 @@ namespace CoreGraphics
 		for (auto& chunk : ChunkManager::GetLoadedChunks())
 		{
 			auto identity = glm::identity<glm::mat4>();
-			auto model = glm::translate(identity, chunk.first);
-
-			if (chunk.second->GetRebuild())
-				chunk.second->Build();
+			auto model = glm::translate(identity, chunk->GetPos());
 
 			m_Shader[(int)ShaderType::BASIC_SHADER]->SetMat4<float>("uModel", model);
 			m_Shader[(int)ShaderType::BASIC_SHADER]->SetVec3<float>("uLightPos", world.GetLightPosition());
@@ -42,10 +39,10 @@ namespace CoreGraphics
 			m_Shader[(int)ShaderType::BASIC_SHADER]->SetFloat("uLightLevel", world.GetLightLevel());
 			m_Shader[(int)ShaderType::BASIC_SHADER]->SetInt("uSunHasSet", world.GetHasSet());
 
-			chunk.second->GetVAO()->Bind();
-			glDrawArrays(GL_TRIANGLES, 0, chunk.second->GetVertCount());
+			chunk->GetVAO()->Bind();
+			glDrawArrays(GL_TRIANGLES, 0, chunk->GetVertCount());
 
-			chunk.second->GetVAO()->Unbind();
+			chunk->GetVAO()->Unbind();
 		}
 		m_Shader[(int)ShaderType::BASIC_SHADER]->Unbind();
 

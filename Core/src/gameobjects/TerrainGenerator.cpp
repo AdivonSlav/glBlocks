@@ -4,6 +4,7 @@
 #include <random>
 #include <filesystem>
 #include <iterator>
+#include <mutex>
 
 #define GLM_SWIZZLE
 #include <glm/glm.hpp>
@@ -11,19 +12,28 @@
 
 #include "TerrainGenerator.h"
 #include "../utils/Logger.h"
+#include "../utils/Maths.h"
 #include "ChunkManager.h"
 
 #define MAX_SEED 9999999999
 #define MIN_SEED 1
 
-#define CHUNKS 484
-#define SEA_LEVEL 8
+std::mutex mtx;
 
 namespace CoreGameObjects
 {
+	unsigned long long TerrainGenerator::m_Seed = 0;
+	double TerrainGenerator::m_LerpedSeed = 0.0;
+	std::atomic<bool> TerrainGenerator::m_MappingChunk = false;
+	std::atomic<bool> TerrainGenerator::m_PreparingChunk = false;
+	std::atomic<bool> TerrainGenerator::m_LoadingChunk = false;
+	std::atomic<bool> TerrainGenerator::m_Terminate = false;
+	Camera* TerrainGenerator::m_Camera = nullptr;
+
 	TerrainGenerator::TerrainGenerator(unsigned long long seed)
-		: m_Seed(seed)
 	{
+		m_Seed = seed;
+
 		if (m_Seed == 0)
 			m_Seed = GetRand<unsigned long long>(1000000000, MAX_SEED);
 		else if (m_Seed > MAX_SEED)
@@ -32,96 +42,84 @@ namespace CoreGameObjects
 			m_Seed = GetRand<unsigned long long>(1000000000, MAX_SEED);
 		}
 
-		m_LerpedSeed = Lerp(m_Seed);
+		m_LerpedSeed = Interpolate(m_Seed, MIN_SEED, MAX_SEED, -255.0f, 255.0f);
 
 		LOG_INFO("World seed: " << m_Seed);
 		LOG_INFO("World seed after interpolation: " << m_LerpedSeed);
 	}
 
+	TerrainGenerator::~TerrainGenerator()
+	{
+		workers[0].join();
+		workers[1].join();
+	}
+
 	void TerrainGenerator::Init()
 	{
+		ChunkManager::GetLoadedChunks().reserve(81);
+
 		if (!CheckIfGenerated())
 		{
 			LOG_INFO("Creating new chunk folder")
 			std::filesystem::create_directory(WRITE_PATH);
 		}
+
+		workers[1] = std::thread(MapChunks);
+		workers[0] = std::thread(PrepareChunks);
 	}
 
-	void TerrainGenerator::CheckChunkStatus(const Camera& camera)
+	void TerrainGenerator::LoadChunks()
 	{
-		float loadDistance = 128.0f;
-
-		for (auto unloadedIt = ChunkManager::GetUnloadedChunks().begin(); unloadedIt != ChunkManager::GetUnloadedChunks().end(); )
+		if (!m_PreparingChunk)
 		{
-			glm::vec2 distance = camera.GetPosition().xz - glm::vec2(unloadedIt->first.x + CHUNK_X, unloadedIt->first.z + CHUNK_Z);
+			m_LoadingChunk = true;
 
-			if (glm::length(distance) <= loadDistance)
+			// Chunks that are marked to be disposed by the other thread are removed from the vector before anything else
+			DisposeChunks();
+
+			// Checks whether any chunks are no longer prepared by the other thread and unloads them if necessary
+			SynchronizeChunks();
+
+			//All chunks prepared by the other thread are loaded for rendering
+			for (auto preparedIt = ChunkManager::GetPreparedChunks()->begin(); preparedIt != ChunkManager::GetPreparedChunks()->end(); ++preparedIt)
 			{
-				if (!ChunkManager::IsLoaded(unloadedIt->first))
+				if (!ChunkManager::IsLoaded(preparedIt->first) && preparedIt->second->ShouldLoad())
 				{
-					auto pair = std::pair(unloadedIt->first, ChunkManager::ReadFromFile(unloadedIt->first, m_Seed));
-					ChunkManager::GetLoadedChunks().insert(pair);
-					unloadedIt = ChunkManager::GetUnloadedChunks().erase(unloadedIt);
+					preparedIt->second->Build();
+					ChunkManager::LoadChunk(preparedIt->second);
+					LOG_INFO("Loaded from prepared -> " << ChunkManager::GetLoadedChunks().size());
 				}
 			}
-			else
-				++unloadedIt;
-		}
 
+			m_LoadingChunk = false;
+		}
+	}
+
+	void TerrainGenerator::DisposeChunks()
+	{
+		for (auto preparedIt = ChunkManager::GetPreparedChunks()->begin(); preparedIt != ChunkManager::GetPreparedChunks()->end(); )
+		{
+			if (preparedIt->second->ShouldDispose())
+			{
+				preparedIt = ChunkManager::GetPreparedChunks()->erase(preparedIt);
+				LOG_INFO("Disposed chunk -> " << ChunkManager::GetPreparedChunks()->size());
+			}
+			else
+				++preparedIt;
+		}
+	}
+
+	void TerrainGenerator::SynchronizeChunks()
+	{
 		for (auto loadedIt = ChunkManager::GetLoadedChunks().begin(); loadedIt != ChunkManager::GetLoadedChunks().end(); )
 		{
-			glm::vec2 distance = camera.GetPosition().xz - glm::vec2(loadedIt->first.x + CHUNK_X, loadedIt->first.z + CHUNK_Z);
-
-			if (glm::length(distance) > loadDistance)
+			if (!loadedIt->get()->ShouldLoad())
 			{
-				std::string chunkPath = std::format("{}{}_{}_{}.ch", WRITE_PATH, loadedIt->first.x, loadedIt->first.y, loadedIt->first.z);
-				ChunkManager::GetUnloadedChunks().insert(std::pair(loadedIt->first, chunkPath));
 				loadedIt = ChunkManager::GetLoadedChunks().erase(loadedIt);
+				LOG_INFO("Unloaded chunk -> " << ChunkManager::GetLoadedChunks().size());
 			}
 			else
 				++loadedIt;
-		}
-
-		Generate(camera);
-	}
-
-	void TerrainGenerator::Generate(const Camera& camera)
-	{
-		const glm::vec3 cameraPos = camera.GetPosition();
-		glm::vec2 cameraPosInChunks = {cameraPos.x / 16, cameraPos.z / 16};
-
-		glm::ivec2 xBoundaries =
-		{
-			cameraPosInChunks.x - (16 / 2),
-			cameraPosInChunks.x + ( 16 / 2)
-		};
-
-		glm::ivec2 zBoundaries =
-		{
-			cameraPosInChunks.y - (16 / 2),
-			cameraPosInChunks.y + ( 16 / 2)
-		};
-
-		for (int z = zBoundaries.x; z <= zBoundaries.y; z++)
-		{
-			for (int x = xBoundaries.x; x <= xBoundaries.y; x++)
-			{
-				glm::vec3 chunkPos = {x * CHUNK_X, 0.0f, z * CHUNK_Z};
-
-				if (!ChunkManager::IsLoaded(chunkPos) && !ChunkManager::IsUnloaded(chunkPos))
-				{
-					if (ChunkManager::IsWritten(chunkPos))
-					{
-						ChunkManager::GetUnloadedChunks().insert(std::pair(chunkPos, std::format("{}{}_{}_{}.ch", WRITE_PATH, chunkPos.x, chunkPos.y, chunkPos.z)));
-					}
-					else
-					{
-						Chunk newChunk(chunkPos);
-						Noisify(newChunk);
-						ChunkManager::WriteToFile(chunkPos, &newChunk, m_Seed);
-					}
-				}
-			}
 		}
 	}
 
@@ -137,14 +135,127 @@ namespace CoreGameObjects
 		return true;
 	}
 
-	void TerrainGenerator::ChunkWorker()
+	void TerrainGenerator::PrepareChunks()
 	{
+		while(!m_Terminate)
+		{
+			const glm::vec3 cameraPos = m_Camera->GetPosition();
 
+			float prepareDistance = 81.0f;
+			float renderDistance = 64.0f;
+
+			if (!m_MappingChunk)
+			{
+				for (auto mappedIt = ChunkManager::GetMappedChunks().begin(); mappedIt != ChunkManager::GetMappedChunks().end(); ++mappedIt)
+				{
+					m_PreparingChunk = true;
+					glm::vec2 distanceVector = cameraPos.xz - glm::vec2(mappedIt->first.x + CHUNK_X, mappedIt->first.z + CHUNK_Z);
+					auto distance = glm::length(distanceVector);
+
+					if (distance <= prepareDistance && !ChunkManager::IsPrepared(mappedIt->first) && !m_LoadingChunk)
+					{
+						auto chunk = ChunkManager::ReadFromFile(mappedIt->first, m_Seed);
+						chunk->SetPosition(mappedIt->first);
+						
+						if (distance <= renderDistance && !chunk->ShouldLoad())
+						{
+							chunk->SetShouldLoad(true);
+							LOG_INFO("Marked chunk for loading")
+						}
+
+						ChunkManager::PrepareChunk(chunk);
+						LOG_INFO("Prepared chunk -> " << ChunkManager::GetPreparedChunks()->size());
+					}
+
+					if (distance <= renderDistance && ChunkManager::IsPrepared(mappedIt->first) && !m_LoadingChunk)
+					{
+						auto chunk = ChunkManager::GetPreparedChunk(mappedIt->first);
+						if (!chunk->ShouldLoad())
+						{
+							chunk->SetShouldLoad(true);
+							LOG_INFO("Marked chunk for loading")
+						}
+					}
+
+					m_PreparingChunk = false;
+				}
+			}
+
+			m_PreparingChunk = true;
+			for (auto& preparedChunk : *ChunkManager::GetPreparedChunks())
+			{
+				glm::vec2 distanceVector = cameraPos.xz - glm::vec2(preparedChunk.first.x + CHUNK_X, preparedChunk.first.z + CHUNK_Z);
+				auto distance = glm::length(distanceVector);
+
+				if (distance > prepareDistance && !preparedChunk.second->ShouldDispose())
+				{
+					preparedChunk.second->SetShouldDispose(true);
+					LOG_INFO("Marked chunk for disposal");
+				}
+
+				if (distance > renderDistance && preparedChunk.second->ShouldLoad())
+				{
+					preparedChunk.second->SetShouldLoad(false);
+					LOG_INFO("Marked chunk for unloading");
+				}
+
+			}
+			m_PreparingChunk = false;
+
+		}
+	}
+
+	void TerrainGenerator::MapChunks()
+	{
+		while (!m_Terminate)
+		{
+			const glm::vec3 cameraPos = m_Camera->GetPosition();
+ 			glm::vec2 cameraPosInChunks = {cameraPos.x / 16, cameraPos.z / 16};
+			                                                           
+			glm::ivec2 xBoundaries =
+			{                                          
+				cameraPosInChunks.x - (8 / 2),             
+				cameraPosInChunks.x + (8 / 2)
+			};
+
+			glm::ivec2 zBoundaries =
+			{
+				cameraPosInChunks.y - (8 / 2),
+				cameraPosInChunks.y + (8 / 2)
+			};
+
+			for (int z = zBoundaries.x; z <= zBoundaries.y; z++)
+			{
+				for (int x = xBoundaries.x; x <= xBoundaries.y; x++)
+				{
+					glm::vec3 chunkPos = {x * CHUNK_X, 0.0f, z * CHUNK_Z};
+
+					if (!ChunkManager::IsMapped(chunkPos))
+					{
+						m_MappingChunk = true;
+						if (ChunkManager::IsWritten(chunkPos))
+						{
+							ChunkManager::MapChunk(chunkPos);
+							LOG_INFO("Mapping chunk from disk -> " << ChunkManager::GetMappedChunks().size());
+						}
+						else
+						{
+							Chunk newChunk(chunkPos);
+							Noisify(newChunk);
+							ChunkManager::WriteToFile(chunkPos, &newChunk, m_Seed);
+							ChunkManager::MapChunk(chunkPos);
+							LOG_INFO("Writing chunk to disk -> " << ChunkManager::GetMappedChunks().size());
+						}
+						m_MappingChunk = false;
+					}
+				}
+			}
+		}
 	}
 
 	void TerrainGenerator::Noisify(Chunk& chunk)
 	{
-		m_LerpedSeed = Lerp(m_Seed);
+		m_LerpedSeed = Interpolate(m_Seed, MIN_SEED, MAX_SEED, -255.0f, 255.0f);
 		glm::vec3 chunkPos = chunk.GetPos();
 		const float increment = 1000.0f;
 
@@ -195,13 +306,6 @@ namespace CoreGameObjects
 		return distribution(generator, typename distType::param_type{ start, end });
 	}
 
-
-	double TerrainGenerator::Lerp(unsigned long long val)
-	{
-		double x = ((double)m_Seed - MIN_SEED) / (MAX_SEED - MIN_SEED);
-		return -255.0 + x * (255.0 - -255.0);
-	}
-
 	float TerrainGenerator::Noise(const glm::vec2& coordinates, int octaves, float persistence)
 	{
 		float sum = 0.0f;
@@ -232,5 +336,11 @@ namespace CoreGameObjects
 		}
 
 		return sum;
+	}
+
+	void TerrainGenerator::Cleanup()
+	{
+		m_Terminate = true;
+		m_Camera = nullptr;
 	}
 }

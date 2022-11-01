@@ -1,5 +1,7 @@
 #pragma once
 
+#include <thread>
+
 #include "ChunkManager.h"
 
 namespace CoreGameObjects
@@ -7,23 +9,30 @@ namespace CoreGameObjects
 	class CORE_API TerrainGenerator
 	{
 	private:
-		unsigned long long m_Seed;
-		double m_LerpedSeed;
-	private:
-		double Lerp(unsigned long long val);
+		static unsigned long long m_Seed;
+		static double m_LerpedSeed;
 
+		static std::atomic<bool> m_MappingChunk;
+		static std::atomic<bool> m_PreparingChunk;
+		static std::atomic<bool> m_LoadingChunk;
+		static std::atomic<bool> m_Terminate;
+
+		std::thread workers[2];
+
+		static Camera* m_Camera;
+	private:
 		/**
 		 * \brief Procedurally generates the terrain of a chunk
 		 * \param chunk The chunk that is to be noisified
 		 */
-		void Noisify(Chunk& chunk);
+		static void Noisify(Chunk& chunk);
 	public:
 		/**
 		 * \brief Constructs a terrain generator and checks the validity of the provided seed
 		 * \param seed The world seed
 		 */
 		TerrainGenerator(unsigned long long seed = 0);
-		~TerrainGenerator() = default;
+		~TerrainGenerator();
 
 		/**
 		 * \brief Initializes a chunk folder if not already present
@@ -31,24 +40,35 @@ namespace CoreGameObjects
 		void Init();
 
 		/**
-		 * \brief Loads or unloads any chunks as necessary based on camera positions
-		 * \param camera The camera object in the scene
+		 * \brief Loads all chunks that are prepared
 		 */
-		void CheckChunkStatus(const Camera& camera);
+		void LoadChunks();
 
 		/**
-		 * \brief Generates a new chunk if necessary and maps it
-		 * \param camera The camera object in the scene
+		 * \brief Disposes all chunks that are marked to be disposed by the second thread
 		 */
-		void Generate(const Camera& camera);
+		void DisposeChunks();
 
 		/**
-		 * \brief Checks whether a world is already generated. If generated, Generate() is skipped
+		 * \brief Synchronizes the prepared and loaded chunk arrays, thereby unloading chunks that are no longer prepared if necessary
+		 */
+		void SynchronizeChunks();
+
+		/**
+		 * \brief Checks whether a world is already generated and logs the number of chunks present
 		 * \return True if there are chunks present on disk
 		 */
 		bool CheckIfGenerated();
 
-		static void ChunkWorker();
+		/**
+		 * \brief Constantly updates the prepared chunks map in a worker thread based on load and render distance
+		 */
+		static void PrepareChunks();
+
+		/**
+		 * \brief Constantly maps chunks from disk and writes new chunks if necessary in a worker thread
+		 */
+		static void MapChunks();
 
 		/**
 		 * \brief Randomly generates a number. Is thread safe
@@ -77,5 +97,16 @@ namespace CoreGameObjects
 		 * \return The sum of the values created by Perlin
 		 */
 		static float Noise(const glm::vec3& coordinates, int octaves, float persistence);
+
+		/**
+		 * \brief Sets the terminate flag on every worker thread
+		 */
+		static void Cleanup();
+
+		/**
+		 * \brief Provides the scene camera to the terrain generator
+		 * \param camera Camera in the scene
+		 */
+		void SetCamera(Camera& camera) { m_Camera = &camera;}
 	};
 }

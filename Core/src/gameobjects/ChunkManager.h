@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 #include <glm/glm.hpp>
+#include <vector>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
@@ -9,7 +10,6 @@
 #include "../CoreAPI.h"
 #include "Chunk.h"
 #include "../graphics/Camera.h"
-#include "../gameobjects/TerrainGenerator.h"
 
 #ifdef BLOCKS_DEBUG
 #define WRITE_PATH "src/chunks/"
@@ -22,9 +22,9 @@ namespace CoreGameObjects
 	class CORE_API ChunkManager
 	{
 	private:
-		static std::unique_ptr<std::unordered_map<glm::vec3, std::shared_ptr<Chunk>>> m_LoadedChunks;
-		static std::vector<std::shared_ptr<Chunk>> m_PreparedChunks;
-		static std::unique_ptr<std::unordered_map<glm::vec3, std::string>> m_UnloadedChunks;
+		static std::vector<std::shared_ptr<Chunk>> m_LoadedChunks;
+		static std::unique_ptr<std::unordered_map<glm::vec3, std::shared_ptr<Chunk>>> m_PreparedChunks;
+		static std::unique_ptr<std::unordered_map<glm::vec3, std::string>> m_MappedChunks;
 
 		ChunkManager() = default;
 	public:
@@ -50,16 +50,39 @@ namespace CoreGameObjects
 		static bool IsWritten(glm::vec3 position);
 
 		/**
-		 * \brief Deallocates all chunk arrays
+		 * \brief Emplaces the passed chunk to the loaded chunks vector
+		 * \param chunk Chunk to be loaded
 		 */
-		static void Cleanup();
+		static void LoadChunk(std::shared_ptr<Chunk>& chunk);
 
-		static bool IsLoaded(const glm::vec3& position) { return m_LoadedChunks->contains(position); }
-		static bool IsUnloaded(const glm::vec3& position) { return m_UnloadedChunks->contains(position); }
-		static Chunk* GetLoadedChunk(const glm::vec3& coordinates);
+		/**
+		 * \brief Inserts the chunk with its position as the key to the unordered_map of prepared chunks
+		 * \param chunk Chunk to be prepared
+		 */
+		static void PrepareChunk(std::shared_ptr<Chunk>& chunk);
 
-		static std::unordered_map<glm::vec3, std::shared_ptr<Chunk>>& GetLoadedChunks() { return *m_LoadedChunks; }
-		static std::vector<std::shared_ptr<Chunk>>& GetPreparedChunks() { return m_PreparedChunks; }
-		static std::unordered_map<glm::vec3, std::string>& GetUnloadedChunks() { return *m_UnloadedChunks; }
+		/**
+		 * \brief Maps the chunk at the given position into the unordered map
+		 * \param position Position of the chunk 
+		 */
+		static void MapChunk(const glm::vec3& position);
+
+		/**
+		 * \brief Converts a given three-component vector into a formatted string representing a filename
+		 * \param position The position of the chunk
+		 * \return The chunk position as a formatted string
+		 */
+		static const std::string ToFilename(const glm::vec3& position);
+
+		static bool IsLoaded(const glm::vec3& position);
+		static bool IsPrepared(const Chunk& chunk);
+		static bool IsPrepared(const glm::vec3& position);
+		static bool IsMapped(const glm::vec3& position) { return m_MappedChunks->contains(position); }
+		static Chunk* GetLoadedChunk(const glm::vec3& position);
+		static Chunk* GetPreparedChunk(const glm::vec3& position);
+
+		static std::vector<std::shared_ptr<Chunk>>& GetLoadedChunks() { return m_LoadedChunks; }
+		static std::unique_ptr<std::unordered_map<glm::vec3, std::shared_ptr<Chunk>>>& GetPreparedChunks() { return m_PreparedChunks; }
+		static std::unordered_map<glm::vec3, std::string>& GetMappedChunks() { return *m_MappedChunks; }
 	};
 }

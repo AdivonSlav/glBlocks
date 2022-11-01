@@ -8,13 +8,13 @@
 namespace CoreGameObjects
 {
 	Chunk::Chunk()
-		: m_VAO(new VertexArray()), m_Position(0.0f, 0.0f, 0.0f), m_Rebuild(true), m_VertexCount(0)
+		: m_VAO(nullptr), m_Position(0.0f, 0.0f, 0.0f), m_Rebuild(true), m_ShouldDispose(false), m_ShouldLoad(false), m_VertexCount(0)
 	{
 
 	}
 
 	Chunk::Chunk(const glm::vec3& position)
-		: m_VAO(new VertexArray()), m_Position(position), m_Rebuild(true), m_VertexCount(0)
+		: m_VAO(nullptr), m_Position(position), m_Rebuild(true), m_ShouldDispose(false), m_ShouldLoad(false), m_VertexCount(0)
 	{
 
 	}
@@ -317,6 +317,8 @@ namespace CoreGameObjects
 				}
 			}
 		}
+
+		m_VAO = new VertexArray();
 
 		GLuint posBufferSize = positions.size() * 4 * sizeof(GLshort);
 		GLuint uvBufferSize = uv.size() * 2 * sizeof(GLfloat);
