@@ -1,14 +1,6 @@
 #pragma once
 
-#define GLFW_INCLUDE_NONE
-
-#include <glm/vec2.hpp>
-#include <functional>
-
-#include "glad/glad.h"
-#include "GLFW/glfw3.h"
 #include "../CoreAPI.h"
-#include "../graphics/Camera.h"
 
 namespace CoreWindow
 {

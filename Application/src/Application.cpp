@@ -65,7 +65,6 @@ void Application::Run()
 		m_Window.PollAndSwapBuffers();
 	}
 
-	TerrainGenerator::Cleanup();
 	Dashboard::Cleanup();
 	Window::Cleanup();
 	LOG_INFO("Ending...");

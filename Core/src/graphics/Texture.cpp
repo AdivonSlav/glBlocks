@@ -1,4 +1,3 @@
-#include <stb/stb_image.h>
 
 #include "Texture.h"
 #include "../utils/Logger.h"

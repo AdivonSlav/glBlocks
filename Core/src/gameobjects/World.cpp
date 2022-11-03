@@ -1,4 +1,3 @@
-#include <cmath>
 
 #include "World.h"
 #include "../utils/Dashboard.h"

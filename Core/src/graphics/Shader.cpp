@@ -1,5 +1,3 @@
-#include <fstream>
-#include <sstream>
 
 #include "Shader.h"
 #include "../utils/Logger.h"

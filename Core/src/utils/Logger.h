@@ -1,7 +1,5 @@
 #pragma once
 
-#include <sstream>
-
 #include "../CoreAPI.h"
 
 namespace CoreUtils

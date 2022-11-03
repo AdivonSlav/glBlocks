@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glm/vec3.hpp>
-
 #include "../graphics/VertexArray.h"
 
 #define CHUNK_X 16
@@ -22,18 +20,36 @@ namespace CoreGameObjects
 		DIRT = 2, STONE, SAND
 	};
 
+	struct Buffers
+	{
+		std::vector<glm::tvec4<GLshort>> positions;
+		std::vector<glm::tvec2<GLfloat>> uv;
+		std::vector<glm::tvec3<GLfloat>> normals;
+		std::vector<GLbyte> types;
+	};
+
 	class CORE_API Chunk
 	{
 	private:
 		VertexArray* m_VAO;
 		signed char m_Blocks[CHUNK_X * CHUNK_Y * CHUNK_Z];
-
 		glm::vec3 m_Position;
 
-		bool m_Rebuild;
+		// 0 - Front, 1 - Back, 2 - Left, 3 - Right
+		Chunk* m_ObscuringChunks[4] = { nullptr }; 
+
+		Buffers m_Buffers;
+
 		bool m_ShouldDispose;
-		bool m_ShouldLoad;
+		bool m_ShouldRender;
+		bool m_IsUploaded;
+		bool m_Built;
 		unsigned int m_VertexCount;
+	private:
+		/**
+		 * \brief Erases all the vector buffers from memory after they have been uploaded to the GPU
+		 */
+		void EraseBuffers();
 	public:
 		/**
 		 * \brief Constructs the chunk at a default position of (0,0,0)
@@ -48,26 +64,44 @@ namespace CoreGameObjects
 
 		~Chunk();
 
-		void SetBlock(int x, int y, int z, BlockType type);
-		BlockType GetBlock(int x, int y, int z) const;
+		/**
+		 * \brief Builds the chunk if it has not been built already
+		 */
+		void Build(bool rebuild = false);
 
 		/**
-		 * \brief Builds the chunk if it has not been built already or rebuilds it if a change has occurred.
+		 * \brief Initializes the vertex array and uploads the buffers to the GPU
 		 */
-		void Build();
+		void UploadToGPU();
+
+		/**
+		 * \brief Replaces part of or all of the chunk's data store in the GPU
+		 */
+		void UpdateGPUData();
+
+		/**
+		 * \brief Finds all other chunks that might be obscuring this one and stores them as pointers
+		 */
+		void FindObscuringChunks();
+
 
 		VertexArray* GetVAO() const { return m_VAO; }
+		BlockType GetBlock(int x, int y, int z) const;
 		signed char* GetBlocksPtr() { return m_Blocks;}
 		const glm::vec3& GetPos() const { return m_Position; }
-		bool GetRebuild() const { return m_Rebuild; }
+		Chunk* GetObscuring(int index) const { return m_ObscuringChunks[index]; }
 		bool ShouldDispose() const { return m_ShouldDispose; }
-		bool ShouldLoad() const { return m_ShouldLoad; }
+		bool ShouldRender() const { return m_ShouldRender; }
+		bool IsUploaded() const { return m_IsUploaded; }
+		bool IsBuilt() const { return m_Built; }
 		unsigned int GetVertCount() const { return m_VertexCount; }
 
+		void SetBlock(int x, int y, int z, BlockType type);
 		void SetPosition(float x, float y, float z) { m_Position = glm::vec3(x, y, z); }
 		void SetPosition(const glm::vec3& position) { m_Position = position; }
+		void SetObscuring(int index, Chunk* chunk) { m_ObscuringChunks[index] = chunk; }
 		void SetShouldDispose(bool value) { m_ShouldDispose = value; }
-		void SetShouldLoad(bool value) { m_ShouldLoad = value; }
+		void SetShouldRender(bool value) { m_ShouldRender = value; }
 
 		bool operator==(const Chunk& chunk) { return this->GetPos() == chunk.GetPos(); }
 	};

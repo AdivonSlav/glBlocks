@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glad/glad.h>
-
 #include "../../CoreAPI.h"
 
 namespace CoreGraphics::Buffers

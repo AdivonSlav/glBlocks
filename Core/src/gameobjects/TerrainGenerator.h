@@ -1,7 +1,5 @@
 #pragma once
 
-#include <thread>
-
 #include "ChunkManager.h"
 
 namespace CoreGameObjects
@@ -12,27 +10,22 @@ namespace CoreGameObjects
 		static unsigned long long m_Seed;
 		static double m_LerpedSeed;
 
-		static std::atomic<bool> m_MappingChunk;
-		static std::atomic<bool> m_PreparingChunk;
-		static std::atomic<bool> m_LoadingChunk;
-		static std::atomic<bool> m_Terminate;
+		// (this^2) + 1 yields the number of chunks that will be serialized at any given time 
+		int m_SerializationCount;
+		float m_RenderDistance;
 
-		std::thread workers[2];
+		glm::ivec2 xBuildBoundaries;
+		glm::ivec2 zBuildBoundaries;
 
 		static Camera* m_Camera;
 	private:
-		/**
-		 * \brief Procedurally generates the terrain of a chunk
-		 * \param chunk The chunk that is to be noisified
-		 */
-		static void Noisify(Chunk& chunk);
 	public:
 		/**
 		 * \brief Constructs a terrain generator and checks the validity of the provided seed
 		 * \param seed The world seed
 		 */
 		TerrainGenerator(unsigned long long seed = 0);
-		~TerrainGenerator();
+		~TerrainGenerator() = default;
 
 		/**
 		 * \brief Initializes a chunk folder if not already present
@@ -45,12 +38,7 @@ namespace CoreGameObjects
 		void LoadChunks();
 
 		/**
-		 * \brief Disposes all chunks that are marked to be disposed by the second thread
-		 */
-		void DisposeChunks();
-
-		/**
-		 * \brief Synchronizes the prepared and loaded chunk arrays, thereby unloading chunks that are no longer prepared if necessary
+		 * \brief Disposes and marks any chunks that dont need to be rendered at the moment
 		 */
 		void SynchronizeChunks();
 
@@ -61,14 +49,9 @@ namespace CoreGameObjects
 		bool CheckIfGenerated();
 
 		/**
-		 * \brief Constantly updates the prepared chunks map in a worker thread based on load and render distance
+		 * \brief Checks whether chunks need to be loaded into memory and/or rendered
 		 */
-		static void PrepareChunks();
-
-		/**
-		 * \brief Constantly maps chunks from disk and writes new chunks if necessary in a worker thread
-		 */
-		static void MapChunks();
+		void PrepareChunks();
 
 		/**
 		 * \brief Randomly generates a number. Is thread safe
@@ -79,6 +62,12 @@ namespace CoreGameObjects
 		 */
 		template<typename Numeral>
 		static Numeral GetRand(Numeral start, Numeral end);
+
+		/**
+		 * \brief Procedurally generates the terrain of a chunk
+		 * \param chunk The chunk that is to be noisified
+		 */
+		static void Noisify(Chunk& chunk);
 
 		/**
 		 * \brief Generates 2D Perlin noise based on the coordinates provided
@@ -99,14 +88,11 @@ namespace CoreGameObjects
 		static float Noise(const glm::vec3& coordinates, int octaves, float persistence);
 
 		/**
-		 * \brief Sets the terminate flag on every worker thread
-		 */
-		static void Cleanup();
-
-		/**
 		 * \brief Provides the scene camera to the terrain generator
 		 * \param camera Camera in the scene
 		 */
 		void SetCamera(Camera& camera) { m_Camera = &camera;}
+
+		static unsigned long long& GetSeed() { return m_Seed; }
 	};
 }

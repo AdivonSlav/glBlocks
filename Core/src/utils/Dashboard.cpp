@@ -1,10 +1,7 @@
+
 #include "Dashboard.h"
 #include "../graphics/Shader.h"
 #include "../window/Window.h"
-
-#include "../vendor/imgui/imgui.h"
-#include "../vendor/imgui/imgui_impl_glfw.h"
-#include "../vendor/imgui/imgui_impl_opengl3.h"
 
 using namespace CoreWindow;
 

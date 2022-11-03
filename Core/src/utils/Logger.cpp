@@ -1,9 +1,5 @@
 #include "Logger.h"
 
-#include <iostream>
-#include <fstream>
-#include <chrono>
-
 namespace CoreUtils
 {
 

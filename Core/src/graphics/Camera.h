@@ -1,7 +1,6 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "../CoreAPI.h"
 
 #include "Shader.h"
 #include "../window/Window.h"

@@ -1,8 +1,7 @@
 #pragma once
 
-#include <glm/vec3.hpp>
-
 #include "../CoreAPI.h"
+
 #include "../graphics/Camera.h"
 
 namespace CoreUtils

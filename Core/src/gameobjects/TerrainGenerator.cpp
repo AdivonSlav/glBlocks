@@ -1,15 +1,4 @@
 
-#include <iostream>
-#include <cmath>
-#include <random>
-#include <filesystem>
-#include <iterator>
-#include <mutex>
-
-#define GLM_SWIZZLE
-#include <glm/glm.hpp>
-#include <glm/gtc/noise.hpp>
-
 #include "TerrainGenerator.h"
 #include "../utils/Logger.h"
 #include "../utils/Maths.h"
@@ -18,19 +7,14 @@
 #define MAX_SEED 9999999999
 #define MIN_SEED 1
 
-std::mutex mtx;
-
 namespace CoreGameObjects
 {
 	unsigned long long TerrainGenerator::m_Seed = 0;
 	double TerrainGenerator::m_LerpedSeed = 0.0;
-	std::atomic<bool> TerrainGenerator::m_MappingChunk = false;
-	std::atomic<bool> TerrainGenerator::m_PreparingChunk = false;
-	std::atomic<bool> TerrainGenerator::m_LoadingChunk = false;
-	std::atomic<bool> TerrainGenerator::m_Terminate = false;
 	Camera* TerrainGenerator::m_Camera = nullptr;
 
 	TerrainGenerator::TerrainGenerator(unsigned long long seed)
+		: m_SerializationCount(8), m_RenderDistance(64.0f)
 	{
 		m_Seed = seed;
 
@@ -48,75 +32,56 @@ namespace CoreGameObjects
 		LOG_INFO("World seed after interpolation: " << m_LerpedSeed);
 	}
 
-	TerrainGenerator::~TerrainGenerator()
-	{
-		workers[0].join();
-		workers[1].join();
-	}
-
 	void TerrainGenerator::Init()
 	{
-		ChunkManager::GetLoadedChunks().reserve(81);
-
-		if (!CheckIfGenerated())
-		{
-			LOG_INFO("Creating new chunk folder")
-			std::filesystem::create_directory(WRITE_PATH);
-		}
-
-		workers[1] = std::thread(MapChunks);
-		workers[0] = std::thread(PrepareChunks);
+		CheckIfGenerated();
+		ChunkManager::GetLoadedChunks().reserve(100);
 	}
 
 	void TerrainGenerator::LoadChunks()
 	{
-		if (!m_PreparingChunk)
+		PrepareChunks();
+
+		for (auto& loadedChunk : ChunkManager::GetLoadedChunks())
 		{
-			m_LoadingChunk = true;
-
-			// Chunks that are marked to be disposed by the other thread are removed from the vector before anything else
-			DisposeChunks();
-
-			// Checks whether any chunks are no longer prepared by the other thread and unloads them if necessary
-			SynchronizeChunks();
-
-			//All chunks prepared by the other thread are loaded for rendering
-			for (auto preparedIt = ChunkManager::GetPreparedChunks()->begin(); preparedIt != ChunkManager::GetPreparedChunks()->end(); ++preparedIt)
+			if (loadedChunk->IsBuilt() && !loadedChunk->IsUploaded())
 			{
-				if (!ChunkManager::IsLoaded(preparedIt->first) && preparedIt->second->ShouldLoad())
-				{
-					preparedIt->second->Build();
-					ChunkManager::LoadChunk(preparedIt->second);
-					LOG_INFO("Loaded from prepared -> " << ChunkManager::GetLoadedChunks().size());
-				}
+				loadedChunk->UploadToGPU();
+				LOG_INFO("Chunk uploaded to GPU");
 			}
-
-			m_LoadingChunk = false;
 		}
-	}
 
-	void TerrainGenerator::DisposeChunks()
-	{
-		for (auto preparedIt = ChunkManager::GetPreparedChunks()->begin(); preparedIt != ChunkManager::GetPreparedChunks()->end(); )
-		{
-			if (preparedIt->second->ShouldDispose())
-			{
-				preparedIt = ChunkManager::GetPreparedChunks()->erase(preparedIt);
-				LOG_INFO("Disposed chunk -> " << ChunkManager::GetPreparedChunks()->size());
-			}
-			else
-				++preparedIt;
-		}
+		SynchronizeChunks();
 	}
 
 	void TerrainGenerator::SynchronizeChunks()
 	{
+		while (!ChunkManager::GetQueuedForBuild().empty() && ChunkManager::IsBuildQueueReady())
+		{
+			auto& future = ChunkManager::GetQueuedForBuild().front();
+			auto chunk = future.get();
+			ChunkManager::LoadChunk(chunk);
+			ChunkManager::MarkPositionAsBuilt(chunk->GetPos());
+			ChunkManager::GetQueuedForBuild().pop();
+		}
+
 		for (auto loadedIt = ChunkManager::GetLoadedChunks().begin(); loadedIt != ChunkManager::GetLoadedChunks().end(); )
 		{
-			if (!loadedIt->get()->ShouldLoad())
+			auto chunkPos = loadedIt->get()->GetPos();
+			glm::vec2 distanceVector = m_Camera->GetPosition().xz - glm::vec2(chunkPos.x + CHUNK_X, chunkPos.z + CHUNK_Z);
+			auto distance = glm::length(distanceVector);
+
+			if (distance > m_RenderDistance && loadedIt->get()->ShouldRender())
 			{
+				loadedIt->get()->SetShouldRender(false);
+				LOG_INFO("Marked chunk for unloading");
+			}
+
+			if (chunkPos.x > (float)xBuildBoundaries.y * CHUNK_X || chunkPos.x < (float)xBuildBoundaries.x * CHUNK_X || chunkPos.z > (float)zBuildBoundaries.y * CHUNK_Z || chunkPos.z < (float)zBuildBoundaries.x * CHUNK_Z)
+			{
+				ChunkManager::SynchronizeObscured(loadedIt->get());
 				loadedIt = ChunkManager::GetLoadedChunks().erase(loadedIt);
-				LOG_INFO("Unloaded chunk -> " << ChunkManager::GetLoadedChunks().size());
+				LOG_INFO("Disposed chunk");
 			}
 			else
 				++loadedIt;
@@ -126,9 +91,16 @@ namespace CoreGameObjects
 	bool TerrainGenerator::CheckIfGenerated()
 	{
 		if (!std::filesystem::is_directory(WRITE_PATH))
+		{
+			std::filesystem::create_directory(WRITE_PATH);
+			LOG_INFO("No chunk folder found, created new one");
 			return false;
+		}
 
 		size_t fileCount = std::distance(std::filesystem::directory_iterator(WRITE_PATH), std::filesystem::directory_iterator());
+
+		if (fileCount == 0)
+			return false;
 
 		LOG_INFO("Found chunk folder with " << fileCount << " chunks");
 
@@ -137,116 +109,44 @@ namespace CoreGameObjects
 
 	void TerrainGenerator::PrepareChunks()
 	{
-		while(!m_Terminate)
+		const glm::vec3 cameraPos = m_Camera->GetPosition();
+ 		glm::vec2 cameraPosInChunks = {cameraPos.x / 16, cameraPos.z / 16};
+
+		xBuildBoundaries.x = cameraPosInChunks.x - (m_SerializationCount / 2);
+		xBuildBoundaries.y = cameraPosInChunks.x + (m_SerializationCount / 2);
+
+		zBuildBoundaries.x = cameraPosInChunks.y - (m_SerializationCount / 2);
+		zBuildBoundaries.y = cameraPosInChunks.y + (m_SerializationCount / 2);
+
+
+		for (int z = zBuildBoundaries.x; z <= zBuildBoundaries.y; z++)
 		{
-			const glm::vec3 cameraPos = m_Camera->GetPosition();
-
-			float prepareDistance = 81.0f;
-			float renderDistance = 64.0f;
-
-			if (!m_MappingChunk)
+			for (int x = xBuildBoundaries.x; x <= xBuildBoundaries.y; x++)
 			{
-				for (auto mappedIt = ChunkManager::GetMappedChunks().begin(); mappedIt != ChunkManager::GetMappedChunks().end(); ++mappedIt)
-				{
-					m_PreparingChunk = true;
-					glm::vec2 distanceVector = cameraPos.xz - glm::vec2(mappedIt->first.x + CHUNK_X, mappedIt->first.z + CHUNK_Z);
-					auto distance = glm::length(distanceVector);
-
-					if (distance <= prepareDistance && !ChunkManager::IsPrepared(mappedIt->first) && !m_LoadingChunk)
-					{
-						auto chunk = ChunkManager::ReadFromFile(mappedIt->first, m_Seed);
-						chunk->SetPosition(mappedIt->first);
-						
-						if (distance <= renderDistance && !chunk->ShouldLoad())
-						{
-							chunk->SetShouldLoad(true);
-							LOG_INFO("Marked chunk for loading")
-						}
-
-						ChunkManager::PrepareChunk(chunk);
-						LOG_INFO("Prepared chunk -> " << ChunkManager::GetPreparedChunks()->size());
-					}
-
-					if (distance <= renderDistance && ChunkManager::IsPrepared(mappedIt->first) && !m_LoadingChunk)
-					{
-						auto chunk = ChunkManager::GetPreparedChunk(mappedIt->first);
-						if (!chunk->ShouldLoad())
-						{
-							chunk->SetShouldLoad(true);
-							LOG_INFO("Marked chunk for loading")
-						}
-					}
-
-					m_PreparingChunk = false;
-				}
-			}
-
-			m_PreparingChunk = true;
-			for (auto& preparedChunk : *ChunkManager::GetPreparedChunks())
-			{
-				glm::vec2 distanceVector = cameraPos.xz - glm::vec2(preparedChunk.first.x + CHUNK_X, preparedChunk.first.z + CHUNK_Z);
+				glm::vec3 chunkPos = {x * CHUNK_X, 0.0f, z * CHUNK_Z};
+				glm::vec2 distanceVector = m_Camera->GetPosition().xz - glm::vec2(chunkPos.x + CHUNK_X, chunkPos.z + CHUNK_Z);
 				auto distance = glm::length(distanceVector);
 
-				if (distance > prepareDistance && !preparedChunk.second->ShouldDispose())
+				if (!ChunkManager::IsLoaded(chunkPos) && !ChunkManager::IsPositionQueuedForBuild(chunkPos))
 				{
-					preparedChunk.second->SetShouldDispose(true);
-					LOG_INFO("Marked chunk for disposal");
+					if (ChunkManager::IsSerialized(chunkPos))
+						ChunkManager::GetQueuedForBuild().push(std::async(std::launch::async, ChunkManager::GenerateChunk, chunkPos, true));
+					else
+						ChunkManager::GetQueuedForBuild().push(std::async(std::launch::async, ChunkManager::GenerateChunk, chunkPos, false));
+					
+					ChunkManager::MarkPositionForBuild(chunkPos);
+
+					LOG_INFO("Queued chunk for building");
 				}
-
-				if (distance > renderDistance && preparedChunk.second->ShouldLoad())
+				
+				if (distance <= m_RenderDistance && ChunkManager::IsLoaded(chunkPos))
 				{
-					preparedChunk.second->SetShouldLoad(false);
-					LOG_INFO("Marked chunk for unloading");
-				}
+					auto chunk = ChunkManager::GetLoadedChunk(chunkPos);
 
-			}
-			m_PreparingChunk = false;
-
-		}
-	}
-
-	void TerrainGenerator::MapChunks()
-	{
-		while (!m_Terminate)
-		{
-			const glm::vec3 cameraPos = m_Camera->GetPosition();
- 			glm::vec2 cameraPosInChunks = {cameraPos.x / 16, cameraPos.z / 16};
-			                                                           
-			glm::ivec2 xBoundaries =
-			{                                          
-				cameraPosInChunks.x - (8 / 2),             
-				cameraPosInChunks.x + (8 / 2)
-			};
-
-			glm::ivec2 zBoundaries =
-			{
-				cameraPosInChunks.y - (8 / 2),
-				cameraPosInChunks.y + (8 / 2)
-			};
-
-			for (int z = zBoundaries.x; z <= zBoundaries.y; z++)
-			{
-				for (int x = xBoundaries.x; x <= xBoundaries.y; x++)
-				{
-					glm::vec3 chunkPos = {x * CHUNK_X, 0.0f, z * CHUNK_Z};
-
-					if (!ChunkManager::IsMapped(chunkPos))
+					if (!chunk->ShouldRender())
 					{
-						m_MappingChunk = true;
-						if (ChunkManager::IsWritten(chunkPos))
-						{
-							ChunkManager::MapChunk(chunkPos);
-							LOG_INFO("Mapping chunk from disk -> " << ChunkManager::GetMappedChunks().size());
-						}
-						else
-						{
-							Chunk newChunk(chunkPos);
-							Noisify(newChunk);
-							ChunkManager::WriteToFile(chunkPos, &newChunk, m_Seed);
-							ChunkManager::MapChunk(chunkPos);
-							LOG_INFO("Writing chunk to disk -> " << ChunkManager::GetMappedChunks().size());
-						}
-						m_MappingChunk = false;
+						chunk->SetShouldRender(true);
+						LOG_INFO("Marked chunk for rendering")
 					}
 				}
 			}
@@ -336,11 +236,5 @@ namespace CoreGameObjects
 		}
 
 		return sum;
-	}
-
-	void TerrainGenerator::Cleanup()
-	{
-		m_Terminate = true;
-		m_Camera = nullptr;
 	}
 }

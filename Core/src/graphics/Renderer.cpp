@@ -1,6 +1,4 @@
 
-#include <glad/glad.h>	
-
 #include "Renderer.h"
 #include "../utils/Logger.h"
 #include "../gameobjects/ChunkManager.h"
@@ -30,6 +28,9 @@ namespace CoreGraphics
 		m_Shader[(int)ShaderType::BASIC_SHADER]->Bind();
 		for (auto& chunk : ChunkManager::GetLoadedChunks())
 		{
+			if (!chunk->ShouldRender() || !chunk->IsBuilt())
+				continue;
+
 			auto identity = glm::identity<glm::mat4>();
 			auto model = glm::translate(identity, chunk->GetPos());
 
@@ -41,7 +42,6 @@ namespace CoreGraphics
 
 			chunk->GetVAO()->Bind();
 			glDrawArrays(GL_TRIANGLES, 0, chunk->GetVertCount());
-
 			chunk->GetVAO()->Unbind();
 		}
 		m_Shader[(int)ShaderType::BASIC_SHADER]->Unbind();

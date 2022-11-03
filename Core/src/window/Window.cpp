@@ -2,7 +2,6 @@
 #include "Window.h"
 #include "../utils/Logger.h"
 #include "../utils/GLErrorCallback.h"
-#include "../graphics/Camera.h"
 #include "../utils/Dashboard.h"
 
 namespace CoreWindow

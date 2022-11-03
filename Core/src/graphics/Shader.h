@@ -1,12 +1,5 @@
 #pragma once
 
-#include <string>
-#include <unordered_map>
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 #include "../CoreAPI.h"
 
 #define BLOCKS_GLSL_VERSION "#version 460"

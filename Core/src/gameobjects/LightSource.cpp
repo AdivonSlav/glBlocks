@@ -1,7 +1,6 @@
 
 #include "LightSource.h"
 #include "World.h"
-#include "../utils/Dashboard.h"
 
 namespace CoreGameObjects
 {
@@ -32,13 +31,15 @@ namespace CoreGameObjects
 		indices[1] = { 2, 3, 0 };
 
 		m_VAO.Bind();
-		auto vbo = new CoreGraphics::Buffers::VertexBuffer(2 * 4 * sizeof(GLfloat), 2, positions, GL_STATIC_DRAW);
+		auto vbo = new VertexBuffer(2 * 4 * sizeof(GLfloat), 2);
+		vbo->BufferData(positions, GL_STATIC_DRAW);
 		m_VAO.AddBuffer(vbo, 0, GL_FLOAT);
 
-		auto typeBuffer = new CoreGraphics::Buffers::VertexBuffer(4 * sizeof(GLbyte), 1, types, GL_STATIC_DRAW);
+		auto typeBuffer = new VertexBuffer(4 * sizeof(GLbyte), 1);
+		typeBuffer->BufferData(types, GL_STATIC_DRAW);
 		m_VAO.AddBuffer(typeBuffer, 1, GL_BYTE);
 
-		m_IBO =  new CoreGraphics::Buffers::IndexBuffer(2 * 3 * sizeof(GLushort), 3, indices, GL_STATIC_DRAW);
+		m_IBO =  new IndexBuffer(2 * 3 * sizeof(GLushort), 3, indices, GL_STATIC_DRAW);
 		m_IndexCount = 2 * 3;
 	}
 

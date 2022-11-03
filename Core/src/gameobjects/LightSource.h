@@ -3,7 +3,6 @@
 #include "Billboard.h"
 #include "../graphics/VertexArray.h"
 #include "../graphics/buffers/IndexBuffer.h"
-#include "../graphics/Camera.h"
 
 namespace CoreGameObjects
 {

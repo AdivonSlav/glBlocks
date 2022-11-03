@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Shader.h"
 #include "../CoreAPI.h"
+
+#include "Shader.h"
 #include "../gameobjects/World.h"
 #include "../graphics/Camera.h"
 

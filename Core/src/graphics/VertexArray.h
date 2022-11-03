@@ -1,10 +1,8 @@
 #pragma once
 
-#include <vector>
-#include <glad/glad.h>
+#include "../CoreAPI.h"
 
 #include "buffers/VertexBuffer.h"
-#include "../CoreAPI.h"
 
 namespace CoreGraphics
 {
@@ -26,6 +24,8 @@ namespace CoreGraphics
 		 * \param type The type of data that is held in the buffer
 		 */
 		void AddBuffer(Buffers::VertexBuffer* buffer, GLint index, GLenum type);
+
+		Buffers::VertexBuffer* GetBuffer(int index) { return m_Buffers.at(index); }
 
 		/**
 		 * \brief Binds the VAO
