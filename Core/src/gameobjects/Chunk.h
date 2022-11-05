@@ -22,11 +22,12 @@ namespace CoreGameObjects
 
 	struct Buffers
 	{
-		std::vector<glm::tvec4<GLshort>> positions;
-		std::vector<glm::tvec2<GLfloat>> uv;
-		std::vector<glm::tvec3<GLfloat>> normals;
+		std::vector<glm::tvec4<GLshort>> positions; // Fourth value indicates the faces: 0(front), 1(back), 2(left), 3(right), 4(top), 5(bottom)
+		std::vector<GLushort> uv; // Both coordinates are expected to be packed into one 16-bit unsigned integer
 		std::vector<GLbyte> types;
 	};
+
+	GLushort PackIntoShort(GLushort val1, GLushort val2);
 
 	class CORE_API Chunk
 	{

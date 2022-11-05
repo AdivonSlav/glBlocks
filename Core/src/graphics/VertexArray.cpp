@@ -45,7 +45,7 @@ namespace CoreGraphics
 		glEnableVertexAttribArray(index);
 		if (type == GL_FLOAT)
 			glVertexAttribPointer(index, buffer->GetComponentCount(), type, GL_FALSE, 0, (const void*)0);
-		else if (type == GL_BYTE || type == GL_INT || type == GL_UNSIGNED_INT || type == GL_SHORT)
+		else if (type == GL_BYTE || type == GL_INT || type == GL_UNSIGNED_INT || type == GL_SHORT || type == GL_UNSIGNED_SHORT)
 			glVertexAttribIPointer(index, buffer->GetComponentCount(), type, 0, (const void*)0);
 
 		buffer->Unbind();

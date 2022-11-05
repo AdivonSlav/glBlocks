@@ -2,14 +2,12 @@
 
 in float isSide;
 in vec2 texCoords;
-flat in uint type;
 in vec3 normal;
 in vec3 fragPos;
 
 out vec4 fragColor;
 
 uniform sampler2D uSampler;
-uniform int uAtlasSize;
 uniform vec3 uLightPos;
 uniform vec3 uCamPos;
 uniform float uLightLevel;
@@ -21,19 +19,6 @@ float diffuseStrength = 1.0f;
 float specularStrength = 0.5f;
 vec3 lightDirection = normalize(uLightPos - fragPos);
 vec3 normalizedNormal = normalize(normal);
-
-vec2 GetScaledCoords()
-{
-	vec2 offsets;
-
-	float texColumn = type % uAtlasSize;
-	offsets.x = texColumn / uAtlasSize;
-
-	float texRow = floor(type / uAtlasSize);
-	offsets.y = texRow / uAtlasSize;
-
-	return (texCoords / uAtlasSize) + offsets;
-}
 
 // Gets an ambient light value based on a constant
 vec3 GetAmbientLight()
@@ -75,8 +60,7 @@ void main()
 		ambientStrength = 0.85f;
 
 
-	vec2 scaledTexCoords = GetScaledCoords();
-	vec4 tex = texture2D(uSampler, scaledTexCoords);
+	vec4 tex = texture2D(uSampler, texCoords);
 
 	vec4 outputLighting = vec4(GetAmbientLight() + (GetDiffuseLight() * 0.7f) + GetSpecularLight(), 1.0f);
 

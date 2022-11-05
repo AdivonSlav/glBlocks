@@ -21,13 +21,22 @@ namespace CoreGameObjects
 		delete m_VAO;
 	}
 
+	GLushort PackIntoShort(GLushort val1, GLushort val2)
+	{
+		GLushort packedValue = 0;
+
+		packedValue |= val1;
+		packedValue |= (val2 << 8);
+
+		return packedValue;
+	}
+
 	void Chunk::EraseBuffers()
 	{
 		// Reinitializes all of the buffer vectors with empty ones, thereby emptying them and releasing any reserved memory
 
 		m_Buffers.positions = std::vector<glm::tvec4<GLshort>>();
-		m_Buffers.uv = std::vector<glm::tvec2<GLfloat>>();
-		m_Buffers.normals = std::vector<glm::tvec3<GLfloat>>();
+		m_Buffers.uv = std::vector<GLushort>();
 		m_Buffers.types = std::vector<GLbyte>();
 	}
 
@@ -62,11 +71,7 @@ namespace CoreGameObjects
 		// Immediately reserving enough space for 65000 vertices (a rough estimate) in order to prevent reallocation of the vectors at every insertion
 		m_Buffers.positions.reserve(65000);
 		m_Buffers.uv.reserve(65000);
-		m_Buffers.normals.reserve(65000);
 		m_Buffers.types.reserve(65000);
-
-		// The position layout contains one extra byte per vertex in order to have 4-byte alignment which is unused.
-		// Could probably change around the data types in order to maximize usage
 
 		for (int x = 0; x < CHUNK_X; x++)
 		{
@@ -108,34 +113,28 @@ namespace CoreGameObjects
 					// Front
 					if (frontType == BlockType::UNDEFINED && !obscuredFront || frontType == BlockType::AIR)
 					{
-						m_Buffers.positions.emplace_back(x + 1, y + 1, z + 1, 1);
-						m_Buffers.uv.emplace_back(1, 1);
-						m_Buffers.normals.emplace_back(0.0f, 0.0f, 1.0f);
+						m_Buffers.positions.emplace_back(x + 1, y + 1, z + 1, 0);
+						m_Buffers.uv.emplace_back(PackIntoShort(1, 1));
 						m_Buffers.types.emplace_back((GLbyte)type);
 						
-						m_Buffers.positions.emplace_back( x, y + 1, z + 1, 1 );
-						m_Buffers.uv.emplace_back(0, 1);
-						m_Buffers.normals.emplace_back(0.0f, 0.0f, 1.0f);
+						m_Buffers.positions.emplace_back( x, y + 1, z + 1, 0);
+						m_Buffers.uv.emplace_back(PackIntoShort(0, 1));
 						m_Buffers.types.emplace_back((GLbyte)type);
 						
-						m_Buffers.positions.emplace_back(x, y, z + 1, 1);
-						m_Buffers.uv.emplace_back(0, 0);
-						m_Buffers.normals.emplace_back(0.0f, 0.0f, 1.0f);
+						m_Buffers.positions.emplace_back(x, y, z + 1, 0);
+						m_Buffers.uv.emplace_back(PackIntoShort(0, 0));
 						m_Buffers.types.emplace_back((GLbyte)type);
 						
-						m_Buffers.positions.emplace_back(x, y, z + 1, 1);
-						m_Buffers.uv.emplace_back(0, 0);
-						m_Buffers.normals.emplace_back(0.0f, 0.0f, 1.0f);
+						m_Buffers.positions.emplace_back(x, y, z + 1, 0);
+						m_Buffers.uv.emplace_back(PackIntoShort(0, 0));
 						m_Buffers.types.emplace_back((GLbyte)type);
 						
-						m_Buffers.positions.emplace_back(x + 1, y, z + 1, 1);
-						m_Buffers.uv.emplace_back(1, 0);
-						m_Buffers.normals.emplace_back(0.0f, 0.0f, 1.0f);
+						m_Buffers.positions.emplace_back(x + 1, y, z + 1, 0);
+						m_Buffers.uv.emplace_back(PackIntoShort(1, 0));
 						m_Buffers.types.emplace_back((GLbyte)type);
 						
-						m_Buffers.positions.emplace_back(x + 1, y + 1, z + 1, 1);
-						m_Buffers.uv.emplace_back(1, 1);
-						m_Buffers.normals.emplace_back(0.0f, 0.0f, 1.0f);
+						m_Buffers.positions.emplace_back(x + 1, y + 1, z + 1, 0);
+						m_Buffers.uv.emplace_back(PackIntoShort(1, 1));
 						m_Buffers.types.emplace_back((GLbyte)type);
 					}
 
@@ -143,169 +142,139 @@ namespace CoreGameObjects
 					if (backType == BlockType::UNDEFINED && !obscuredBack || backType == BlockType::AIR)
 					{
 						m_Buffers.positions.emplace_back(x, y + 1, z, 1);
-						m_Buffers.uv.emplace_back(1, 1);
-						m_Buffers.normals.emplace_back(0.0f, 0.0f, -1.0f);
+						m_Buffers.uv.emplace_back(PackIntoShort(1, 1));
 						m_Buffers.types.emplace_back((GLbyte)type);
 						
 						m_Buffers.positions.emplace_back(x + 1, y + 1, z, 1);
-						m_Buffers.uv.emplace_back(0, 1);
-						m_Buffers.normals.emplace_back(0.0f, 0.0f, -1.0f);
-						m_Buffers.types.emplace_back((GLbyte)type);
-						
-						m_Buffers.positions.emplace_back(x + 1, y, z,1 );
-						m_Buffers.uv.emplace_back(0, 0);
-						m_Buffers.normals.emplace_back(0.0f, 0.0f, -1.0f);
+						m_Buffers.uv.emplace_back(PackIntoShort(0, 1));
 						m_Buffers.types.emplace_back((GLbyte)type);
 						
 						m_Buffers.positions.emplace_back(x + 1, y, z, 1);
-						m_Buffers.uv.emplace_back(0, 0);
-						m_Buffers.normals.emplace_back(0.0f, 0.0f, -1.0f);
+						m_Buffers.uv.emplace_back(PackIntoShort(0, 0));
+						m_Buffers.types.emplace_back((GLbyte)type);
+						
+						m_Buffers.positions.emplace_back(x + 1, y, z, 1);
+						m_Buffers.uv.emplace_back(PackIntoShort(0, 0));
 						m_Buffers.types.emplace_back((GLbyte)type);
 						
 						m_Buffers.positions.emplace_back(x, y, z, 1);
-						m_Buffers.uv.emplace_back(1, 0);
-						m_Buffers.normals.emplace_back(0.0f, 0.0f, -1.0f);
+						m_Buffers.uv.emplace_back(PackIntoShort(1, 0));
 						m_Buffers.types.emplace_back((GLbyte)type);
 						
 						m_Buffers.positions.emplace_back(x, y + 1, z, 1);
-						m_Buffers.uv.emplace_back(1, 1);
-						m_Buffers.normals.emplace_back(0.0f, 0.0f, -1.0f);
+						m_Buffers.uv.emplace_back(PackIntoShort(1, 1));
 						m_Buffers.types.emplace_back((GLbyte)type);
 					}
 
 					// Left
 					if (leftType == BlockType::UNDEFINED && !obscuredLeft || leftType == BlockType::AIR)
 					{
-						m_Buffers.positions.emplace_back(x, y + 1, z + 1, 1);
-						m_Buffers.uv.emplace_back(1, 1);
-						m_Buffers.normals.emplace_back(-1.0f, 0.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x, y + 1, z + 1, 2);
+						m_Buffers.uv.emplace_back(PackIntoShort(1, 1));
 						m_Buffers.types.emplace_back((GLbyte)type);
 						
-						m_Buffers.positions.emplace_back(x, y + 1, z, 1);
-						m_Buffers.uv.emplace_back(0, 1);
-						m_Buffers.normals.emplace_back(-1.0f, 0.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x, y + 1, z, 2);
+						m_Buffers.uv.emplace_back(PackIntoShort(0, 1));
 						m_Buffers.types.emplace_back((GLbyte)type);
 						
-						m_Buffers.positions.emplace_back(x, y, z, 1);
-						m_Buffers.uv.emplace_back(0, 0);
-						m_Buffers.normals.emplace_back(-1.0f, 0.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x, y, z, 2);
+						m_Buffers.uv.emplace_back(PackIntoShort(0, 0));
 						m_Buffers.types.emplace_back((GLbyte)type);
 						
-						m_Buffers.positions.emplace_back(x, y, z, 1);
-						m_Buffers.uv.emplace_back(0, 0);
-						m_Buffers.normals.emplace_back(-1.0f, 0.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x, y, z, 2);
+						m_Buffers.uv.emplace_back(PackIntoShort(0, 0));
 						m_Buffers.types.emplace_back((GLbyte)type);
 						
-						m_Buffers.positions.emplace_back(x, y, z + 1, 1);
-						m_Buffers.uv.emplace_back(1, 0);
-						m_Buffers.normals.emplace_back(-1.0f, 0.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x, y, z + 1, 2);
+						m_Buffers.uv.emplace_back(PackIntoShort(1, 0));
 						m_Buffers.types.emplace_back((GLbyte)type);
 
-						m_Buffers.positions.emplace_back(x, y + 1, z + 1, 1);
-						m_Buffers.uv.emplace_back(1, 1);
-						m_Buffers.normals.emplace_back(-1.0f, 0.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x, y + 1, z + 1, 2);
+						m_Buffers.uv.emplace_back(PackIntoShort(1, 1));
 						m_Buffers.types.emplace_back((GLbyte)type);
 					}
 
 					// Right
 					if (rightType == BlockType::UNDEFINED && !obscuredRight || rightType == BlockType::AIR)
 					{
-						m_Buffers.positions.emplace_back(x + 1, y + 1, z, 1);
-						m_Buffers.uv.emplace_back(1, 1);
-						m_Buffers.normals.emplace_back(1.0f, 0.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x + 1, y + 1, z, 3);
+						m_Buffers.uv.emplace_back(PackIntoShort(1, 1));
 						m_Buffers.types.emplace_back((GLbyte)type);
 						
-						m_Buffers.positions.emplace_back(x + 1, y + 1, z + 1, 1);
-						m_Buffers.uv.emplace_back(0, 1);
-						m_Buffers.normals.emplace_back(1.0f, 0.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x + 1, y + 1, z + 1, 3);
+						m_Buffers.uv.emplace_back(PackIntoShort(0, 1));
 						m_Buffers.types.emplace_back((GLbyte)type);
 						
-						m_Buffers.positions.emplace_back(x + 1, y, z + 1, 1);
-						m_Buffers.uv.emplace_back(0, 0);
-						m_Buffers.normals.emplace_back(1.0f, 0.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x + 1, y, z + 1, 3);
+						m_Buffers.uv.emplace_back(PackIntoShort(0, 0));
 						m_Buffers.types.emplace_back((GLbyte)type);
 						
-						m_Buffers.positions.emplace_back(x + 1, y, z + 1, 1);
-						m_Buffers.uv.emplace_back(0, 0);
-						m_Buffers.normals.emplace_back(1.0f, 0.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x + 1, y, z + 1, 3);
+						m_Buffers.uv.emplace_back(PackIntoShort(0, 0));
 						m_Buffers.types.emplace_back((GLbyte)type);
 						
-						m_Buffers.positions.emplace_back(x + 1, y, z, 1);
-						m_Buffers.uv.emplace_back(1, 0);
-						m_Buffers.normals.emplace_back(1.0f, 0.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x + 1, y, z, 3);
+						m_Buffers.uv.emplace_back(PackIntoShort(1, 0));
 						m_Buffers.types.emplace_back((GLbyte)type);
 						
-						m_Buffers.positions.emplace_back(x + 1, y + 1, z, 1);
-						m_Buffers.uv.emplace_back(1, 1);
-						m_Buffers.normals.emplace_back(1.0f, 0.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x + 1, y + 1, z, 3);
+						m_Buffers.uv.emplace_back(PackIntoShort(1, 1));
 						m_Buffers.types.emplace_back((GLbyte)type);
 					}
 
 					// Top
 					if (topType== BlockType::UNDEFINED || topType == BlockType::AIR)
 					{
-						m_Buffers.positions.emplace_back(x + 1, y + 1, z, 0);
-						m_Buffers.uv.emplace_back(1, 1);
-						m_Buffers.normals.emplace_back(0.0f, 1.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x + 1, y + 1, z, 4);
+						m_Buffers.uv.emplace_back(PackIntoShort(1, 1));
 						m_Buffers.types.emplace_back((GLbyte)(type==BlockType::GRASS? (int)type + 1: (int)type));
 						
-						m_Buffers.positions.emplace_back(x , y + 1, z, 0);
-						m_Buffers.uv.emplace_back(0, 1);
-						m_Buffers.normals.emplace_back(0.0f, 1.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x , y + 1, z, 4);
+						m_Buffers.uv.emplace_back(PackIntoShort(0, 1));
 						m_Buffers.types.emplace_back((GLbyte)(type==BlockType::GRASS? (int)type + 1: (int)type));
 
-						m_Buffers.positions.emplace_back(x, y + 1, z + 1, 0);
-						m_Buffers.uv.emplace_back(0, 0);
-						m_Buffers.normals.emplace_back(0.0f, 1.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x, y + 1, z + 1, 4);
+						m_Buffers.uv.emplace_back(PackIntoShort(0, 0));
 						m_Buffers.types.emplace_back((GLbyte)(type==BlockType::GRASS? (int)type + 1: (int)type));
 						
-						m_Buffers.positions.emplace_back(x, y + 1, z + 1, 0);
-						m_Buffers.uv.emplace_back(0, 0);
-						m_Buffers.normals.emplace_back(0.0f, 1.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x, y + 1, z + 1, 4);
+						m_Buffers.uv.emplace_back(PackIntoShort(0, 0));
 						m_Buffers.types.emplace_back((GLbyte)(type==BlockType::GRASS? (int)type + 1: (int)type));
 						
-						m_Buffers.positions.emplace_back(x + 1, y + 1, z + 1, 0);
-						m_Buffers.uv.emplace_back(1, 0);
-						m_Buffers.normals.emplace_back(0.0f, 1.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x + 1, y + 1, z + 1, 4);
+						m_Buffers.uv.emplace_back(PackIntoShort(1, 0));
 						m_Buffers.types.emplace_back((GLbyte)(type==BlockType::GRASS? (int)type + 1: (int)type));
 						
-						m_Buffers.positions.emplace_back(x + 1, y + 1, z, 0 );
-						m_Buffers.uv.emplace_back(1, 1);
-						m_Buffers.normals.emplace_back(0.0f, 1.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x + 1, y + 1, z, 4);
+						m_Buffers.uv.emplace_back(PackIntoShort(1, 1));
 						m_Buffers.types.emplace_back((GLbyte)(type==BlockType::GRASS? (int)type + 1: (int)type));
 					}
 
 					// Bottom
 					if (bottomType == BlockType::UNDEFINED || bottomType == BlockType::AIR)
 					{
-						m_Buffers.positions.emplace_back(x, y, z, 0);
-						m_Buffers.uv.emplace_back(1, 1);
-						m_Buffers.normals.emplace_back(0.0f, -1.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x, y, z, 5);
+						m_Buffers.uv.emplace_back(PackIntoShort(1, 1));
 						m_Buffers.types.emplace_back((GLbyte)(type == BlockType::GRASS ? (int)type + 2 : (int)type));
 						
-						m_Buffers.positions.emplace_back(x + 1, y, z, 0);
-						m_Buffers.uv.emplace_back(0, 1);
-						m_Buffers.normals.emplace_back(0.0f, -1.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x + 1, y, z, 5);
+						m_Buffers.uv.emplace_back(PackIntoShort(0, 1));
 						m_Buffers.types.emplace_back((GLbyte)(type == BlockType::GRASS ? (int)type + 2 : (int)type));
 						
-						m_Buffers.positions.emplace_back(x + 1, y, z + 1, 0);
-						m_Buffers.uv.emplace_back(0, 0);
-						m_Buffers.normals.emplace_back(0.0f, -1.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x + 1, y, z + 1, 5);
+						m_Buffers.uv.emplace_back(PackIntoShort(0, 0));
 						m_Buffers.types.emplace_back((GLbyte)(type == BlockType::GRASS ? (int)type + 2 : (int)type));
 						
-						m_Buffers.positions.emplace_back(x + 1, y, z + 1, 0);
-						m_Buffers.uv.emplace_back(0, 0);
-						m_Buffers.normals.emplace_back(0.0f, -1.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x + 1, y, z + 1, 5);
+						m_Buffers.uv.emplace_back(PackIntoShort(0, 0));
 						m_Buffers.types.emplace_back((GLbyte)(type == BlockType::GRASS ? (int)type + 2 : (int)type));
 						
-						m_Buffers.positions.emplace_back(x, y, z + 1, 0);
-						m_Buffers.uv.emplace_back(1, 0);
-						m_Buffers.normals.emplace_back(0.0f, -1.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x, y, z + 1, 5);
+						m_Buffers.uv.emplace_back(PackIntoShort(1, 0));
 						m_Buffers.types.emplace_back((GLbyte)(type == BlockType::GRASS ? (int)type + 2 : (int)type));
 						
-						m_Buffers.positions.emplace_back(x, y, z, 0);
-						m_Buffers.uv.emplace_back(1, 1);
-						m_Buffers.normals.emplace_back(0.0f, -1.0f, 0.0f);
+						m_Buffers.positions.emplace_back(x, y, z, 5);
+						m_Buffers.uv.emplace_back(PackIntoShort(1, 1));
 						m_Buffers.types.emplace_back((GLbyte)(type == BlockType::GRASS ? (int)type + 2 : (int)type));
 					}
 				}
@@ -321,8 +290,7 @@ namespace CoreGameObjects
 		m_VAO = new VertexArray();
 
 		GLuint posBufferSize = m_Buffers.positions.size() * 4 * sizeof(GLshort);
-		GLuint uvBufferSize = m_Buffers.uv.size() * 2 * sizeof(GLfloat);
-		GLuint normalsBufferSize = m_Buffers.normals.size() * 3 * sizeof(GLfloat);
+		GLuint uvBufferSize = m_Buffers.uv.size() * sizeof(GLushort);
 		GLuint typeBufferSize = m_Buffers.types.size() * sizeof(GLbyte);
 
 		m_VAO->Bind();
@@ -331,13 +299,9 @@ namespace CoreGameObjects
 		posBuffer->BufferData(m_Buffers.positions.data(), GL_STATIC_DRAW);
 		m_VAO->AddBuffer(posBuffer, 0, GL_SHORT);
 
-		auto uvBuffer = new VertexBuffer(uvBufferSize, 2);
+		auto uvBuffer = new VertexBuffer(uvBufferSize, 1);
 		uvBuffer->BufferData(m_Buffers.uv.data(), GL_STATIC_DRAW);
-		m_VAO->AddBuffer(uvBuffer, 1, GL_FLOAT);
-
-		auto normalsBuffer = new VertexBuffer(normalsBufferSize, 3);
-		normalsBuffer->BufferData(m_Buffers.normals.data(), GL_STATIC_DRAW);
-		m_VAO->AddBuffer(normalsBuffer, 3, GL_FLOAT);
+		m_VAO->AddBuffer(uvBuffer, 1, GL_UNSIGNED_SHORT);
 
 		auto typeBuffer = new VertexBuffer(typeBufferSize, 1);
 		typeBuffer->BufferData(m_Buffers.types.data(), GL_STATIC_DRAW);
@@ -355,13 +319,11 @@ namespace CoreGameObjects
 
 		GLuint posBufferSize = m_Buffers.positions.size() * 4 * sizeof(GLshort);
 		GLuint uvBufferSize = m_Buffers.uv.size() * 2 * sizeof(GLfloat);
-		GLuint normalsBufferSize = m_Buffers.normals.size() * 3 * sizeof(GLfloat);
 		GLuint typeBufferSize = m_Buffers.types.size() * sizeof(GLbyte);
 
 		m_VAO->GetBuffer(0)->BufferSubData(0, posBufferSize, m_Buffers.positions.data());
 		m_VAO->GetBuffer(1)->BufferSubData(0, uvBufferSize, m_Buffers.uv.data());
-		m_VAO->GetBuffer(2)->BufferSubData(0, normalsBufferSize, m_Buffers.normals.data());
-		m_VAO->GetBuffer(3)->BufferSubData(0, typeBufferSize, m_Buffers.types.data());
+		m_VAO->GetBuffer(2)->BufferSubData(0, typeBufferSize, m_Buffers.types.data());
 
 		m_VAO->Unbind();
 
