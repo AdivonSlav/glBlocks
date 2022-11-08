@@ -10,13 +10,6 @@ namespace CoreGameObjects
 		static unsigned long long m_Seed;
 		static double m_LerpedSeed;
 
-		// (this^2) + 1 yields the number of chunks that will be serialized at any given time 
-		int m_SerializationCount;
-		float m_RenderDistance;
-
-		glm::ivec2 xBuildBoundaries;
-		glm::ivec2 zBuildBoundaries;
-
 		static Camera* m_Camera;
 	private:
 	public:
@@ -33,12 +26,12 @@ namespace CoreGameObjects
 		void Init();
 
 		/**
-		 * \brief Loads all chunks that are prepared
+		 * \brief Serializes and deserializes chunks from disc and loads them into memory at a certain distance, then builds them 
 		 */
 		void LoadChunks();
 
 		/**
-		 * \brief Disposes and marks any chunks that dont need to be rendered at the moment
+		 * \brief Marks chunks based on render status and disposes chunks if needed
 		 */
 		void SynchronizeChunks();
 
@@ -49,7 +42,7 @@ namespace CoreGameObjects
 		bool CheckIfGenerated();
 
 		/**
-		 * \brief Checks whether chunks need to be loaded into memory and/or rendered
+		 * \brief Uploads all chunks to the GPU that should be rendered
 		 */
 		void PrepareChunks();
 

@@ -26,9 +26,10 @@ namespace CoreGraphics
 		glClearColor(world.GetClearColor().r, world.GetClearColor().g, world.GetClearColor().b, 1.0f);
 
 		m_Shader[(int)ShaderType::BASIC_SHADER]->Bind();
+
 		for (auto& chunk : ChunkManager::GetLoadedChunks())
 		{
-			if (!chunk->ShouldRender() || !chunk->IsBuilt())
+			if (!chunk->IsUploaded())
 				continue;
 
 			auto identity = glm::identity<glm::mat4>();
@@ -44,11 +45,14 @@ namespace CoreGraphics
 			glDrawArrays(GL_TRIANGLES, 0, chunk->GetVertCount());
 			chunk->GetVAO()->Unbind();
 		}
+
 		m_Shader[(int)ShaderType::BASIC_SHADER]->Unbind();
 
 		m_Shader[(int)ShaderType::LIGHTSOURCE_SHADER]->Bind();
+
 		m_Shader[(int)ShaderType::LIGHTSOURCE_SHADER]->SetVec3<float>("uCamRight", camera.GetWorldRight());
 		m_Shader[(int)ShaderType::LIGHTSOURCE_SHADER]->SetVec3<float>("uCamUp", camera.GetWorldUp());
+
 		for (int i = 0; i < 2; i++)
 		{
 			m_Shader[(int)ShaderType::LIGHTSOURCE_SHADER]->SetVec3<float>("uWorldPos",world.GetLightSource((LightSourceType)i).GetPosition());

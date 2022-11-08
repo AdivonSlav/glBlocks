@@ -35,7 +35,7 @@
 #include <random>
 #include <iterator>
 #include <future>
-#include <queue>
+#include <deque>
 
 // GLM
 #define GLM_FORCE_SWIZZLE

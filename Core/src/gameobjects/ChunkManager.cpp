@@ -6,7 +6,7 @@
 namespace CoreGameObjects
 {
 	std::vector<std::shared_ptr<Chunk>> ChunkManager::m_LoadedChunks;
-	std::queue<std::future<std::shared_ptr<Chunk>>> ChunkManager::m_QueuedForBuilding;
+	std::deque<std::future<void>> ChunkManager::m_QueuedForBuilding;
 	std::unordered_set<glm::vec3> ChunkManager::m_QueuedPositionsForBuilding;
 
 	void ChunkManager::Serialize(const glm::vec3& position, Chunk* chunk, unsigned long long& seed)
@@ -71,23 +71,17 @@ namespace CoreGameObjects
 			chunk->GetObscuring(3)->SetObscuring(2, nullptr);
 	}
 
-	std::shared_ptr<Chunk> ChunkManager::GenerateChunk(glm::vec3 position, bool serialized)
+	void ChunkManager::BuildChunk(Chunk* chunk)
 	{
-		std::shared_ptr<Chunk> chunk;
-
-		if (serialized)
-			chunk = Deserialize(position, TerrainGenerator::GetSeed());
-		else
+		if (!chunk->Serialized())
 		{
-			chunk = std::make_shared<Chunk>(position);
 			TerrainGenerator::Noisify(*chunk);
-			Serialize(position, chunk.get(), TerrainGenerator::GetSeed());
+			Serialize(chunk->GetPos(), chunk, TerrainGenerator::GetSeed());
 		}
 
 		chunk->Build();
+		MarkPositionAsBuilt(chunk->GetPos());
 		LOG_INFO("Built chunk");
-
-		return chunk;
 	}
 
 	bool ChunkManager::IsBuildQueueReady()

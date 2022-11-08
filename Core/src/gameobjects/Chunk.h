@@ -3,7 +3,7 @@
 #include "../graphics/VertexArray.h"
 
 #define CHUNK_X 16
-#define CHUNK_Y 384
+#define CHUNK_Y 128
 #define CHUNK_Z 16
 
 using namespace CoreGraphics;
@@ -22,7 +22,7 @@ namespace CoreGameObjects
 
 	struct Buffers
 	{
-		std::vector<glm::tvec4<GLshort>> positions; // Fourth value indicates the faces: 0(front), 1(back), 2(left), 3(right), 4(top), 5(bottom)
+		std::vector<glm::tvec4<GLbyte>> positions; // Fourth value indicates the faces: 0(front), 1(back), 2(left), 3(right), 4(top), 5(bottom)
 		std::vector<GLushort> uv; // Both coordinates are expected to be packed into one 16-bit unsigned integer
 		std::vector<GLbyte> types;
 	};
@@ -45,6 +45,7 @@ namespace CoreGameObjects
 		bool m_ShouldRender;
 		bool m_IsUploaded;
 		bool m_Built;
+		bool m_Serialized;
 		unsigned int m_VertexCount;
 	private:
 		/**
@@ -95,6 +96,7 @@ namespace CoreGameObjects
 		bool ShouldRender() const { return m_ShouldRender; }
 		bool IsUploaded() const { return m_IsUploaded; }
 		bool IsBuilt() const { return m_Built; }
+		bool Serialized() const { return m_Serialized; }
 		unsigned int GetVertCount() const { return m_VertexCount; }
 
 		void SetBlock(int x, int y, int z, BlockType type);
@@ -103,6 +105,7 @@ namespace CoreGameObjects
 		void SetObscuring(int index, Chunk* chunk) { m_ObscuringChunks[index] = chunk; }
 		void SetShouldDispose(bool value) { m_ShouldDispose = value; }
 		void SetShouldRender(bool value) { m_ShouldRender = value; }
+		void SetSerialized(bool value) { m_Serialized = value; }
 
 		bool operator==(const Chunk& chunk) { return this->GetPos() == chunk.GetPos(); }
 	};

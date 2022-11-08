@@ -17,7 +17,7 @@ namespace CoreGameObjects
 	{
 	private:
 		static std::vector<std::shared_ptr<Chunk>> m_LoadedChunks;
-		static std::queue<std::future<std::shared_ptr<Chunk>>> m_QueuedForBuilding;
+		static std::deque<std::future<void>> m_QueuedForBuilding;
 		static std::unordered_set<glm::vec3> m_QueuedPositionsForBuilding;
 
 		ChunkManager() = default;
@@ -56,14 +56,35 @@ namespace CoreGameObjects
 		 */
 		static void SynchronizeObscured(const Chunk* chunk);
 
-		static std::shared_ptr<Chunk> GenerateChunk(glm::vec3 position, bool serialized = false);
+		/**
+		 * \brief Calls Build() on the chunk. Meant to be used on another thread. Furthermore, nosifies and serializes the chunk if it is not already
+		 * \param chunk Chunk to be built
+		 */
+		static void BuildChunk(Chunk* chunk);
 
+		/**
+		 * \brief Returns whether the front of the future deque has finished its task
+		 * \return True/false whether the future is ready
+		 */
 		static bool IsBuildQueueReady();
 
+		/**
+		 * \brief Checks if the set of queued build positions contains the provided position
+		 * \param position Position of the chunk
+		 * \return Whether the provided chunk position is already being built
+		 */
 		static bool IsPositionQueuedForBuild(const glm::vec3& position) { return m_QueuedPositionsForBuilding.contains(position); }
 
+		/**
+		 * \brief Inserts the provided position, thereby marking the chunk at that position as already being operated on by another thread (being built)
+		 * \param position Position of the chunk
+		 */
 		static void MarkPositionForBuild(const glm::vec3& position) { m_QueuedPositionsForBuilding.insert(position); }
 
+		/**
+		 * \brief Marks the chunk at that position as having been built and no longer being operated on
+		 * \param position Position of the chunk
+		 */
 		static void MarkPositionAsBuilt(const glm::vec3& position) { m_QueuedPositionsForBuilding.erase(position); }
 
 		/**
@@ -73,10 +94,21 @@ namespace CoreGameObjects
 		 */
 		static const std::string ToFilename(const glm::vec3& position);
 
+		/**
+		 * \brief Checks whether the chunk at the provided position is loaded into memory
+		 * \param position Position of the chunk
+		 * \return Whether the chunk exists or not
+		 */
 		static bool IsLoaded(const glm::vec3& position);
+
+		/**
+		 * \brief Returns the chunk at the provied position as a pointer
+		 * \param position Position of the chunk
+		 * \return Pointer to the chunk in memory
+		 */
 		static Chunk* GetLoadedChunk(const glm::vec3& position);
 
 		static std::vector<std::shared_ptr<Chunk>>& GetLoadedChunks() { return m_LoadedChunks; }
-		static std::queue<std::future<std::shared_ptr<Chunk>>>& GetQueuedForBuild() { return m_QueuedForBuilding; }
+		static std::deque<std::future<void>>& GetQueuedForBuild() { return m_QueuedForBuilding; }
 	};
 }

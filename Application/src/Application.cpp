@@ -39,7 +39,7 @@ void Application::Run()
 	m_World->GetGenerator().SetCamera(m_Camera);
 	m_World->GetGenerator().Init();
 
-	m_Camera.SetPosition(0, 260.0f, 0);
+	m_Camera.SetPosition(1, 150.0f, 1);
 	m_Camera.SendShader(basicShader);
 	m_Camera.SendShader(lightSourceShader);
 
@@ -54,6 +54,7 @@ void Application::Run()
 
 		m_World->StepTime(m_Timer);
 		m_World->GetGenerator().LoadChunks();
+		m_World->GetGenerator().PrepareChunks();
 		m_Renderer->Draw(*m_World, m_Camera);
 
 		m_Dashboard->GetData(m_FrameRate, m_AverageFrameTime);

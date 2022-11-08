@@ -5,13 +5,13 @@
 namespace CoreGameObjects
 {
 	Chunk::Chunk()
-		: m_VAO(nullptr), m_Position(0.0f, 0.0f, 0.0f),  m_ShouldDispose(false), m_ShouldRender(false), m_IsUploaded(false), m_Built(false), m_VertexCount(0)
+		: m_VAO(nullptr), m_Position(0.0f, 0.0f, 0.0f),  m_ShouldDispose(false), m_ShouldRender(false), m_IsUploaded(false), m_Built(false), m_Serialized(true), m_VertexCount(0)
 	{
 
 	}
 
 	Chunk::Chunk(const glm::vec3& position)
-		: m_VAO(nullptr), m_Position(position), m_ShouldDispose(false), m_ShouldRender(false), m_IsUploaded(false), m_Built(false), m_VertexCount(0)
+		: m_VAO(nullptr), m_Position(position), m_ShouldDispose(false), m_ShouldRender(false), m_IsUploaded(false), m_Built(false), m_Serialized(true), m_VertexCount(0)
 	{
 
 	}
@@ -35,7 +35,7 @@ namespace CoreGameObjects
 	{
 		// Reinitializes all of the buffer vectors with empty ones, thereby emptying them and releasing any reserved memory
 
-		m_Buffers.positions = std::vector<glm::tvec4<GLshort>>();
+		m_Buffers.positions = std::vector<glm::tvec4<GLbyte>>();
 		m_Buffers.uv = std::vector<GLushort>();
 		m_Buffers.types = std::vector<GLbyte>();
 	}
@@ -68,10 +68,11 @@ namespace CoreGameObjects
 		if (!rebuild)
 			FindObscuringChunks();
 
-		// Immediately reserving enough space for 65000 vertices (a rough estimate) in order to prevent reallocation of the vectors at every insertion
-		m_Buffers.positions.reserve(65000);
-		m_Buffers.uv.reserve(65000);
-		m_Buffers.types.reserve(65000);
+		// Immediately reserving enough space for 16 * 128 * 16 blocks of the chunk, in order to prevent reallocation of the vector at every insertion
+		// 16 * 128 * 16 * 6 * 6 = 1179648
+		m_Buffers.positions.reserve(1179648);
+		m_Buffers.uv.reserve(1179648);
+		m_Buffers.types.reserve(1179648);
 
 		for (int x = 0; x < CHUNK_X; x++)
 		{
@@ -289,15 +290,15 @@ namespace CoreGameObjects
 	{
 		m_VAO = new VertexArray();
 
-		GLuint posBufferSize = m_Buffers.positions.size() * 4 * sizeof(GLshort);
-		GLuint uvBufferSize = m_Buffers.uv.size() * sizeof(GLushort);
-		GLuint typeBufferSize = m_Buffers.types.size() * sizeof(GLbyte);
+		GLuint posBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * 4 * sizeof(GLbyte);
+		GLuint uvBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * sizeof(GLshort);
+		GLuint typeBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * sizeof(GLbyte);
 
 		m_VAO->Bind();
 
 		auto posBuffer = new VertexBuffer(posBufferSize, 4);
 		posBuffer->BufferData(m_Buffers.positions.data(), GL_STATIC_DRAW);
-		m_VAO->AddBuffer(posBuffer, 0, GL_SHORT);
+		m_VAO->AddBuffer(posBuffer, 0, GL_BYTE);
 
 		auto uvBuffer = new VertexBuffer(uvBufferSize, 1);
 		uvBuffer->BufferData(m_Buffers.uv.data(), GL_STATIC_DRAW);
@@ -317,9 +318,9 @@ namespace CoreGameObjects
 	{
 		m_VAO->Bind();
 
-		GLuint posBufferSize = m_Buffers.positions.size() * 4 * sizeof(GLshort);
-		GLuint uvBufferSize = m_Buffers.uv.size() * 2 * sizeof(GLfloat);
-		GLuint typeBufferSize = m_Buffers.types.size() * sizeof(GLbyte);
+		GLuint posBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * 4 * sizeof(GLshort);
+		GLuint uvBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * sizeof(GLshort);
+		GLuint typeBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * sizeof(GLbyte);
 
 		m_VAO->GetBuffer(0)->BufferSubData(0, posBufferSize, m_Buffers.positions.data());
 		m_VAO->GetBuffer(1)->BufferSubData(0, uvBufferSize, m_Buffers.uv.data());
