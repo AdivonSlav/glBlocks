@@ -5,10 +5,10 @@ This is a voxel engine I've been working on to advance my knowledge in OpenGL. F
 ## Planned features
 
 - Breaking and placing of blocks
-- ~~Day/night cycle~~ **(Implemented on 25.10.2022)**
-- Multithreaded chunk generation and loading
-- ~~Chunk persistence between application runs (stored as files)~~ **(Implemented on 27.10.2022)**
-- Fog and lighting effects
+- ~~Day/night cycle~~
+- ~~Multithreaded chunk generation and loading~~
+- ~~Chunk persistence between application runs (stored as files)~~
+- Fog and ~~lighting effects~~
 
 The libraries that I used are:
 
