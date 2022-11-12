@@ -3,13 +3,8 @@
 #include "../CoreAPI.h"
 
 #include "Chunk.h"
-#include "../graphics/Camera.h"
 
-#ifdef BLOCKS_DEBUG
-#define WRITE_PATH "src/chunks/"
-#else
 #define WRITE_PATH "chunks/"
-#endif
 
 namespace CoreGameObjects
 {

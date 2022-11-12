@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ChunkManager.h"
+#include "../graphics/Camera.h"
 
 namespace CoreGameObjects
 {

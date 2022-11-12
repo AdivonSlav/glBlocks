@@ -94,8 +94,8 @@ project "Application"
             "if not exist \"%{wks.location}bin\\" ..outputdir.. "\\Application\\shaders\" mkdir \"%{wks.location}bin\\" ..outputdir.. "\\Application\\shaders\"",
             "if not exist \"%{wks.location}bin\\" ..outputdir.. "\\Application\\textures\" mkdir \"%{wks.location}bin\\" ..outputdir.. "\\Application\\textures\"",
 
-            "xcopy \"%{prj.location}src\\shaders\" \"%{wks.location}bin\\"  ..outputdir.. "\\Application\\shaders\" /E /Y /I /R",
-            "xcopy \"%{prj.location}src\\textures\" \"%{wks.location}bin\\"  ..outputdir.. "\\Application\\textures\" /E /Y /I /R",
+            "xcopy \"%{prj.location}shaders\" \"%{wks.location}bin\\"  ..outputdir.. "\\Application\\shaders\" /E /Y /I /R",
+            "xcopy \"%{prj.location}textures\" \"%{wks.location}bin\\"  ..outputdir.. "\\Application\\textures\" /E /Y /I /R",
         }
 
     filter "configurations:Debug"
