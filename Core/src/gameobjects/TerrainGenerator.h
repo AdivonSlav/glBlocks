@@ -81,6 +81,8 @@ namespace CoreGameObjects
 		 */
 		static float Noise(const glm::vec3& coordinates, int octaves, float persistence);
 
+		static void Cleanup();
+
 		/**
 		 * \brief Provides the scene camera to the terrain generator
 		 * \param camera Camera in the scene

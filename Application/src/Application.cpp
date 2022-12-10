@@ -47,6 +47,7 @@ void Application::Run()
 
 	m_Timer.Start();
 
+
 	while (!m_Window.ShouldClose())
 	{
 		m_Camera.SetMatrix(40.0f, 0.1f, 1000.0f);
@@ -62,10 +63,11 @@ void Application::Run()
 
 		m_Timer.RecordLapse();
 		CalcPerf();
-
 		m_Window.PollAndSwapBuffers();
 	}
 
+	VertexArrayManager::Cleanup();
+	TerrainGenerator::Cleanup();
 	Dashboard::Cleanup();
 	Window::Cleanup();
 	LOG_INFO("Ending...");

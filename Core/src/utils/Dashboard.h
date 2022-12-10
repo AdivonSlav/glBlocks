@@ -18,6 +18,7 @@ namespace CoreUtils
 
 		double m_FPS;
 		double m_AverageFrameTime;
+		static bool m_GenNewWorld;
 
 		static Payload m_Payload;
 
@@ -56,6 +57,7 @@ namespace CoreUtils
 
 		static void SetShown(bool shown) { m_Show = shown; }
 		static bool IsShown() { return m_Show;}
+		static bool ShouldGenerateWorld() { return m_GenNewWorld; }
 	};
 
 

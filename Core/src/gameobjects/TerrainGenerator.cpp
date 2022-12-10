@@ -2,10 +2,15 @@
 #include "TerrainGenerator.h"
 #include "../utils/Logger.h"
 #include "../utils/Maths.h"
+#include "../utils/Dashboard.h"
 #include "ChunkManager.h"
+#include "../graphics/VertexArrayManager.h"
 
 #define MAX_SEED 9999999999
 #define MIN_SEED 1
+
+#define LOAD_DISTANCE 100.0f
+#define RENDER_DISTANCE 72.0f
 
 namespace CoreGameObjects
 {
@@ -42,10 +47,10 @@ namespace CoreGameObjects
 		auto camPos = m_Camera->GetPosition();
 		auto camPosChunks = glm::vec2(camPos.x / 16, camPos.z / 16);
 
-		int startX = camPosChunks.x - 8;
-		int endX = camPosChunks.x + 8;
-		int startZ = camPosChunks.y - 8;
-		int endZ = camPosChunks.y + 8;
+		int startX = camPosChunks.x - 32;
+		int endX = camPosChunks.x + 32;
+		int startZ = camPosChunks.y - 32;
+		int endZ = camPosChunks.y + 32;
 
 		for (int i = startX; i <= endX; i++)
 		{
@@ -55,7 +60,7 @@ namespace CoreGameObjects
 				auto distanceVector = camPos.xz - glm::vec2(chunkPos.x + CHUNK_X, chunkPos.z + CHUNK_Z);
 				auto distance = glm::length(distanceVector);
 
-				if (distance <= 128.0f && !ChunkManager::IsLoaded(chunkPos))
+				if (distance <= LOAD_DISTANCE && !ChunkManager::IsLoaded(chunkPos))
 				{
 					std::shared_ptr<Chunk> chunk;
 
@@ -76,28 +81,33 @@ namespace CoreGameObjects
 			}
 		}
 
-		int counter = 0;
+		bool queuedOnce = false;
 
 		for (auto& loadedChunk : ChunkManager::GetLoadedChunks())
 		{
-			if (counter == 4)
+			if (queuedOnce)
 				break;
 
-			if (ChunkManager::IsPositionQueuedForBuild(loadedChunk->GetPos()) || loadedChunk->IsBuilt())
+			if (ChunkManager::IsPositionQueuedForBuild(loadedChunk->GetPos()) || loadedChunk->IsBuilt() || ChunkManager::GetQueuedForBuild().size() == 1)
 				continue;
 
-			ChunkManager::GetQueuedForBuild().push_back(std::async(std::launch::async, ChunkManager::BuildChunk, loadedChunk.get()));
 			ChunkManager::MarkPositionForBuild(loadedChunk->GetPos());
-			counter++;
+			ChunkManager::QueueForBuild(loadedChunk.get());
+			queuedOnce = true;
 		}
-
+		
 		SynchronizeChunks();
 	}
 
 	void TerrainGenerator::SynchronizeChunks()
 	{
 		while (!ChunkManager::GetQueuedForBuild().empty() && ChunkManager::IsBuildQueueReady())
-			ChunkManager::GetQueuedForBuild().pop_back();
+		{
+			auto builtPosition = ChunkManager::GetQueuedForBuild().front().get();
+			ChunkManager::MarkPositionAsBuilt(builtPosition);
+			ChunkManager::GetQueuedForBuild().pop_front();
+			LOG_INFO("Built chunk");
+		}
 
 		auto& camPos = m_Camera->GetPosition();
 
@@ -107,18 +117,25 @@ namespace CoreGameObjects
 			auto distanceVector = camPos.xz - glm::vec2(chunkPos.x + CHUNK_X, chunkPos.z + CHUNK_Z);
 			auto distance = glm::length(distanceVector);
 
-			if (distance <= 64.0f && loadedIt->get()->IsBuilt() && !loadedIt->get()->ShouldRender())
+			if (distance <= RENDER_DISTANCE && loadedIt->get()->IsBuilt() && !loadedIt->get()->ShouldRender())
 			{
 				loadedIt->get()->SetShouldRender(true);
 				LOG_INFO("Marked chunk for rendering");
 			}
-			else if (distance > 64.0f && loadedIt->get()->IsBuilt() && loadedIt->get()->ShouldRender())
+			else if (distance > RENDER_DISTANCE && loadedIt->get()->IsBuilt() && loadedIt->get()->ShouldRender())
 			{
 				loadedIt->get()->SetShouldRender(false);
 				LOG_INFO("Marked chunk to not render");
+
+				if (loadedIt->get()->GetVAO() != nullptr)
+				{
+					VertexArrayManager::CacheVAO(loadedIt->get()->GetVAO());
+					loadedIt->get()->GetVAO() = nullptr;
+					loadedIt->get()->SetUploaded(false);
+				}
 			}
 
-			if (distance > 128.0f && loadedIt->get()->IsBuilt())
+			if (distance > LOAD_DISTANCE && loadedIt->get()->IsBuilt())
 			{
 				loadedIt = ChunkManager::GetLoadedChunks().erase(loadedIt);
 				LOG_INFO("Unloaded chunk -> " << ChunkManager::GetLoadedChunks().size());
@@ -134,6 +151,7 @@ namespace CoreGameObjects
 		{
 			std::filesystem::create_directory(WRITE_PATH);
 			LOG_INFO("No chunk folder found, created new one");
+
 			return false;
 		}
 
@@ -149,17 +167,18 @@ namespace CoreGameObjects
 
 	void TerrainGenerator::PrepareChunks()
 	{
-		int counter = 0;
+		bool uploadedOnce = false;
 
 		for (auto& chunk : ChunkManager::GetLoadedChunks())
 		{
-			if (counter == 1)
+			if (uploadedOnce)
 				break;
+
 
 			if (chunk->IsBuilt() && chunk->ShouldRender() && !chunk->IsUploaded())
 			{
 				chunk->UploadToGPU();
-				counter++;
+				uploadedOnce = true;
 				LOG_INFO("Uploaded chunk to GPU");
 			}
 		}
@@ -175,8 +194,8 @@ namespace CoreGameObjects
 		{
 			for (int z = 0; z < CHUNK_Z; z++)
 			{
-				int16_t surfaceY = 80;
-				int16_t stoneY = 74;
+				int16_t surfaceY = 64;
+				int16_t stoneY = 59;
 
 				// Getting block coordinates in world space and adding a seed value lerped between -255.0 and 255.0
 				float blockX = x + chunkPos.x + m_LerpedSeed;
@@ -185,8 +204,8 @@ namespace CoreGameObjects
 				// The coordinates are divided by an increment to get smaller steps
 				float height = Noise(glm::vec2(blockX / increment, blockZ / increment), 7, 0.9f);
 				float stoneHeight = Noise(glm::vec2(blockX / increment, blockZ / increment), 7, 1.0f);
-				surfaceY += height * 5.0f;
-				stoneY += stoneHeight * 10.0f;
+				surfaceY += height * 10.0f;
+				stoneY += stoneHeight * 12.0f;
 
 				for (int y = 0; y < CHUNK_Y; y++)
 				{
@@ -248,5 +267,16 @@ namespace CoreGameObjects
 		}
 
 		return sum;
+	}
+
+	void TerrainGenerator::Cleanup()
+	{
+		if (CoreUtils::Dashboard::ShouldGenerateWorld())
+		{
+			for (const auto& entry : std::filesystem::directory_iterator(WRITE_PATH))
+			{
+				std::filesystem::remove_all(entry);
+			}
+		}
 	}
 }

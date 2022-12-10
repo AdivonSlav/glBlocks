@@ -6,7 +6,7 @@
 namespace CoreGameObjects
 {
 	std::vector<std::shared_ptr<Chunk>> ChunkManager::m_LoadedChunks;
-	std::deque<std::future<void>> ChunkManager::m_QueuedForBuilding;
+	std::deque<std::future<glm::vec3>> ChunkManager::m_QueuedForBuilding;
 	std::unordered_set<glm::vec3> ChunkManager::m_QueuedPositionsForBuilding;
 
 	void ChunkManager::Serialize(const glm::vec3& position, Chunk* chunk, unsigned long long& seed)
@@ -24,6 +24,8 @@ namespace CoreGameObjects
 			stream.write(reinterpret_cast<char*>(&seed), sizeof(unsigned long long));
 			stream.write(reinterpret_cast<char*>(chunk->GetBlocksPtr()), CHUNK_X * CHUNK_Y * CHUNK_Z * sizeof(signed char));
 		}
+
+		chunk->SetSerialized(true);
 
 		stream.close();
 	}
@@ -71,8 +73,15 @@ namespace CoreGameObjects
 			chunk->GetObscuring(3)->SetObscuring(2, nullptr);
 	}
 
-	void ChunkManager::BuildChunk(Chunk* chunk)
+	glm::vec3 ChunkManager::BuildChunk(Chunk* chunk, bool rebuild)
 	{
+		if (rebuild)
+		{
+			chunk->Build(true);
+			MarkPositionAsBuilt(chunk->GetPos());
+			return chunk->GetPos();
+		}
+
 		if (!chunk->Serialized())
 		{
 			TerrainGenerator::Noisify(*chunk);
@@ -80,8 +89,13 @@ namespace CoreGameObjects
 		}
 
 		chunk->Build();
-		MarkPositionAsBuilt(chunk->GetPos());
-		LOG_INFO("Built chunk");
+
+		return chunk->GetPos();
+	}
+
+	void ChunkManager::QueueForBuild(Chunk* chunk, bool rebuild)
+	{
+		m_QueuedForBuilding.push_back(std::async(std::launch::async, ChunkManager::BuildChunk, chunk, rebuild));
 	}
 
 	bool ChunkManager::IsBuildQueueReady()

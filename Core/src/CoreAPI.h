@@ -36,6 +36,7 @@
 #include <iterator>
 #include <future>
 #include <deque>
+#include <queue>
 
 // GLM
 #define GLM_FORCE_SWIZZLE

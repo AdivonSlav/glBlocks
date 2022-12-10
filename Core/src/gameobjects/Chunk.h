@@ -87,7 +87,7 @@ namespace CoreGameObjects
 		void FindObscuringChunks();
 
 
-		VertexArray* GetVAO() const { return m_VAO; }
+		VertexArray*& GetVAO() { return m_VAO; }
 		BlockType GetBlock(int x, int y, int z) const;
 		signed char* GetBlocksPtr() { return m_Blocks;}
 		const glm::vec3& GetPos() const { return m_Position; }
@@ -106,6 +106,7 @@ namespace CoreGameObjects
 		void SetShouldDispose(bool value) { m_ShouldDispose = value; }
 		void SetShouldRender(bool value) { m_ShouldRender = value; }
 		void SetSerialized(bool value) { m_Serialized = value; }
+		void SetUploaded(bool value) { m_IsUploaded = value; }
 
 		bool operator==(const Chunk& chunk) { return this->GetPos() == chunk.GetPos(); }
 	};

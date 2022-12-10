@@ -60,10 +60,13 @@ namespace CoreUtils
 		switch (m_Level)
 		{
 		case LogLevel::INFO:
+			//system("Color 02");
 			return "INFO: ";
 		case LogLevel::WARN:
+			//system("Color 06");
 			return "WARN: ";
 		case LogLevel::ERROR:
+			//system("Color 04");
 			return "ERROR: ";
 		}
 

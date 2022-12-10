@@ -15,6 +15,7 @@
 #include "graphics/Renderer.h"
 #include "graphics/Camera.h"
 #include "graphics/Texture.h"
+#include "graphics/VertexArrayManager.h"
 
 #include "gameobjects/Chunk.h"
 #include "gameobjects/ChunkManager.h"

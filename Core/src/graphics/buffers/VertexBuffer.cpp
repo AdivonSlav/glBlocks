@@ -24,7 +24,8 @@ namespace CoreGraphics::Buffers
 	void VertexBuffer::BufferSubData(GLintptr offset, GLuint size, const void* data)
 	{
 		Bind();
-		glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+		glBufferData(GL_ARRAY_BUFFER, m_Size, NULL, GL_STREAM_DRAW);
+		glBufferSubData(GL_ARRAY_BUFFER, offset, m_Size, data);
 		Unbind();
 	}
 

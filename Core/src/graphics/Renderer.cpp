@@ -29,8 +29,11 @@ namespace CoreGraphics
 
 		for (auto& chunk : ChunkManager::GetLoadedChunks())
 		{
-			if (!chunk->IsUploaded())
+			if (!chunk->IsUploaded() || !chunk->ShouldRender())
 				continue;
+
+			if (chunk->GetVAO() == nullptr)
+				__debugbreak();
 
 			auto identity = glm::identity<glm::mat4>();
 			auto model = glm::translate(identity, chunk->GetPos());

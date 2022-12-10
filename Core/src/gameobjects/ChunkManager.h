@@ -12,7 +12,7 @@ namespace CoreGameObjects
 	{
 	private:
 		static std::vector<std::shared_ptr<Chunk>> m_LoadedChunks;
-		static std::deque<std::future<void>> m_QueuedForBuilding;
+		static std::deque<std::future<glm::vec3>> m_QueuedForBuilding;
 		static std::unordered_set<glm::vec3> m_QueuedPositionsForBuilding;
 
 		ChunkManager() = default;
@@ -55,7 +55,9 @@ namespace CoreGameObjects
 		 * \brief Calls Build() on the chunk. Meant to be used on another thread. Furthermore, nosifies and serializes the chunk if it is not already
 		 * \param chunk Chunk to be built
 		 */
-		static void BuildChunk(Chunk* chunk);
+		static glm::vec3 BuildChunk(Chunk* chunk, bool rebuild = false);
+
+		static void QueueForBuild(Chunk* chunk, bool rebuild = false);
 
 		/**
 		 * \brief Returns whether the front of the future deque has finished its task
@@ -104,6 +106,6 @@ namespace CoreGameObjects
 		static Chunk* GetLoadedChunk(const glm::vec3& position);
 
 		static std::vector<std::shared_ptr<Chunk>>& GetLoadedChunks() { return m_LoadedChunks; }
-		static std::deque<std::future<void>>& GetQueuedForBuild() { return m_QueuedForBuilding; }
+		static std::deque<std::future<glm::vec3>>& GetQueuedForBuild() { return m_QueuedForBuilding; }
 	};
 }

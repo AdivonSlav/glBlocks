@@ -1,6 +1,7 @@
 #include "Chunk.h"
 #include "../utils/Logger.h"
 #include "ChunkManager.h"
+#include "../graphics/VertexArrayManager.h"
 
 namespace CoreGameObjects
 {
@@ -18,7 +19,7 @@ namespace CoreGameObjects
 
 	Chunk::~Chunk()
 	{
-		delete m_VAO;
+
 	}
 
 	GLushort PackIntoShort(GLushort val1, GLushort val2)
@@ -70,6 +71,7 @@ namespace CoreGameObjects
 
 		// Immediately reserving enough space for 16 * 128 * 16 blocks of the chunk, in order to prevent reallocation of the vector at every insertion
 		// 16 * 128 * 16 * 6 * 6 = 1179648
+		EraseBuffers();
 		m_Buffers.positions.reserve(1179648);
 		m_Buffers.uv.reserve(1179648);
 		m_Buffers.types.reserve(1179648);
@@ -288,6 +290,12 @@ namespace CoreGameObjects
 
 	void Chunk::UploadToGPU()
 	{
+		if (!VertexArrayManager::IsEmpty())
+		{
+			UpdateGPUData();
+			return;
+		}
+
 		m_VAO = new VertexArray();
 
 		GLuint posBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * 4 * sizeof(GLbyte);
@@ -297,25 +305,28 @@ namespace CoreGameObjects
 		m_VAO->Bind();
 
 		auto posBuffer = new VertexBuffer(posBufferSize, 4);
-		posBuffer->BufferData(m_Buffers.positions.data(), GL_STATIC_DRAW);
+		posBuffer->BufferData(m_Buffers.positions.data(), GL_STREAM_DRAW);
 		m_VAO->AddBuffer(posBuffer, 0, GL_BYTE);
 
 		auto uvBuffer = new VertexBuffer(uvBufferSize, 1);
-		uvBuffer->BufferData(m_Buffers.uv.data(), GL_STATIC_DRAW);
+		uvBuffer->BufferData(m_Buffers.uv.data(), GL_STREAM_DRAW);
 		m_VAO->AddBuffer(uvBuffer, 1, GL_UNSIGNED_SHORT);
 
 		auto typeBuffer = new VertexBuffer(typeBufferSize, 1);
-		typeBuffer->BufferData(m_Buffers.types.data(), GL_STATIC_DRAW);
+		typeBuffer->BufferData(m_Buffers.types.data(), GL_STREAM_DRAW);
 		m_VAO->AddBuffer(typeBuffer, 2, GL_BYTE);
 
 		m_VAO->Unbind();
 
-		EraseBuffers();
+		//EraseBuffers();
 		m_IsUploaded = true;
 	}
 
 	void Chunk::UpdateGPUData()
 	{
+		if (m_VAO == nullptr)
+			m_VAO = VertexArrayManager::GetVAO();
+
 		m_VAO->Bind();
 
 		GLuint posBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * 4 * sizeof(GLshort);
@@ -328,9 +339,10 @@ namespace CoreGameObjects
 
 		m_VAO->Unbind();
 
-		m_VertexCount -= m_VertexCount - posBufferSize;
+		m_VertexCount = m_Buffers.positions.size();
 
-		EraseBuffers();
+		//EraseBuffers();
+		m_IsUploaded = true;
 	}
 
 	void Chunk::FindObscuringChunks()
@@ -340,7 +352,7 @@ namespace CoreGameObjects
 			if (loadedChunk.get() == this || loadedChunk.get() == nullptr)
 				continue;
 
-			auto& chunkPos = loadedChunk->GetPos();
+			auto chunkPos = loadedChunk->GetPos();
 
 			if (chunkPos.x == m_Position.x && chunkPos.z == m_Position.z + CHUNK_Z) // Front
 			{

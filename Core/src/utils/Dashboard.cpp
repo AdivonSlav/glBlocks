@@ -8,6 +8,7 @@ using namespace CoreWindow;
 namespace CoreUtils
 {
 	bool Dashboard::m_Show = false;
+	bool Dashboard::m_GenNewWorld = false;
 	Payload Dashboard::m_Payload;
 
 	Dashboard::Dashboard(CoreGraphics::Camera* camera)
@@ -47,6 +48,7 @@ namespace CoreUtils
 		ImGui::Text("Average frametime: %.3f ms", m_AverageFrameTime);
 		ImGui::Text("Camera position (XYZ): %.2f %.2f %.2f", m_Camera->GetPosition().x, m_Camera->GetPosition().y, m_Camera->GetPosition().z);
 		ImGui::SliderFloat("Time step multiplier:", &m_Payload.timeStepMultiplier, 0.0f, 20.0f);
+		ImGui::Checkbox("Generate new world", &m_GenNewWorld);
 
 		ImGui::End();
 	}

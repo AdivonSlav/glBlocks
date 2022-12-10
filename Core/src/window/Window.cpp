@@ -68,6 +68,10 @@ namespace CoreWindow
 		// Sets the corresponding callback methods for keyboard and mouse events
 		glfwSetKeyCallback(m_Window, KeyCallback);
 		glfwSetMouseButtonCallback(m_Window, MouseButtonCallback);
+
+		// Centers window on screen
+		const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+		glfwSetWindowPos(m_Window, mode->width / 2.0f - width / 2.0f, mode->height / 2.0f - height / 2.0f);
 	}
 
 	int Window::ShouldClose()
