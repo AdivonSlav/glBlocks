@@ -2,9 +2,12 @@
 
 #include "ChunkManager.h"
 #include "../graphics/Camera.h"
+#include "../utils/Semaphore.h"
 
 namespace CoreGameObjects
 {
+	using namespace CoreUtils;
+
 	class CORE_API TerrainGenerator
 	{
 	private:
@@ -12,6 +15,7 @@ namespace CoreGameObjects
 		static double m_LerpedSeed;
 
 		static Camera* m_Camera;
+		static Semaphore m_Semaphore;
 	private:
 	public:
 		/**

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../CoreAPI.h"
-
+#include "../utils/Semaphore.h"
 #include "Chunk.h"
 
 #define WRITE_PATH "chunks/"
@@ -12,7 +12,7 @@ namespace CoreGameObjects
 	{
 	private:
 		static std::vector<std::shared_ptr<Chunk>> m_LoadedChunks;
-		static std::deque<std::future<glm::vec3>> m_QueuedForBuilding;
+		static std::deque<std::future<Chunk*>> m_QueuedForBuilding;
 		static std::unordered_set<glm::vec3> m_QueuedPositionsForBuilding;
 
 		ChunkManager() = default;
@@ -30,7 +30,7 @@ namespace CoreGameObjects
 		 * \param seed Reference to the TerrainGenerator seed value so it can be updated
 		 * \return A newly allocated chunk on the heap from the layout information in the chunk file
 		 */
-		static std::shared_ptr<Chunk> Deserialize(const glm::vec3& position, unsigned long long& seed);
+		static void Deserialize(const glm::vec3& position, Chunk* chunk, unsigned long long& seed);
 
 		/**
 		 * \brief Checks whether a chunk file exists corresponding to the given position
@@ -51,13 +51,7 @@ namespace CoreGameObjects
 		 */
 		static void SynchronizeObscured(const Chunk* chunk);
 
-		/**
-		 * \brief Calls Build() on the chunk. Meant to be used on another thread. Furthermore, nosifies and serializes the chunk if it is not already
-		 * \param chunk Chunk to be built
-		 */
-		static glm::vec3 BuildChunk(Chunk* chunk, bool rebuild = false);
-
-		static void QueueForBuild(Chunk* chunk, bool rebuild = false);
+		static void QueueForBuild(Chunk* chunk, CoreUtils::Semaphore& semaphore, bool rebuild = false);
 
 		/**
 		 * \brief Returns whether the front of the future deque has finished its task
@@ -106,6 +100,6 @@ namespace CoreGameObjects
 		static Chunk* GetLoadedChunk(const glm::vec3& position);
 
 		static std::vector<std::shared_ptr<Chunk>>& GetLoadedChunks() { return m_LoadedChunks; }
-		static std::deque<std::future<glm::vec3>>& GetQueuedForBuild() { return m_QueuedForBuilding; }
+		static std::deque<std::future<Chunk*>>& GetQueuedForBuild() { return m_QueuedForBuilding; }
 	};
 }

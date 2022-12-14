@@ -6,7 +6,7 @@
 namespace CoreGameObjects
 {
 	std::vector<std::shared_ptr<Chunk>> ChunkManager::m_LoadedChunks;
-	std::deque<std::future<glm::vec3>> ChunkManager::m_QueuedForBuilding;
+	std::deque<std::future<Chunk*>> ChunkManager::m_QueuedForBuilding;
 	std::unordered_set<glm::vec3> ChunkManager::m_QueuedPositionsForBuilding;
 
 	void ChunkManager::Serialize(const glm::vec3& position, Chunk* chunk, unsigned long long& seed)
@@ -17,7 +17,7 @@ namespace CoreGameObjects
 		std::ofstream stream(filePath, std::ios::trunc | std::ios::binary);
 
 		if (stream.fail())
-			LOG_ERROR(strerror(errno));
+			LOG_ERROR("Could not serialize chunk to " << filePath);
 
 		if (stream.is_open())
 		{
@@ -30,15 +30,14 @@ namespace CoreGameObjects
 		stream.close();
 	}
 
-	std::shared_ptr<Chunk> ChunkManager::Deserialize(const glm::vec3& position, unsigned long long& seed)
+	void ChunkManager::Deserialize(const glm::vec3& position, Chunk* chunk, unsigned long long& seed)
 	{
-		auto chunk = std::make_shared<Chunk>(position);
-		auto filepath = ToFilename(position);
+		std::string filePath = ToFilename(position);
 
-		std::ifstream stream(filepath, std::ios::binary);
+		std::ifstream stream(filePath, std::ios::binary);
 
 		if (stream.fail())
-			LOG_ERROR(strerror(errno));
+			LOG_ERROR("Could not deserialize chunk from " << filePath);
 
 		if (stream.is_open())
 		{
@@ -47,8 +46,6 @@ namespace CoreGameObjects
 		}
 
 		stream.close();
-
-		return chunk;
 	}
 
 	bool ChunkManager::IsSerialized(const glm::vec3& position)
@@ -73,29 +70,19 @@ namespace CoreGameObjects
 			chunk->GetObscuring(3)->SetObscuring(2, nullptr);
 	}
 
-	glm::vec3 ChunkManager::BuildChunk(Chunk* chunk, bool rebuild)
+	void ChunkManager::QueueForBuild(Chunk* chunk, CoreUtils::Semaphore& semaphore, bool rebuild)
 	{
-		if (rebuild)
+		m_QueuedForBuilding.push_back(std::async(std::launch::async, [](Chunk* chunk, Semaphore& semaphore, bool rebuild)
 		{
-			chunk->Build(true);
-			MarkPositionAsBuilt(chunk->GetPos());
-			return chunk->GetPos();
-		}
+			std::scoped_lock scopedLock(semaphore);
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
-		if (!chunk->Serialized())
-		{
-			TerrainGenerator::Noisify(*chunk);
-			Serialize(chunk->GetPos(), chunk, TerrainGenerator::GetSeed());
-		}
+			chunk->Build();
 
-		chunk->Build();
+			return chunk;
+		}, chunk, std::ref(semaphore), rebuild));
 
-		return chunk->GetPos();
-	}
-
-	void ChunkManager::QueueForBuild(Chunk* chunk, bool rebuild)
-	{
-		m_QueuedForBuilding.push_back(std::async(std::launch::async, ChunkManager::BuildChunk, chunk, rebuild));
+		MarkPositionForBuild(chunk->GetPos());
 	}
 
 	bool ChunkManager::IsBuildQueueReady()

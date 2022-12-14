@@ -33,7 +33,7 @@ namespace CoreGameObjects
 	{
 	private:
 		VertexArray* m_VAO;
-		signed char m_Blocks[CHUNK_X * CHUNK_Y * CHUNK_Z];
+		signed char m_Blocks[CHUNK_X * CHUNK_Y * CHUNK_Z] = { (signed char)BlockType::UNDEFINED };
 		glm::vec3 m_Position;
 
 		// 0 - Front, 1 - Back, 2 - Left, 3 - Right

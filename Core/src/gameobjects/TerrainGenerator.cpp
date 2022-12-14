@@ -9,14 +9,15 @@
 #define MAX_SEED 9999999999
 #define MIN_SEED 1
 
-#define LOAD_DISTANCE 100.0f
-#define RENDER_DISTANCE 72.0f
+#define LOAD_DISTANCE 192.0f
+#define RENDER_DISTANCE 160.0f
 
 namespace CoreGameObjects
 {
 	unsigned long long TerrainGenerator::m_Seed = 0;
 	double TerrainGenerator::m_LerpedSeed = 0.0;
 	Camera* TerrainGenerator::m_Camera = nullptr;
+	Semaphore TerrainGenerator::m_Semaphore(2);
 
 	TerrainGenerator::TerrainGenerator(unsigned long long seed)
 	{
@@ -62,16 +63,17 @@ namespace CoreGameObjects
 
 				if (distance <= LOAD_DISTANCE && !ChunkManager::IsLoaded(chunkPos))
 				{
-					std::shared_ptr<Chunk> chunk;
+					std::shared_ptr<Chunk> chunk = std::make_shared<Chunk>(chunkPos);
 
 					if (ChunkManager::IsSerialized(chunkPos))
 					{
-						chunk = ChunkManager::Deserialize(chunkPos, m_Seed);
+						ChunkManager::Deserialize(chunkPos, chunk.get(), GetSeed());
 						chunk->SetSerialized(true);
 					}
 					else
 					{
-						chunk = std::make_shared<Chunk>(chunkPos);
+						Noisify(*chunk);
+						ChunkManager::Serialize(chunkPos, chunk.get(), GetSeed());
 						chunk->SetSerialized(false);
 					}
 
@@ -88,11 +90,10 @@ namespace CoreGameObjects
 			if (queuedOnce)
 				break;
 
-			if (ChunkManager::IsPositionQueuedForBuild(loadedChunk->GetPos()) || loadedChunk->IsBuilt() || ChunkManager::GetQueuedForBuild().size() == 1)
+			if (ChunkManager::IsPositionQueuedForBuild(loadedChunk->GetPos()) || loadedChunk->IsBuilt())
 				continue;
 
-			ChunkManager::MarkPositionForBuild(loadedChunk->GetPos());
-			ChunkManager::QueueForBuild(loadedChunk.get());
+			ChunkManager::QueueForBuild(loadedChunk.get(), m_Semaphore);
 			queuedOnce = true;
 		}
 		
@@ -103,10 +104,12 @@ namespace CoreGameObjects
 	{
 		while (!ChunkManager::GetQueuedForBuild().empty() && ChunkManager::IsBuildQueueReady())
 		{
-			auto builtPosition = ChunkManager::GetQueuedForBuild().front().get();
-			ChunkManager::MarkPositionAsBuilt(builtPosition);
-			ChunkManager::GetQueuedForBuild().pop_front();
-			LOG_INFO("Built chunk");
+				auto builtChunk = ChunkManager::GetQueuedForBuild().front().get();
+
+				ChunkManager::MarkPositionAsBuilt(builtChunk->GetPos());
+				ChunkManager::GetQueuedForBuild().pop_front();
+
+				LOG_INFO("Built chunk");
 		}
 
 		auto& camPos = m_Camera->GetPosition();
@@ -127,7 +130,7 @@ namespace CoreGameObjects
 				loadedIt->get()->SetShouldRender(false);
 				LOG_INFO("Marked chunk to not render");
 
-				if (loadedIt->get()->GetVAO() != nullptr)
+				if (loadedIt->get()->GetVAO() != nullptr && !ChunkManager::IsPositionQueuedForBuild(chunkPos))
 				{
 					VertexArrayManager::CacheVAO(loadedIt->get()->GetVAO());
 					loadedIt->get()->GetVAO() = nullptr;
@@ -174,8 +177,7 @@ namespace CoreGameObjects
 			if (uploadedOnce)
 				break;
 
-
-			if (chunk->IsBuilt() && chunk->ShouldRender() && !chunk->IsUploaded())
+			if (chunk->IsBuilt() && chunk->ShouldRender() && !chunk->IsUploaded() && !ChunkManager::IsPositionQueuedForBuild(chunk->GetPos()))
 			{
 				chunk->UploadToGPU();
 				uploadedOnce = true;

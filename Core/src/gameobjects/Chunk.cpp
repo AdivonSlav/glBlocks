@@ -50,7 +50,8 @@ namespace CoreGameObjects
 			return;
 		}
 
-		m_Blocks[x + CHUNK_X * (y + CHUNK_Y * z)] = (signed char)type;
+		//m_Blocks[x + CHUNK_X * (y + CHUNK_Y * z)] = (signed char)type;
+		m_Blocks[x * CHUNK_Y * CHUNK_X + y * CHUNK_X + z] = (signed char)type;
 	}
 
 	BlockType Chunk::GetBlock(int x, int y, int z) const
@@ -61,7 +62,8 @@ namespace CoreGameObjects
 			return BlockType::UNDEFINED;
 		}
 
-		return (BlockType)m_Blocks[x + CHUNK_X * (y + CHUNK_Y * z)];
+		//return (BlockType)m_Blocks[x + CHUNK_X * (y + CHUNK_Y * z)];
+		return (BlockType)m_Blocks[x * CHUNK_Y * CHUNK_X + y * CHUNK_X + z];
 	}
 
 	void Chunk::Build(bool rebuild)
@@ -69,12 +71,14 @@ namespace CoreGameObjects
 		if (!rebuild)
 			FindObscuringChunks();
 
+		EraseBuffers();
+
 		// Immediately reserving enough space for 16 * 128 * 16 blocks of the chunk, in order to prevent reallocation of the vector at every insertion
 		// 16 * 128 * 16 * 6 * 6 = 1179648
-		EraseBuffers();
-		m_Buffers.positions.reserve(1179648);
-		m_Buffers.uv.reserve(1179648);
-		m_Buffers.types.reserve(1179648);
+		unsigned int space = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6;
+		m_Buffers.positions.reserve(space);
+		m_Buffers.uv.reserve(space);
+		m_Buffers.types.reserve(space);
 
 		for (int x = 0; x < CHUNK_X; x++)
 		{
@@ -99,22 +103,38 @@ namespace CoreGameObjects
 					bool obscuredLeft = false;
 					bool obscuredRight = false;
 
-					// Incase a bordering chunk exists, check whether its neighboring block is obscuring the current one
-					if (m_ObscuringChunks[0])
+					 //Incase a bordering chunk exists, check whether its neighboring block is obscuring the current one
+					if (m_ObscuringChunks[0] && z == CHUNK_Z - 1)
 						obscuredFront = m_ObscuringChunks[0]->GetBlock(x, y, 0) == BlockType::AIR ? false : true;
-					if (m_ObscuringChunks[1])
+					if (m_ObscuringChunks[1] && z == 0)
 						obscuredBack = m_ObscuringChunks[1]->GetBlock(x, y, CHUNK_Z - 1) == BlockType::AIR ? false : true;
-					if (m_ObscuringChunks[2])
+					if (m_ObscuringChunks[2] && x == 0)
 						obscuredLeft = m_ObscuringChunks[2]->GetBlock(CHUNK_X - 1, y, z) == BlockType::AIR ? false : true;
-					if (m_ObscuringChunks[3])
+					if (m_ObscuringChunks[3] && x == CHUNK_X - 1)
 						obscuredRight = m_ObscuringChunks[3]->GetBlock(0, y, z) == BlockType::AIR ? false : true;
+					
+					bool genFront = frontType == BlockType::UNDEFINED || frontType == BlockType::AIR;
+					bool genBack = backType == BlockType::UNDEFINED || backType == BlockType::AIR;
+					bool genLeft = leftType == BlockType::UNDEFINED || leftType == BlockType::AIR;
+					bool genRight = rightType == BlockType::UNDEFINED || rightType == BlockType::AIR;
+					bool genTop = topType == BlockType::UNDEFINED || topType == BlockType::AIR;
+					bool genBottom = bottomType == BlockType::UNDEFINED || bottomType == BlockType::AIR;
+
+					if (obscuredFront)
+						genFront = false;
+					if (obscuredBack)
+						genBack = false;
+					if (obscuredLeft)
+						genLeft = false;
+					if (obscuredRight)
+						genRight = false;
 
 					// Vertex data.
 					// Can probably be shortened in some way (too lazy to find out how atm)
 					// Each voxel face is only created if there is no adjacent face obscuring it
 
 					// Front
-					if (frontType == BlockType::UNDEFINED && !obscuredFront || frontType == BlockType::AIR)
+					if (genFront)
 					{
 						m_Buffers.positions.emplace_back(x + 1, y + 1, z + 1, 0);
 						m_Buffers.uv.emplace_back(PackIntoShort(1, 1));
@@ -142,7 +162,7 @@ namespace CoreGameObjects
 					}
 
 					// Back
-					if (backType == BlockType::UNDEFINED && !obscuredBack || backType == BlockType::AIR)
+					if (genBack)
 					{
 						m_Buffers.positions.emplace_back(x, y + 1, z, 1);
 						m_Buffers.uv.emplace_back(PackIntoShort(1, 1));
@@ -170,7 +190,7 @@ namespace CoreGameObjects
 					}
 
 					// Left
-					if (leftType == BlockType::UNDEFINED && !obscuredLeft || leftType == BlockType::AIR)
+					if (genLeft)
 					{
 						m_Buffers.positions.emplace_back(x, y + 1, z + 1, 2);
 						m_Buffers.uv.emplace_back(PackIntoShort(1, 1));
@@ -198,7 +218,7 @@ namespace CoreGameObjects
 					}
 
 					// Right
-					if (rightType == BlockType::UNDEFINED && !obscuredRight || rightType == BlockType::AIR)
+					if (genRight)
 					{
 						m_Buffers.positions.emplace_back(x + 1, y + 1, z, 3);
 						m_Buffers.uv.emplace_back(PackIntoShort(1, 1));
@@ -226,7 +246,7 @@ namespace CoreGameObjects
 					}
 
 					// Top
-					if (topType== BlockType::UNDEFINED || topType == BlockType::AIR)
+					if (genTop)
 					{
 						m_Buffers.positions.emplace_back(x + 1, y + 1, z, 4);
 						m_Buffers.uv.emplace_back(PackIntoShort(1, 1));
@@ -254,7 +274,7 @@ namespace CoreGameObjects
 					}
 
 					// Bottom
-					if (bottomType == BlockType::UNDEFINED || bottomType == BlockType::AIR)
+					if (genBottom)
 					{
 						m_Buffers.positions.emplace_back(x, y, z, 5);
 						m_Buffers.uv.emplace_back(PackIntoShort(1, 1));
@@ -318,7 +338,6 @@ namespace CoreGameObjects
 
 		m_VAO->Unbind();
 
-		//EraseBuffers();
 		m_IsUploaded = true;
 	}
 
@@ -341,7 +360,6 @@ namespace CoreGameObjects
 
 		m_VertexCount = m_Buffers.positions.size();
 
-		//EraseBuffers();
 		m_IsUploaded = true;
 	}
 
@@ -349,6 +367,8 @@ namespace CoreGameObjects
 	{
 		for (auto& loadedChunk : ChunkManager::GetLoadedChunks())
 		{
+			bool foundNeighbor = false;
+
 			if (loadedChunk.get() == this || loadedChunk.get() == nullptr)
 				continue;
 
@@ -358,22 +378,35 @@ namespace CoreGameObjects
 			{
 				loadedChunk.get()->SetObscuring(1, this);
 				m_ObscuringChunks[0] = loadedChunk.get();
+				foundNeighbor = true;
 			}
 			else if (chunkPos.x == m_Position.x && chunkPos.z == m_Position.z - CHUNK_Z) // Back
 			{
 				loadedChunk.get()->SetObscuring(0, this);
 				m_ObscuringChunks[1] = loadedChunk.get();
+				foundNeighbor = true;
 			}
 			else if (chunkPos.x == m_Position.x - CHUNK_X && chunkPos.z == m_Position.z) // Left
 			{
 				loadedChunk.get()->SetObscuring(3, this);
 				m_ObscuringChunks[2] = loadedChunk.get();
+				foundNeighbor = true;
 			}
 			else if (chunkPos.x == m_Position.x + CHUNK_X && chunkPos.z == m_Position.z) // Right
 			{
 				loadedChunk.get()->SetObscuring(2, this);
 				m_ObscuringChunks[3] = loadedChunk.get();
+				foundNeighbor = true;
 			}
+
+			//if (foundNeighbor)
+			//{
+			//	if (loadedChunk->IsBuilt() && !loadedChunk->IsUploaded() && !ChunkManager::IsPositionQueuedForBuild(chunkPos))
+			//	{
+			//		ChunkManager::QueueForBuild(loadedChunk.get(), true);
+			//	}
+			//}
 		}
 	}
 }
+;
