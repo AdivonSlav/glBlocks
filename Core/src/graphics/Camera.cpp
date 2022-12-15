@@ -1,8 +1,9 @@
+#include "PCH.h"
 
 #include "Camera.h"
 #include "../vendor/imgui/imgui.h"
-#include "../utils/Logger.h"
 #include "../utils/Dashboard.h"
+#include "../window/Window.h"
 
 using namespace CoreWindow;
 

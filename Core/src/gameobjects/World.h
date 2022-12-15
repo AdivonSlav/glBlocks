@@ -3,7 +3,6 @@
 #include "../CoreAPI.h"
 #include "TerrainGenerator.h"
 #include "LightSource.h"
-#include "../utils/Timer.h"
 
 #define CLEAR_COLOR_R 127.5f // Red channel max value of glClearColor
 #define CLEAR_COLOR_G 191.25 // Green channel max value of glClearColor

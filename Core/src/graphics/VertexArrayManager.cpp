@@ -1,5 +1,6 @@
+#include "PCH.h"
+
 #include "VertexArrayManager.h"
-#include "../utils/Logger.h"
 
 namespace CoreGraphics
 {

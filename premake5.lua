@@ -20,7 +20,8 @@ project "Core"
     }
 
     includedirs {
-        "%{wks.location}/dependencies/include"
+        "%{wks.location}/dependencies/include",
+        "%{prj.name}/src"
     }
 
     libdirs {
@@ -33,6 +34,9 @@ project "Core"
         "glfw3.lib"
     }
 
+    pchheader "PCH.h"
+    pchsource "%{prj.name}/src/PCH.cpp"
+        
     filter "system:windows"
         cppdialect "C++20"
         staticruntime "Off"
@@ -58,6 +62,12 @@ project "Core"
         staticruntime "off"
         runtime "Release"
         optimize "On"
+
+    filter "files:Core/src/vendor/**.cpp"
+        flags { "NoPCH" }
+        
+    filter "files:Core/src/vendor/**.c"
+        flags { "NoPCH" }
 
 project "Application"
     location "Application"

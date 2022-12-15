@@ -1,9 +1,5 @@
 #pragma once
 
-#include "../CoreAPI.h"
-
-#include "Logger.h"
-
 inline void ErrorMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
 	LOG_ERROR((type == GL_DEBUG_TYPE_ERROR ? "OPENGL ERROR" : "") << " " << type << " " << severity << " " << message)

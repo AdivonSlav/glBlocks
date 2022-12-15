@@ -1,3 +1,5 @@
+#include "PCH.h"
+
 #include "VertexBuffer.h"
 
 namespace CoreGraphics::Buffers

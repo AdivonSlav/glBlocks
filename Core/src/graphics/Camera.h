@@ -3,7 +3,6 @@
 #include "../CoreAPI.h"
 
 #include "Shader.h"
-#include "../window/Window.h"
 
 namespace CoreGraphics
 {

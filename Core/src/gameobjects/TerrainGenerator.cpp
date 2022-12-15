@@ -1,7 +1,6 @@
+#include "PCH.h"
 
 #include "TerrainGenerator.h"
-#include "../utils/Logger.h"
-#include "../utils/Maths.h"
 #include "../utils/Dashboard.h"
 #include "ChunkManager.h"
 #include "../graphics/VertexArrayManager.h"

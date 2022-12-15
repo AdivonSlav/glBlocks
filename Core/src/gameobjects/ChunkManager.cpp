@@ -1,7 +1,7 @@
+#include "PCH.h"
 
 #include "ChunkManager.h"
 #include "TerrainGenerator.h"
-#include "../utils/Logger.h"
 
 namespace CoreGameObjects
 {
@@ -72,7 +72,7 @@ namespace CoreGameObjects
 
 	void ChunkManager::QueueForBuild(Chunk* chunk, CoreUtils::Semaphore& semaphore, bool rebuild)
 	{
-		m_QueuedForBuilding.push_back(std::async(std::launch::async, [](Chunk* chunk, Semaphore& semaphore, bool rebuild)
+		m_QueuedForBuilding.push_back(std::async(std::launch::async | std::launch::deferred, [](Chunk* chunk, Semaphore& semaphore, bool rebuild)
 		{
 			std::scoped_lock scopedLock(semaphore);
 			std::this_thread::sleep_for(std::chrono::milliseconds(50));

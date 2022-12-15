@@ -2,6 +2,8 @@
 
 // Included into the actual application project to export everything
 
+#include "PCH.h"
+
 #include "utils/Logger.h"
 #include "utils/Dashboard.h"
 #include "utils/Timer.h"

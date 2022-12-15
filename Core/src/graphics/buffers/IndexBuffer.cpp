@@ -1,3 +1,5 @@
+#include "PCH.h"
+
 #include "IndexBuffer.h"
 
 namespace CoreGraphics::Buffers
