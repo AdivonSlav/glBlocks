@@ -4,6 +4,8 @@
 
 namespace CoreWindow
 {
+	enum class CursorMode { NORMAL, HIDDEN, DISABLED };
+
 	// Singleton Window class which ensures just one window instance at all times
 	class CORE_API Window
 	{
@@ -16,20 +18,12 @@ namespace CoreWindow
 		static bool m_Keys[GLFW_KEY_LAST];
 		static bool m_MouseButtons[GLFW_MOUSE_BUTTON_LAST];
 
-		static float m_LastPosX;
-		static float m_LastPosY;
-
 		static bool m_FirstClick;
 
 		Window() = default;
 	public:
 		Window(const Window& obj) = delete;
 		~Window() = default;
-
-		static Window& Get() { return *m_Instance; }
-		static GLFWwindow* GetWindowPtr() { return m_Instance->m_Window; }
-		static int GetWidth() { return m_Instance->m_Width; }
-		static int GetHeight() { return m_Instance->m_Height; }
 
 		/**
 		 * \brief Initializes GLFW, GLAD and creates the window
@@ -65,12 +59,24 @@ namespace CoreWindow
 		 */
 		static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 
+		/**
+		 * \brief Function that gets called any time the mouse moves.
+		 */
+		static void CursorCallback(GLFWwindow* window, double xpos, double ypos);
+
 		static bool IsKeyPressed(unsigned int key);
 		static bool IsKeyReleased(unsigned int key);
 		static bool IsMouseButtonPressed(unsigned int button);
 		static bool IsMouseButtonReleased(unsigned int button);
 
-		static void GetCursorPos(double& x, double& y);
+		static Window& Get() { return *m_Instance; }
+		static GLFWwindow* GetWindowPtr() { return m_Instance->m_Window; }
+		static int GetWidth() { return m_Instance->m_Width; }
+		static int GetHeight() { return m_Instance->m_Height; }
+
+		static void SetCursorPos(const glm::vec2& position);
+		static void SetCursorMode(CursorMode mode);
+		static glm::vec2 GetCursorPos();
 
 		/**
 		 * \brief Returns the time elapsed since GLFW was initialized

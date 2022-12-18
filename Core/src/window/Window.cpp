@@ -10,8 +10,6 @@ namespace CoreWindow
 	Window* Window::m_Instance = new Window;
 	bool Window::m_Keys[GLFW_KEY_LAST] = { false };
 	bool Window::m_MouseButtons[GLFW_MOUSE_BUTTON_LAST] = { false };
-	float Window::m_LastPosX = Window::GetWidth() / 2.0f;
-	float Window::m_LastPosY = Window::GetHeight() / 2.0f;
 	bool Window::m_FirstClick = true;
 
 	void Window::Init(int width, int height, const char* title)
@@ -139,8 +137,32 @@ namespace CoreWindow
 		return !m_MouseButtons[button];
 	}
 
-	void Window::GetCursorPos(double& x, double& y)
+	void Window::SetCursorPos(const glm::vec2& position)
 	{
-		glfwGetCursorPos(m_Instance->m_Window, &x, &y);
+		glfwSetCursorPos(m_Instance->m_Window, position.x, position.y);
+	}
+
+	void Window::SetCursorMode(CursorMode mode)
+	{
+		switch (mode)
+		{
+		case CursorMode::NORMAL:
+			glfwSetInputMode(m_Instance->m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			break;
+		case CursorMode::HIDDEN:
+			glfwSetInputMode(m_Instance->m_Window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+			break;
+		case CursorMode::DISABLED:
+			glfwSetInputMode(m_Instance->m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			break;
+		}
+	}
+
+	glm::vec2 Window::GetCursorPos()
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(m_Instance->m_Window, &xpos, &ypos);
+
+		return {xpos, ypos};
 	}
 }

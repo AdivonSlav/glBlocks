@@ -1,23 +1,24 @@
 #include "PCH.h"
 
-
-
 #include "Chunk.h"
 #include "ChunkManager.h"
 #include "../graphics/VertexArrayManager.h"
+#include "../utils/Dashboard.h"
 
 namespace CoreGameObjects
 {
-	Chunk::Chunk()
-		: m_VAO(nullptr), m_Position(0.0f, 0.0f, 0.0f),  m_ShouldDispose(false), m_ShouldRender(false), m_IsUploaded(false), m_Built(false), m_Serialized(true), m_VertexCount(0)
-	{
+	using namespace CoreUtils;
 
+	Chunk::Chunk()
+		: m_VAO(nullptr), m_Position(0.0f, 0.0f, 0.0f),  m_ShouldDispose(false), m_ShouldRender(false), m_IsUploaded(false), m_Built(false), m_Serialized(true), m_Visible(false), m_VertexCount(0)
+	{
+		m_Model = glm::translate(glm::identity<glm::mat4>(), m_Position);
 	}
 
 	Chunk::Chunk(const glm::vec3& position)
-		: m_VAO(nullptr), m_Position(position), m_ShouldDispose(false), m_ShouldRender(false), m_IsUploaded(false), m_Built(false), m_Serialized(true), m_VertexCount(0)
+		: m_VAO(nullptr), m_Position(position), m_ShouldDispose(false), m_ShouldRender(false), m_IsUploaded(false), m_Built(false), m_Serialized(true), m_Visible(false),  m_VertexCount(0)
 	{
-
+		m_Model = glm::translate(glm::identity<glm::mat4>(), m_Position);
 	}
 
 	Chunk::~Chunk()
@@ -53,8 +54,13 @@ namespace CoreGameObjects
 			return;
 		}
 
-		//m_Blocks[x + CHUNK_X * (y + CHUNK_Y * z)] = (signed char)type;
 		m_Blocks[x * CHUNK_Y * CHUNK_X + y * CHUNK_X + z] = (signed char)type;
+	}
+
+	void Chunk::SetPosition(const glm::vec3& position)
+	{
+		m_Position = position;
+		m_Model = glm::translate(glm::identity<glm::mat4>(), m_Position);
 	}
 
 	BlockType Chunk::GetBlock(int x, int y, int z) const
@@ -65,7 +71,6 @@ namespace CoreGameObjects
 			return BlockType::UNDEFINED;
 		}
 
-		//return (BlockType)m_Blocks[x + CHUNK_X * (y + CHUNK_Y * z)];
 		return (BlockType)m_Blocks[x * CHUNK_Y * CHUNK_X + y * CHUNK_X + z];
 	}
 
@@ -410,6 +415,44 @@ namespace CoreGameObjects
 			//	}
 			//}
 		}
+	}
+
+	void Chunk::CheckVisibility(const Camera& camera)
+	{
+		if (!Dashboard::ShouldFrustumCull())
+		{
+			m_Visible = true;
+			return;
+		}
+
+		glm::vec3 center = glm::vec3(m_Position.x + CHUNK_X / 2.0f, CHUNK_Y / 2.0f, m_Position.z + CHUNK_Z / 2.0f);
+
+		// We multiply the center coordinate of the chunk with the MVP in order to figure out where the chunk center would be on the screen
+		glm::vec4 coordinates = camera.GetViewProjection() * GetModel() * glm::vec4(center, 1.0f);
+		// Dividing X and Y by W, we get those coordinates in NDC
+		coordinates.x /= coordinates.w;
+		coordinates.y /= coordinates.w;
+
+		// The diameter of a sphere that could encompass an entire chunk
+		float diameter = std::sqrtf(CHUNK_X * CHUNK_X +  CHUNK_Y * CHUNK_Y + CHUNK_Z * CHUNK_Z);
+
+		if (coordinates.z < -diameter)
+		{
+			m_Visible = false;
+			return;
+		}
+
+		// We turn the diameter into the same coordinate space as X and Y
+		diameter /= std::fabsf(coordinates.w);
+
+		if (std::fabsf(coordinates.x) > 1 + diameter || fabsf(coordinates.y) > 1 + diameter)
+		{
+			m_Visible = false;
+			return;
+		}
+			
+
+		m_Visible = true;
 	}
 }
 ;

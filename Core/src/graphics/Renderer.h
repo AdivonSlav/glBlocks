@@ -18,7 +18,6 @@ namespace CoreGraphics
 		Renderer();
 		~Renderer() = default;
 
-
 		void Draw(CoreGameObjects::World& world, Camera& camera);
 
 		/**

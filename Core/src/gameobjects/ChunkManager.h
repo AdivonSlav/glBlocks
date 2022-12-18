@@ -8,11 +8,13 @@
 
 namespace CoreGameObjects
 {
+	using namespace CoreUtils;
+
 	class CORE_API ChunkManager
 	{
 	private:
 		static std::vector<std::shared_ptr<Chunk>> m_LoadedChunks;
-		static std::deque<std::future<Chunk*>> m_QueuedForBuilding;
+		static std::deque<std::future<std::vector<Chunk*>>> m_QueuedForBuilding;
 		static std::unordered_set<glm::vec3> m_QueuedPositionsForBuilding;
 
 		ChunkManager() = default;
@@ -51,7 +53,13 @@ namespace CoreGameObjects
 		 */
 		static void SynchronizeObscured(const Chunk* chunk);
 
-		static void QueueForBuild(Chunk* chunk, CoreUtils::Semaphore& semaphore, bool rebuild = false);
+		/**
+		 * \brief 
+		 * \param chunks Vector of chunks that need to be built
+		 * \param semaphore A semaphore that prevents the spawning of too many concurrent threads
+		 * \param rebuild Whether the chunks need to be rebuilt or not
+		 */
+		static void QueueForBuild(std::vector<Chunk*>& chunks, CoreUtils::Semaphore& semaphore, bool rebuild = false);
 
 		/**
 		 * \brief Returns whether the front of the future deque has finished its task
@@ -100,6 +108,6 @@ namespace CoreGameObjects
 		static Chunk* GetLoadedChunk(const glm::vec3& position);
 
 		static std::vector<std::shared_ptr<Chunk>>& GetLoadedChunks() { return m_LoadedChunks; }
-		static std::deque<std::future<Chunk*>>& GetQueuedForBuild() { return m_QueuedForBuilding; }
+		static std::deque<std::future<std::vector<Chunk*>>>& GetQueuedForBuild() { return m_QueuedForBuilding; }
 	};
 }

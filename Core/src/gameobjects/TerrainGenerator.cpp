@@ -8,8 +8,8 @@
 #define MAX_SEED 9999999999
 #define MIN_SEED 1
 
-#define LOAD_DISTANCE 192.0f
-#define RENDER_DISTANCE 160.0f
+#define LOAD_DISTANCE 126.0f
+#define RENDER_DISTANCE 100.0f
 
 namespace CoreGameObjects
 {
@@ -82,33 +82,35 @@ namespace CoreGameObjects
 			}
 		}
 
-		bool queuedOnce = false;
+		std::vector<Chunk*> chunksToBuild;
 
 		for (auto& loadedChunk : ChunkManager::GetLoadedChunks())
 		{
-			if (queuedOnce)
+			if (chunksToBuild.size() == 30)
 				break;
 
 			if (ChunkManager::IsPositionQueuedForBuild(loadedChunk->GetPos()) || loadedChunk->IsBuilt())
 				continue;
 
-			ChunkManager::QueueForBuild(loadedChunk.get(), m_Semaphore);
-			queuedOnce = true;
+			chunksToBuild.push_back(loadedChunk.get());
 		}
-		
-		SynchronizeChunks();
+
+		if (!chunksToBuild.empty())
+			ChunkManager::QueueForBuild(chunksToBuild, m_Semaphore);
 	}
 
 	void TerrainGenerator::SynchronizeChunks()
 	{
 		while (!ChunkManager::GetQueuedForBuild().empty() && ChunkManager::IsBuildQueueReady())
 		{
-				auto builtChunk = ChunkManager::GetQueuedForBuild().front().get();
+			auto builtChunks = ChunkManager::GetQueuedForBuild().front().get();
 
-				ChunkManager::MarkPositionAsBuilt(builtChunk->GetPos());
-				ChunkManager::GetQueuedForBuild().pop_front();
+			for (auto& chunk : builtChunks)
+				ChunkManager::MarkPositionAsBuilt(chunk->GetPos());
 
-				LOG_INFO("Built chunk");
+			ChunkManager::GetQueuedForBuild().pop_front();
+
+			LOG_INFO("Built " << builtChunks.size() << " chunks");
 		}
 
 		auto& camPos = m_Camera->GetPosition();

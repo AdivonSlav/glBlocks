@@ -34,13 +34,12 @@ namespace CoreGraphics
 			if (!chunk->IsUploaded() || !chunk->ShouldRender())
 				continue;
 
-			if (chunk->GetVAO() == nullptr)
-				__debugbreak();
+			chunk->CheckVisibility(camera);
 
-			auto identity = glm::identity<glm::mat4>();
-			auto model = glm::translate(identity, chunk->GetPos());
+			if (!chunk->IsVisible())
+				continue;
 
-			m_Shader[(int)ShaderType::BASIC_SHADER]->SetMat4<float>("uModel", model);
+			m_Shader[(int)ShaderType::BASIC_SHADER]->SetMat4<float>("uModel", chunk->GetModel());
 			m_Shader[(int)ShaderType::BASIC_SHADER]->SetVec3<float>("uLightPos", world.GetLightPosition());
 			m_Shader[(int)ShaderType::BASIC_SHADER]->SetVec3<float>("uCamPos", camera.GetPosition());
 			m_Shader[(int)ShaderType::BASIC_SHADER]->SetFloat("uLightLevel", world.GetLightLevel());

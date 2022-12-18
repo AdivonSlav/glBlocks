@@ -10,9 +10,11 @@ using namespace CoreWindow;
 namespace CoreGraphics
 {
 	Camera::Camera(glm::vec3 position)
-		: m_Position(position), m_Sensitivity(20.0f), m_FirstClick(false)
+		: m_Position(position), m_Yaw(-90.0f), m_Pitch(0.0f), m_RotationSensitivity(0.06f), m_FirstInput(true)
 	{
 		m_Shaders.reserve(2);
+
+		m_View = glm::identity<glm::mat4>();
 		m_Orientation = glm::normalize(m_Position - glm::vec3(0.0f, 0.0f, 0.0f));
 
 		// We can get the right vector of the camera by just getting the cross product of the up direction (in world space) and the direction where the camera is facing
@@ -21,6 +23,8 @@ namespace CoreGraphics
 
 		// The up vector in camera space is again just the vector perpendicular to the direction and the right vector so we perform a cross product
 		m_UpDir = glm::cross(m_Orientation, m_Right);
+
+		m_LastMousePos = Window::GetCursorPos();
 	}
 
 	void Camera::SendShader(Shader& shader)
@@ -28,33 +32,36 @@ namespace CoreGraphics
 		m_Shaders.push_back(&shader);
 	}
 
-	void Camera::SetMatrix(float fov, float nearPlane, float farPlane)
+	void Camera::OnUpdate(double deltaTime)
 	{
-		// Initializing view and projection matrices as identity matrices
-		auto view = glm::identity<glm::mat4>();
-		auto projection = glm::identity<glm::mat4>();
+		m_Right = glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), m_Orientation));
 
-		// Calculates the view and projection matrices
-		view = glm::lookAt(m_Position, m_Position + m_Orientation, m_UpDir);
-		projection = glm::perspective(glm::radians(fov), (float)(Window::GetWidth() / (float)Window::GetHeight()), nearPlane, farPlane);
+		m_View = glm::lookAt(m_Position, m_Position + m_Orientation, m_UpDir);
+		m_ViewProjection = m_Perspective * m_View;
 
-		m_RightWorld = { view[0][0], view[1][0], view[2][0] };
-		m_UpDirWorld = { view[0][1], view[1][1], view[2][1] };
+		m_RightWorld = { m_View[0][0], m_View[1][0], m_View[2][0] };
+		m_UpDirWorld = { m_View[0][1], m_View[1][1], m_View[2][1] };
 
 		for (auto& shader : m_Shaders)
 		{
+			// Sends the matrices to the uniform variables located in the vertex shader
 			shader->Bind();
-			// Sends the matrix to the uniform variable located in the vertex shader
-			shader->SetMat4<float>("uProjection", projection);
-			shader->SetMat4<float>("uView", view);
+			shader->SetMat4<float>("uProjection", m_Perspective);
+			shader->SetMat4<float>("uView", m_View);
 			shader->Unbind();
 		}
+
+		CheckInput(deltaTime);
+	}
+
+	void Camera::OnResize(float fov, float nearPlane, float farPlane)
+	{
+		m_Perspective = glm::perspective(glm::radians(fov), (float)(Window::GetWidth() / (float)Window::GetHeight()), nearPlane, farPlane);
+		m_ViewProjection = m_Perspective * m_View;
 	}
 
 	void Camera::CheckInput(double deltaTime)
 	{
-		// To do: Implement delta time between frames in order to slow down the movements
-
 		if (Window::IsKeyPressed(GLFW_KEY_W))
 		{
 			m_Position += (float)(deltaTime * m_Speed) * m_Orientation;
@@ -83,48 +90,53 @@ namespace CoreGraphics
 
 		if (Window::IsKeyPressed(GLFW_KEY_LEFT_SHIFT))
 		{
-			m_Speed = 25.0f;
+			m_Speed = 15.0f;
 		}
 		if (Window::IsKeyReleased(GLFW_KEY_LEFT_SHIFT))
 		{
 			m_Speed = 5.0f;
 		}
 
-
 		if (CoreUtils::Dashboard::IsShown())
 		{
-			glfwSetInputMode(Window::GetWindowPtr(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			Window::SetCursorMode(CursorMode::NORMAL);
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Arrow);
 			return;
 		}
 
-		glfwSetInputMode(Window::GetWindowPtr(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		Window::SetCursorMode(CursorMode::DISABLED);
 		ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
-		// If the first click is the current one, reset the mouse position to the center in order to prevent an accidental rotation
-		if (m_FirstClick)
+		auto mousePos = Window::GetCursorPos();
+		glm::vec2 delta;
+
+		if (m_FirstInput)
 		{
-			glfwSetCursorPos(Window::GetWindowPtr(), Window::GetWidth() / 2, Window::GetHeight() / 2);
-			m_FirstClick = false;
+			m_LastMousePos = mousePos;
+			m_FirstInput = false;
 		}
 
-		double mouseX;
-		double mouseY;
-		Window::GetCursorPos(mouseX, mouseY);
+		delta.x = mousePos.x - m_LastMousePos.x;
+		delta.y = m_LastMousePos.y - mousePos.y;
+		delta *= m_RotationSensitivity;
+		m_LastMousePos = mousePos;
 
-		// Some mathematics mumbo jumbo
-
-		float rotationX = m_Sensitivity * (float)(mouseY - (Window::GetHeight() / 2)) / Window::GetHeight();
-		float rotationY = m_Sensitivity * (float)(mouseX - (Window::GetWidth() / 2)) / Window::GetWidth();
-
-		auto newOrientation = glm::rotate(m_Orientation, glm::radians(-rotationX), glm::normalize(glm::cross(m_Orientation, m_UpDir)));
-
-		if (!(glm::angle(newOrientation, m_UpDir) <= glm::radians(5.0f)) || glm::angle(newOrientation, -m_UpDir) <= glm::radians(5.0f))
+		if (delta.x != 0.0f || delta.y != 0.0f)
 		{
-			m_Orientation = newOrientation;
-		}
+			m_Yaw += delta.x;
+			m_Pitch += delta.y;
 
-		m_Orientation = glm::rotate(m_Orientation, glm::radians(-rotationY), m_UpDir);
-		glfwSetCursorPos(Window::GetWindowPtr(), Window::GetWidth() / 2, Window::GetHeight() / 2);
+			if (m_Pitch > 89.0f)
+				m_Pitch = 89.0f;
+			if (m_Pitch < -89.0f)
+				m_Pitch = -89.0f;
+
+			glm::vec3 newOrientation;
+			newOrientation.x = std::cos(glm::radians(m_Yaw)) * std::cos(glm::radians(m_Pitch));
+			newOrientation.y = std::sin(glm::radians(m_Pitch));
+			newOrientation.z = std::sin(glm::radians(m_Yaw)) * std::cos(glm::radians(m_Pitch));
+
+			m_Orientation = glm::normalize(newOrientation);
+		}
 	}
 }

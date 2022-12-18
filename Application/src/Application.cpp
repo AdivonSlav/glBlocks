@@ -5,6 +5,7 @@ Application::Application()
 	: m_Window(Window::Get()), m_Camera({ 0.0f, 0.0f, 2.0f }), m_FrameRate(0.0), m_AverageFrameTime(0.0), m_FrameCount(0), m_LastUpdate(0.0)
 {
 	m_Window.Init(1366, 768, "glBlocks");
+	m_Camera.OnResize(45.0f, 0.1f, 1000.0f);
 	m_Renderer = new Renderer();
 	m_Dashboard = new Dashboard(&m_Camera);
 	m_World = new World();
@@ -39,24 +40,21 @@ void Application::Run()
 	m_World->GetGenerator().SetCamera(m_Camera);
 	m_World->GetGenerator().Init();
 
-	m_Camera.SetPosition(0.0f, 50.0f, 0.0f);
+	m_Camera.SetPosition(0.0f, 150.0f, 0.0f);
 	m_Camera.SendShader(basicShader);
 	m_Camera.SendShader(lightSourceShader);
 
-	auto modelMat = glm::identity<glm::mat4>();
-
 	m_Timer.Start();
-
 
 	while (!m_Window.ShouldClose())
 	{
-		m_Camera.SetMatrix(40.0f, 0.1f, 1000.0f);
-		m_Camera.CheckInput(m_Timer.GetDelta());
+		m_Camera.OnUpdate(m_Timer.GetDelta());
 
 		m_World->StepTime(m_Timer);
 		m_World->GetGenerator().LoadChunks();
 		m_World->GetGenerator().PrepareChunks();
 		m_Renderer->Draw(*m_World, m_Camera);
+		m_World->GetGenerator().SynchronizeChunks();
 
 		m_Dashboard->GetData(m_FrameRate, m_AverageFrameTime);
 		m_Dashboard->Render();

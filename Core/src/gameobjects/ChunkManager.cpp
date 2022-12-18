@@ -6,7 +6,7 @@
 namespace CoreGameObjects
 {
 	std::vector<std::shared_ptr<Chunk>> ChunkManager::m_LoadedChunks;
-	std::deque<std::future<Chunk*>> ChunkManager::m_QueuedForBuilding;
+	std::deque<std::future<std::vector<Chunk*>>> ChunkManager::m_QueuedForBuilding;
 	std::unordered_set<glm::vec3> ChunkManager::m_QueuedPositionsForBuilding;
 
 	void ChunkManager::Serialize(const glm::vec3& position, Chunk* chunk, unsigned long long& seed)
@@ -70,19 +70,24 @@ namespace CoreGameObjects
 			chunk->GetObscuring(3)->SetObscuring(2, nullptr);
 	}
 
-	void ChunkManager::QueueForBuild(Chunk* chunk, CoreUtils::Semaphore& semaphore, bool rebuild)
+	void ChunkManager::QueueForBuild(std::vector<Chunk*>& chunks, CoreUtils::Semaphore& semaphore, bool rebuild)
 	{
-		m_QueuedForBuilding.push_back(std::async(std::launch::async | std::launch::deferred, [](Chunk* chunk, Semaphore& semaphore, bool rebuild)
+		for (auto& chunk : chunks)
+			MarkPositionForBuild(chunk->GetPos());
+
+		m_QueuedForBuilding.push_back(std::async(std::launch::async | std::launch::deferred, [](std::vector<Chunk*> chunks, Semaphore& semaphore, bool rebuild)
 		{
 			std::scoped_lock scopedLock(semaphore);
 			std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
-			chunk->Build();
+			for (auto& chunk : chunks)
+			{
+				chunk->Build();
+				std::this_thread::sleep_for(std::chrono::milliseconds(20));
+			}
 
-			return chunk;
-		}, chunk, std::ref(semaphore), rebuild));
-
-		MarkPositionForBuild(chunk->GetPos());
+			return chunks;
+		}, chunks, std::ref(semaphore), rebuild));
 	}
 
 	bool ChunkManager::IsBuildQueueReady()

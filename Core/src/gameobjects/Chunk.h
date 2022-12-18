@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../graphics/VertexArray.h"
+#include "graphics/Camera.h"
 
 #define CHUNK_X 16
 #define CHUNK_Y 128
@@ -35,6 +36,7 @@ namespace CoreGameObjects
 		VertexArray* m_VAO;
 		signed char m_Blocks[CHUNK_X * CHUNK_Y * CHUNK_Z] = { (signed char)BlockType::UNDEFINED };
 		glm::vec3 m_Position;
+		glm::mat4 m_Model;
 
 		// 0 - Front, 1 - Back, 2 - Left, 3 - Right
 		Chunk* m_ObscuringChunks[4] = { nullptr }; 
@@ -46,6 +48,7 @@ namespace CoreGameObjects
 		bool m_IsUploaded;
 		bool m_Built;
 		bool m_Serialized;
+		bool m_Visible;
 		unsigned int m_VertexCount;
 	private:
 		/**
@@ -86,22 +89,28 @@ namespace CoreGameObjects
 		 */
 		void FindObscuringChunks();
 
+		/**
+		 * \brief Checks whether the chunk is visible to the camera. If it is then it should be rendered
+		 * \param camera Reference to the scene camera
+		 * */
+		void CheckVisibility(const Camera& camera);
 
 		VertexArray*& GetVAO() { return m_VAO; }
 		BlockType GetBlock(int x, int y, int z) const;
 		signed char* GetBlocksPtr() { return m_Blocks;}
 		const glm::vec3& GetPos() const { return m_Position; }
+		const glm::mat4& GetModel() const { return m_Model; }
 		Chunk* GetObscuring(int index) const { return m_ObscuringChunks[index]; }
 		bool ShouldDispose() const { return m_ShouldDispose; }
 		bool ShouldRender() const { return m_ShouldRender; }
 		bool IsUploaded() const { return m_IsUploaded; }
 		bool IsBuilt() const { return m_Built; }
 		bool Serialized() const { return m_Serialized; }
+		bool IsVisible() const { return m_Visible; }
 		unsigned int GetVertCount() const { return m_VertexCount; }
 
 		void SetBlock(int x, int y, int z, BlockType type);
-		void SetPosition(float x, float y, float z) { m_Position = glm::vec3(x, y, z); }
-		void SetPosition(const glm::vec3& position) { m_Position = position; }
+		void SetPosition(const glm::vec3& position);
 		void SetObscuring(int index, Chunk* chunk) { m_ObscuringChunks[index] = chunk; }
 		void SetShouldDispose(bool value) { m_ShouldDispose = value; }
 		void SetShouldRender(bool value) { m_ShouldRender = value; }
