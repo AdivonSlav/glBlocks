@@ -14,7 +14,7 @@ I implemented lighting for the voxels using the Phong lighting method. Ambient l
 - ~~Day/night cycle~~
 - ~~Multithreaded chunk generation and loading~~
 - ~~Chunk persistence between application runs (stored as files)~~
-- Fog and ~~lighting effects~~
+- ~~Fog and lighting effects~~
 - 3D Perlin noise for ores
 
 The libraries that I used are:
