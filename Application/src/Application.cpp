@@ -52,7 +52,7 @@ void Application::Run()
 
 		m_World->StepTime(m_Timer);
 		m_World->GetGenerator().LoadChunks();
-		m_World->GetGenerator().PrepareChunks();
+		m_World->GetGenerator().PrepareChunks(m_Timer.GetDelta());
 		m_Renderer->Draw(*m_World, m_Camera);
 		m_World->GetGenerator().SynchronizeChunks();
 

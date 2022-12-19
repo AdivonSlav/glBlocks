@@ -13,6 +13,7 @@ namespace CoreGameObjects
 	private:
 		static unsigned long long m_Seed;
 		static double m_LerpedSeed;
+		static double m_LastUploadTime;
 
 		static Camera* m_Camera;
 		static Semaphore m_Semaphore;
@@ -49,7 +50,7 @@ namespace CoreGameObjects
 		/**
 		 * \brief Uploads all chunks to the GPU that should be rendered
 		 */
-		void PrepareChunks();
+		void PrepareChunks(double deltaTime);
 
 		/**
 		 * \brief Randomly generates a number. Is thread safe

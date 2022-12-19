@@ -4,9 +4,9 @@
 #include "TerrainGenerator.h"
 #include "LightSource.h"
 
-#define CLEAR_COLOR_R 127.5f // Red channel max value of glClearColor
-#define CLEAR_COLOR_G 191.25 // Green channel max value of glClearColor
-#define CLEAR_COLOR_B 237.15f // Blue channel max value of glClearColor
+#define CLEAR_COLOR_R 125.0f // Red channel max value of glClearColor
+#define CLEAR_COLOR_G 206.0f // Green channel max value of glClearColor
+#define CLEAR_COLOR_B 235.0f // Blue channel max value of glClearColor
 
 namespace CoreGameObjects
 {

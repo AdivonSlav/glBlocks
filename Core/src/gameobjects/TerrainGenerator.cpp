@@ -1,3 +1,4 @@
+
 #include "PCH.h"
 
 #include "TerrainGenerator.h"
@@ -8,13 +9,18 @@
 #define MAX_SEED 9999999999
 #define MIN_SEED 1
 
-#define LOAD_DISTANCE 126.0f
-#define RENDER_DISTANCE 100.0f
+#define LOAD_DISTANCE 124.0f // Chunks whose distance length is less than this to the camera are loaded into memory
+#define RENDER_DISTANCE 100.0f // Chunks whose distance length is less than this to the camera are uploaded to the GPU and rendered
+
+#define CHUNK_LOAD_COUNT 5 // Max number of chunks that can be loaded into memory in a single frame
+#define ASYNC_CHUNK_BUILD_COUNT 30 // Max number of chunks that can be forwarded to another thread for building
+#define CHUNK_UPLOAD_WAIT_TIME 0.1 // The time to wait before uploading a new chunk to the GPU (in seconds)
 
 namespace CoreGameObjects
 {
 	unsigned long long TerrainGenerator::m_Seed = 0;
 	double TerrainGenerator::m_LerpedSeed = 0.0;
+	double TerrainGenerator::m_LastUploadTime = 0.0;
 	Camera* TerrainGenerator::m_Camera = nullptr;
 	Semaphore TerrainGenerator::m_Semaphore(2);
 
@@ -52,10 +58,15 @@ namespace CoreGameObjects
 		int startZ = camPosChunks.y - 32;
 		int endZ = camPosChunks.y + 32;
 
+		int chunksLoaded = 0;
+
 		for (int i = startX; i <= endX; i++)
 		{
 			for (int j = startZ; j <= endZ; j++)
 			{
+				if (chunksLoaded == CHUNK_LOAD_COUNT)
+					break;
+
 				auto chunkPos = glm::vec3(i * CHUNK_X, 0.0f, j * CHUNK_Z);
 				auto distanceVector = camPos.xz - glm::vec2(chunkPos.x + CHUNK_X, chunkPos.z + CHUNK_Z);
 				auto distance = glm::length(distanceVector);
@@ -77,6 +88,7 @@ namespace CoreGameObjects
 					}
 
 					ChunkManager::LoadChunk(chunk);
+					chunksLoaded++;
 					LOG_INFO("Loaded chunk -> " << ChunkManager::GetLoadedChunks().size());
 				}
 			}
@@ -86,7 +98,7 @@ namespace CoreGameObjects
 
 		for (auto& loadedChunk : ChunkManager::GetLoadedChunks())
 		{
-			if (chunksToBuild.size() == 30)
+			if (chunksToBuild.size() == ASYNC_CHUNK_BUILD_COUNT)
 				break;
 
 			if (ChunkManager::IsPositionQueuedForBuild(loadedChunk->GetPos()) || loadedChunk->IsBuilt())
@@ -169,20 +181,26 @@ namespace CoreGameObjects
 		return true;
 	}
 
-	void TerrainGenerator::PrepareChunks()
+	void TerrainGenerator::PrepareChunks(double deltaTime)
 	{
 		bool uploadedOnce = false;
+		m_LastUploadTime += deltaTime;
 
-		for (auto& chunk : ChunkManager::GetLoadedChunks())
+		if (m_LastUploadTime >= CHUNK_UPLOAD_WAIT_TIME)
 		{
-			if (uploadedOnce)
-				break;
+			m_LastUploadTime = 0.0;
 
-			if (chunk->IsBuilt() && chunk->ShouldRender() && !chunk->IsUploaded() && !ChunkManager::IsPositionQueuedForBuild(chunk->GetPos()))
+			for (auto& chunk : ChunkManager::GetLoadedChunks())
 			{
-				chunk->UploadToGPU();
-				uploadedOnce = true;
-				LOG_INFO("Uploaded chunk to GPU");
+				if (uploadedOnce)
+					return;
+
+				if (chunk->IsBuilt() && chunk->ShouldRender() && !chunk->IsUploaded() && !ChunkManager::IsPositionQueuedForBuild(chunk->GetPos()))
+				{
+					chunk->UploadToGPU();
+					uploadedOnce = true;
+					LOG_INFO("Uploaded chunk to GPU");
+				}
 			}
 		}
 	}
