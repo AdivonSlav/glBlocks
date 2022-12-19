@@ -34,10 +34,12 @@ namespace CoreWindow
 		//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 		// Temporarily disables resizing of the window
-		glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+		//glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 		// For debug logging
+#ifdef BLOCKS_DEBUG
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+#endif
 
 		m_Window = glfwCreateWindow(width, height, title, nullptr, nullptr);
 
@@ -58,15 +60,18 @@ namespace CoreWindow
 		LOG_INFO("OpenGL " << glGetString(GL_VERSION))
 
 		// Enables OpenGL debug output and sets the callback function for any errors so they can be logged to the console
+#ifdef BLOCKS_DEBUG
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		glfwSetErrorCallback(GLFWErrorCallback);
 		glDebugMessageCallback(ErrorMessageCallback, nullptr);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+#endif
 
-		// Sets the corresponding callback methods for keyboard and mouse events
+		// Sets the corresponding callback methods
 		glfwSetKeyCallback(m_Window, KeyCallback);
 		glfwSetMouseButtonCallback(m_Window, MouseButtonCallback);
+		glfwSetWindowSizeCallback(m_Window, ResizeCallback);
 
 		// Centers window on screen
 		const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
@@ -82,6 +87,11 @@ namespace CoreWindow
 	{
 		glfwSwapBuffers(m_Window);
 		glfwPollEvents();
+	}
+
+	void Window::AddResizeCallback(std::function<void(int, int)> callback)
+	{
+		m_CustomCallbacks.ResizeCallbacks.push_back(callback);
 	}
 
 	void Window::Cleanup()
@@ -103,6 +113,19 @@ namespace CoreWindow
 	void Window::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
 		m_MouseButtons[button] = action != GLFW_RELEASE;
+	}
+
+	void Window::ResizeCallback(GLFWwindow* window, int width, int height)
+	{
+		m_Instance->m_Width = width;
+		m_Instance->m_Height = height;
+
+		glViewport(0, 0, width, height);
+
+		for (auto& callback : m_Instance->m_CustomCallbacks.ResizeCallbacks)
+		{
+			callback(width, height);
+		}
 	}
 
 	bool Window::IsKeyPressed(unsigned int key)

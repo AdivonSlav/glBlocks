@@ -1,10 +1,18 @@
 #pragma once
 
 #include "../CoreAPI.h"
+#include "../graphics/Camera.h"
 
 namespace CoreWindow
 {
 	enum class CursorMode { NORMAL, HIDDEN, DISABLED };
+
+	using CustomResizeCallback = void (*)(void*, int, int);
+
+	struct WindowCustomCallbacks
+	{
+		std::vector<std::function<void(int, int)>> ResizeCallbacks;
+	};
 
 	// Singleton Window class which ensures just one window instance at all times
 	class CORE_API Window
@@ -17,6 +25,8 @@ namespace CoreWindow
 
 		static bool m_Keys[GLFW_KEY_LAST];
 		static bool m_MouseButtons[GLFW_MOUSE_BUTTON_LAST];
+
+		WindowCustomCallbacks m_CustomCallbacks;
 
 		static bool m_FirstClick;
 
@@ -45,24 +55,29 @@ namespace CoreWindow
 		void PollAndSwapBuffers();
 
 		/**
+		 * \brief Stores a pointer to a custom resize callback function that should be called whenever the window resizes
+		 */
+		void AddResizeCallback(std::function<void(int, int)> callback);
+
+		/**
 		 * \brief Terminates the GLFW application
 		 */
 		static void Cleanup();
 
 		/**
-		 * \brief Function that gets called any time a key has been pressed or released
+		 * \brief Method that gets called any time a key has been pressed or released
 		 */
 		static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 		/**
-		 * \brief Function that gets called any time a mouse button has been pressed or released
+		 * \brief Method that gets called any time a mouse button has been pressed or released
 		 */
 		static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 
 		/**
-		 * \brief Function that gets called any time the mouse moves.
+		 * \brief Method that gets called any time the window is resized
 		 */
-		static void CursorCallback(GLFWwindow* window, double xpos, double ypos);
+		static void ResizeCallback(GLFWwindow* window, int width, int height);
 
 		static bool IsKeyPressed(unsigned int key);
 		static bool IsKeyReleased(unsigned int key);

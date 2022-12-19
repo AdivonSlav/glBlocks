@@ -54,9 +54,9 @@ namespace CoreGraphics
 		CheckInput(deltaTime);
 	}
 
-	void Camera::OnResize(float fov, float nearPlane, float farPlane)
+	void Camera::OnResize(int width, int height)
 	{
-		m_Perspective = glm::perspective(glm::radians(fov), (float)(Window::GetWidth() / (float)Window::GetHeight()), nearPlane, farPlane);
+		m_Perspective = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 1000.0f);
 		m_ViewProjection = m_Perspective * m_View;
 	}
 

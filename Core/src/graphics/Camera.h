@@ -48,11 +48,10 @@ namespace CoreGraphics
 
 		/**
 		 * \brief Called on window resize to recalculate the perspective matrix
-		 * \param fov Field of view in degrees
-		 * \param nearPlane Near clipping plane
-		 * \param farPlane Far clipping plane
+		 * \param width New width of the window
+		 * \param height New height of the window
 		 */
-		void OnResize(float fov, float nearPlane, float farPlane);
+		void OnResize(int width, int height);
 
 		/**
 		 * \brief Checks to see if any input toward the camera has happened and processes it

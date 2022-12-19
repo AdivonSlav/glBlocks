@@ -5,7 +5,7 @@ Application::Application()
 	: m_Window(Window::Get()), m_Camera({ 0.0f, 0.0f, 2.0f }), m_FrameRate(0.0), m_AverageFrameTime(0.0), m_FrameCount(0), m_LastUpdate(0.0)
 {
 	m_Window.Init(1366, 768, "glBlocks");
-	m_Camera.OnResize(45.0f, 0.1f, 1000.0f);
+	m_Camera.OnResize(1366, 768);
 	m_Renderer = new Renderer();
 	m_Dashboard = new Dashboard(&m_Camera);
 	m_World = new World();
@@ -43,6 +43,9 @@ void Application::Run()
 	m_Camera.SetPosition(0.0f, 150.0f, 0.0f);
 	m_Camera.SendShader(basicShader);
 	m_Camera.SendShader(lightSourceShader);
+
+	auto resizeCallback = std::bind(&Camera::OnResize, m_Camera, std::placeholders::_1, std::placeholders::_2);
+	m_Window.AddResizeCallback(resizeCallback);
 
 	m_Timer.Start();
 
