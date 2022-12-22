@@ -30,6 +30,7 @@ The libraries that I used are:
 - Right click (Hold) - Pan camera
 - Left shift (Hold) - Accelerate movement
 - Left ctrl (Hold) - Downward movement
+- ESC - Open dashboard
 
 ## Build instructions
 
