@@ -7,12 +7,16 @@ layout(location = 2) in uint aType;
 out vec2 texCoords;
 out vec3 normal;
 out vec3 fragPos;
+out vec3 clearColor;
+out int enableFog;
 
 uniform mat4 uView;
 uniform mat4 uProjection;
 uniform mat4 uModel;
 
+uniform vec3 uClearColor;
 uniform int uAtlasSize;
+uniform int uEnableFog;
 
 vec2 UnpackTextureCoords()
 {
@@ -68,6 +72,8 @@ void main()
 
 	texCoords = GetScaledCoords();
 	CalculateNormal();
+	clearColor = uClearColor;
+	enableFog = uEnableFog;
 
 	fragPos = vec3(uModel * vec4(vec3(aPos), 1.0));
 }

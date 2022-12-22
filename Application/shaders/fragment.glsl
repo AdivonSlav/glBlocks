@@ -4,8 +4,8 @@ in float isSide;
 in vec2 texCoords;
 in vec3 normal;
 in vec3 fragPos;
-
-out vec4 fragColor;
+in vec3 clearColor;
+flat in int enableFog;
 
 uniform sampler2D uSampler;
 uniform vec3 uLightPos;
@@ -19,8 +19,9 @@ float diffuseStrength = 1.0f;
 float specularStrength = 0.5f;
 vec3 lightDirection = normalize(uLightPos - fragPos);
 vec3 normalizedNormal = normalize(normal);
-const vec4 fogColor = vec4(0.6, 0.8, 1.0, 1.0);
-const float fogDensity = 0.00006f;
+
+vec4 fogColor = vec4(0.6, 0.8, 1.0, 1.0);
+float fogDensity = 0.00012f;
 
 // Gets an ambient light value based on a constant
 vec3 GetAmbientLight()
@@ -49,6 +50,7 @@ vec3 GetSpecularLight()
 void main()
 {
 	ambientStrength = uLightLevel;
+	fogColor = vec4(clearColor, 1.0);
 
 	if (uSunHasSet != 0) // If the sun has set, decrease the ambient and diffuse light to mimic night time
 	{
@@ -65,8 +67,15 @@ void main()
 	vec4 tex = texture2D(uSampler, texCoords);
 	vec4 outputLighting = vec4(GetAmbientLight() + (GetDiffuseLight() * 0.7f) + GetSpecularLight(), 1.0f); // We get the output lighting by multiplying all off the calculated types of light
 
-	float fragDistance = gl_FragCoord.z / gl_FragCoord.w; // We get the distance of the fragment to the camera
-	float fog = clamp(exp((-fogDensity * fragDistance * fragDistance)), 0.2, 1); // The fog effect is increased exponentially with the distance of the fragment
+	if (enableFog != 0)
+	{
+		float fragDistance = gl_FragCoord.z / gl_FragCoord.w; // We get the distance of the fragment to the camera
+		float fog = clamp(exp((-fogDensity * fragDistance * fragDistance)), 0.2, 1); // The fog effect is increased exponentially with the distance of the fragment
 
-	gl_FragColor = mix(fogColor, tex * outputLighting, fog); // Linearly interpolates between the fogColor and the texture
+		gl_FragColor = mix(fogColor, tex * outputLighting, fog); // Linearly interpolates between the fogColor and the texture
+	}
+	else
+	{
+		gl_FragColor = tex * outputLighting;
+	}
 }

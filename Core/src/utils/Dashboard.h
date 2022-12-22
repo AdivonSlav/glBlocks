@@ -20,6 +20,7 @@ namespace CoreUtils
 		double m_AverageFrameTime;
 		static bool m_GenNewWorld;
 		static bool m_FrustumCulling;
+		static bool m_EnableFog;
 
 		static Payload m_Payload;
 
@@ -60,6 +61,7 @@ namespace CoreUtils
 		static bool IsShown() { return m_Show;}
 		static bool ShouldGenerateWorld() { return m_GenNewWorld; }
 		static bool ShouldFrustumCull() { return m_FrustumCulling; }
+		static bool ShouldEnableFog() { return m_EnableFog; }
 	};
 
 

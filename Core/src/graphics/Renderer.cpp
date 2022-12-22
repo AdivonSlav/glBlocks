@@ -1,9 +1,8 @@
 #include "PCH.h"
 
-
-
 #include "Renderer.h"
 #include "../gameobjects/ChunkManager.h"
+#include "../utils/Dashboard.h"
 
 using namespace CoreGameObjects;
 
@@ -25,9 +24,16 @@ namespace CoreGraphics
 	void Renderer::Draw(World& world, Camera& camera)
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(world.GetClearColor().r, world.GetClearColor().g, world.GetClearColor().b, 1.0f);
+		glm::vec3 clearColor = world.GetClearColor();
+		glClearColor(clearColor.r, clearColor.g, clearColor.b, 1.0f);
 
 		m_Shader[(int)ShaderType::BASIC_SHADER]->Bind();
+		m_Shader[(int)ShaderType::BASIC_SHADER]->SetVec3<float>("uClearColor", clearColor);
+		m_Shader[(int)ShaderType::BASIC_SHADER]->SetVec3<float>("uLightPos", world.GetLightPosition());
+		m_Shader[(int)ShaderType::BASIC_SHADER]->SetVec3<float>("uCamPos", camera.GetPosition());
+		m_Shader[(int)ShaderType::BASIC_SHADER]->SetFloat("uLightLevel", world.GetLightLevel());
+		m_Shader[(int)ShaderType::BASIC_SHADER]->SetInt("uSunHasSet", world.GetHasSet());
+		m_Shader[(int)ShaderType::BASIC_SHADER]->SetInt("uEnableFog", Dashboard::ShouldEnableFog());
 
 		for (auto& chunk : ChunkManager::GetLoadedChunks())
 		{
@@ -40,10 +46,6 @@ namespace CoreGraphics
 				continue;
 
 			m_Shader[(int)ShaderType::BASIC_SHADER]->SetMat4<float>("uModel", chunk->GetModel());
-			m_Shader[(int)ShaderType::BASIC_SHADER]->SetVec3<float>("uLightPos", world.GetLightPosition());
-			m_Shader[(int)ShaderType::BASIC_SHADER]->SetVec3<float>("uCamPos", camera.GetPosition());
-			m_Shader[(int)ShaderType::BASIC_SHADER]->SetFloat("uLightLevel", world.GetLightLevel());
-			m_Shader[(int)ShaderType::BASIC_SHADER]->SetInt("uSunHasSet", world.GetHasSet());
 
 			chunk->GetVAO()->Bind();
 			glDrawArrays(GL_TRIANGLES, 0, chunk->GetVertCount());
