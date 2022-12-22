@@ -63,8 +63,8 @@ namespace CoreWindow
 #ifdef BLOCKS_DEBUG
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-		glfwSetErrorCallback(GLFWErrorCallback);
-		glDebugMessageCallback(ErrorMessageCallback, nullptr);
+		glfwSetErrorCallback(CoreUtils::GLFWErrorCallback);
+		glDebugMessageCallback(CoreUtils::ErrorMessageCallback, nullptr);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 #endif
 

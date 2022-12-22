@@ -80,7 +80,7 @@ namespace CoreGameObjects
 		void UploadToGPU();
 
 		/**
-		 * \brief Replaces part of or all of the chunk's data store in the GPU
+		 * \brief Orphans the buffer store on the GPU and then updates it entirely
 		 */
 		void UpdateGPUData();
 

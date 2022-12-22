@@ -40,7 +40,7 @@ void Application::Run()
 	m_World->GetGenerator().SetCamera(m_Camera);
 	m_World->GetGenerator().Init();
 
-	m_Camera.SetPosition(0.0f, 100.0f, 0.0f);
+	m_Camera.SetPosition(0.0f, 70.0f, 0.0f);
 	m_Camera.SendShader(basicShader);
 	m_Camera.SendShader(lightSourceShader);
 

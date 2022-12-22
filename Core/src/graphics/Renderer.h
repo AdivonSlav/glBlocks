@@ -18,6 +18,11 @@ namespace CoreGraphics
 		Renderer();
 		~Renderer() = default;
 
+		/**
+		 * \brief Iterates through all of the chunks, applies the necessary uniforms and draws
+		 * \param world Reference to the world for lighting information
+		 * \param camera Reference to the scene camera
+		 */
 		void Draw(CoreGameObjects::World& world, Camera& camera);
 
 		/**

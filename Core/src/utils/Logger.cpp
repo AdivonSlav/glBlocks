@@ -28,7 +28,7 @@ namespace CoreUtils
 
 	void Logger::LogToFile(const std::string& logMessage)
 	{
-		std::fstream stream(GetCurrentTime(true) + ".txt", std::fstream::in | std::fstream::out | std::fstream::app);
+		std::ofstream stream(GetCurrentTime(true) + ".txt", std::fstream::out | std::fstream::app);
 
 		if (stream.fail())
 		{

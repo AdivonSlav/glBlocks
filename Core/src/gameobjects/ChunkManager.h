@@ -30,7 +30,6 @@ namespace CoreGameObjects
 		 * \brief Reads the chunk layout information from a file and constructs the chunk
 		 * \param position The position of the chunk
 		 * \param seed Reference to the TerrainGenerator seed value so it can be updated
-		 * \return A newly allocated chunk on the heap from the layout information in the chunk file
 		 */
 		static void Deserialize(const glm::vec3& position, Chunk* chunk, unsigned long long& seed);
 
@@ -54,7 +53,7 @@ namespace CoreGameObjects
 		static void SynchronizeObscured(const Chunk* chunk);
 
 		/**
-		 * \brief 
+		 * \brief Queues a vector of chunks as std::future objects that will be built in a separate thread
 		 * \param chunks Vector of chunks that need to be built
 		 * \param semaphore A semaphore that prevents the spawning of too many concurrent threads
 		 * \param rebuild Whether the chunks need to be rebuilt or not

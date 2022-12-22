@@ -2,7 +2,6 @@
 
 #include "ChunkManager.h"
 #include "../graphics/Camera.h"
-#include "../utils/Semaphore.h"
 
 namespace CoreGameObjects
 {
@@ -27,17 +26,17 @@ namespace CoreGameObjects
 		~TerrainGenerator() = default;
 
 		/**
-		 * \brief Initializes a chunk folder if not already present
+		 * \brief Initializes a chunk folder if not already present and reserves memory for loading chunks
 		 */
 		void Init();
 
 		/**
-		 * \brief Serializes and deserializes chunks from disc and loads them into memory at a certain distance, then builds them 
+		 * \brief Serializes and deserializes chunks from disc, loads them into memory and packs them into vectors for building in separate threads
 		 */
 		void LoadChunks();
 
 		/**
-		 * \brief Marks chunks based on render status and disposes chunks if needed
+		 * \brief Marks chunks based on render status and disposes chunks if needed. Also receives built chunks from std::future
 		 */
 		void SynchronizeChunks();
 
@@ -51,16 +50,6 @@ namespace CoreGameObjects
 		 * \brief Uploads all chunks to the GPU that should be rendered
 		 */
 		void PrepareChunks(double deltaTime);
-
-		/**
-		 * \brief Randomly generates a number. Is thread safe
-		 * \tparam Numeral The type of number to be randomly generated 
-		 * \param start Start of the range of numbers that can be randomly generated
-		 * \param end End of the range of numbers that can be randomly generated
-		 * \return The randomly generated number
-		 */
-		template<typename Numeral>
-		static Numeral GetRand(Numeral start, Numeral end);
 
 		/**
 		 * \brief Procedurally generates the terrain of a chunk
@@ -86,6 +75,9 @@ namespace CoreGameObjects
 		 */
 		static float Noise(const glm::vec3& coordinates, int octaves, float persistence);
 
+		/**
+		 * \brief Cleans up the chunk folder to prepare it for regeneration on a second application run if needed
+		 */
 		static void Cleanup();
 
 		/**

@@ -243,21 +243,6 @@ namespace CoreGameObjects
 		}
 	}
 
-	template <typename Numeral>
-	Numeral TerrainGenerator::GetRand(Numeral start, Numeral end)
-	{
-		thread_local static std::mt19937 generator(std::random_device{}());
-
-		// Switch between integer or real distribution of numbers based on whether the method should return an integer or a float/double
-		using distType = typename std::conditional<
-			std::is_integral<Numeral>::value, std::uniform_int_distribution<Numeral>, std::uniform_real_distribution<Numeral>
-		>::type;
-
-		thread_local static distType distribution;
-
-		return distribution(generator, typename distType::param_type{ start, end });
-	}
-
 	float TerrainGenerator::Noise(const glm::vec2& coordinates, int octaves, float persistence)
 	{
 		float sum = 0.0f;
