@@ -4,7 +4,7 @@
 #include "graphics/Camera.h"
 
 #define CHUNK_X 16
-#define CHUNK_Y 128
+#define CHUNK_Y 64
 #define CHUNK_Z 16
 
 using namespace CoreGraphics;

@@ -84,7 +84,6 @@ namespace CoreGameObjects
 					{
 						Noisify(*chunk);
 						ChunkManager::Serialize(chunkPos, chunk.get(), GetSeed());
-						chunk->SetSerialized(false);
 					}
 
 					ChunkManager::LoadChunk(chunk);
@@ -215,8 +214,8 @@ namespace CoreGameObjects
 		{
 			for (int z = 0; z < CHUNK_Z; z++)
 			{
-				int16_t surfaceY = 64;
-				int16_t stoneY = 59;
+				int16_t surfaceY = 32;
+				int16_t stoneY = 28;
 
 				// Getting block coordinates in world space and adding a seed value lerped between -255.0 and 255.0
 				float blockX = x + chunkPos.x + m_LerpedSeed;
