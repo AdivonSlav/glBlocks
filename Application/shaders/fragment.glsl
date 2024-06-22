@@ -23,6 +23,8 @@ vec3 normalizedNormal = normalize(normal);
 vec4 fogColor = vec4(0.6, 0.8, 1.0, 1.0);
 float fogDensity = 0.00012f;
 
+out vec4 fragColor;
+
 // Gets an ambient light value based on a constant
 vec3 GetAmbientLight()
 {
@@ -64,7 +66,7 @@ void main()
 		ambientStrength = 0.85f;
 
 
-	vec4 tex = texture2D(uSampler, texCoords);
+	vec4 tex = texture(uSampler, texCoords);
 	vec4 outputLighting = vec4(GetAmbientLight() + (GetDiffuseLight() * 0.7f) + GetSpecularLight(), 1.0f); // We get the output lighting by multiplying all off the calculated types of light
 
 	if (enableFog != 0)
@@ -72,10 +74,10 @@ void main()
 		float fragDistance = gl_FragCoord.z / gl_FragCoord.w; // We get the distance of the fragment to the camera
 		float fog = clamp(exp((-fogDensity * fragDistance * fragDistance)), 0.2, 1); // The fog effect is increased exponentially with the distance of the fragment
 
-		gl_FragColor = mix(fogColor, tex * outputLighting, fog); // Linearly interpolates between the fogColor and the texture
+		fragColor = mix(fogColor, tex * outputLighting, fog); // Linearly interpolates between the fogColor and the texture
 	}
 	else
 	{
-		gl_FragColor = tex * outputLighting;
+		fragColor = tex * outputLighting;
 	}
 }
