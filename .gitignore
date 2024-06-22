@@ -407,3 +407,6 @@ FodyWeavers.xsd
 
 # Ignore any generated log files
 Application/*.txt
+
+# Ignore vscode
+.vscode/

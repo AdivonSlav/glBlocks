@@ -2,10 +2,13 @@
 #include "Config.h"
 
 Application::Application()
-	: m_Window(Window::Get()), m_Camera({ 0.0f, 0.0f, 2.0f }), m_FrameRate(0.0), m_AverageFrameTime(0.0), m_FrameCount(0), m_LastUpdate(0.0)
+		: m_Window(Window::Get()), m_FrameRate(0.0), m_AverageFrameTime(0.0), m_FrameCount(0), m_LastUpdate(0.0)
 {
 	m_Window.Init(1366, 768, "glBlocks");
+
+	m_Camera = Camera({0.0f, 0.0f, 2.0f});
 	m_Camera.OnResize(1366, 768);
+
 	m_Renderer = new Renderer();
 	m_Dashboard = new Dashboard(&m_Camera);
 	m_World = new World();
@@ -87,4 +90,3 @@ void Application::CalcPerf()
 		m_LastUpdate = 0.0;
 	}
 }
-

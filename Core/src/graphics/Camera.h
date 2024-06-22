@@ -9,7 +9,7 @@ namespace CoreGraphics
 	class CORE_API Camera
 	{
 	private:
-		std::vector<Shader*> m_Shaders;
+		std::vector<Shader *> m_Shaders;
 
 		glm::mat4 m_Perspective;
 		glm::mat4 m_View;
@@ -31,7 +31,9 @@ namespace CoreGraphics
 		bool m_FirstInput;
 
 		glm::vec2 m_LastMousePos;
+
 	public:
+		Camera();
 		Camera(glm::vec3 position);
 		~Camera() = default;
 
@@ -39,7 +41,7 @@ namespace CoreGraphics
 		 * \brief Sends a shader that is stored as a pointer in the camera so the proper matrices can be applied
 		 * \param shader The shader that is to be sent
 		 */
-		void SendShader(Shader& shader);
+		void SendShader(Shader &shader);
 
 		/**
 		 * \brief Called every frame to recalculate the view matrices and send them to shader uniforms
@@ -58,12 +60,12 @@ namespace CoreGraphics
 		 */
 		void CheckInput(double deltaTime);
 
-		const glm::mat4& GetPerspective() const { return m_Perspective; }
-		const glm::mat4& GetView() const { return m_View; }
-		const glm::mat4& GetViewProjection() const { return m_ViewProjection; }
-		const glm::vec3& GetPosition() const { return m_Position; }
-		const glm::vec3& GetWorldRight() const { return m_RightWorld; }
-		const glm::vec3& GetWorldUp() const { return m_UpDirWorld; }
+		const glm::mat4 &GetPerspective() const { return m_Perspective; }
+		const glm::mat4 &GetView() const { return m_View; }
+		const glm::mat4 &GetViewProjection() const { return m_ViewProjection; }
+		const glm::vec3 &GetPosition() const { return m_Position; }
+		const glm::vec3 &GetWorldRight() const { return m_RightWorld; }
+		const glm::vec3 &GetWorldUp() const { return m_UpDirWorld; }
 
 		void SetPosition(float x, float y, float z) { m_Position = glm::vec3(x, y, z); }
 	};

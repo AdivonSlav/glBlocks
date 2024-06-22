@@ -434,7 +434,7 @@ namespace CoreGameObjects
 		coordinates.y /= coordinates.w;
 
 		// The diameter of a sphere that could encompass an entire chunk
-		float diameter = std::sqrtf(CHUNK_X * CHUNK_X +  CHUNK_Y * CHUNK_Y + CHUNK_Z * CHUNK_Z);
+		float diameter = std::sqrt(CHUNK_X * CHUNK_X +  CHUNK_Y * CHUNK_Y + CHUNK_Z * CHUNK_Z);
 
 		if (coordinates.z < -diameter)
 		{
@@ -443,9 +443,9 @@ namespace CoreGameObjects
 		}
 
 		// We turn the diameter into the same coordinate space as X and Y
-		diameter /= std::fabsf(coordinates.w);
+		diameter /= std::fabs(coordinates.w);
 
-		if (std::fabsf(coordinates.x) > 1 + diameter || fabsf(coordinates.y) > 1 + diameter)
+		if (std::fabs(coordinates.x) > 1 + diameter || fabsf(coordinates.y) > 1 + diameter)
 		{
 			m_Visible = false;
 			return;

@@ -9,8 +9,10 @@ using namespace CoreWindow;
 
 namespace CoreGraphics
 {
+	Camera::Camera() {}
+
 	Camera::Camera(glm::vec3 position)
-		: m_Position(position), m_Yaw(-90.0f), m_Pitch(0.0f), m_RotationSensitivity(0.06f), m_FirstInput(true)
+			: m_Position(position), m_Yaw(-90.0f), m_Pitch(0.0f), m_RotationSensitivity(0.06f), m_FirstInput(true)
 	{
 		m_Shaders.reserve(2);
 
@@ -27,7 +29,7 @@ namespace CoreGraphics
 		m_LastMousePos = Window::GetCursorPos();
 	}
 
-	void Camera::SendShader(Shader& shader)
+	void Camera::SendShader(Shader &shader)
 	{
 		m_Shaders.push_back(&shader);
 	}
@@ -39,10 +41,10 @@ namespace CoreGraphics
 		m_View = glm::lookAt(m_Position, m_Position + m_Orientation, m_UpDir);
 		m_ViewProjection = m_Perspective * m_View;
 
-		m_RightWorld = { m_View[0][0], m_View[1][0], m_View[2][0] };
-		m_UpDirWorld = { m_View[0][1], m_View[1][1], m_View[2][1] };
+		m_RightWorld = {m_View[0][0], m_View[1][0], m_View[2][0]};
+		m_UpDirWorld = {m_View[0][1], m_View[1][1], m_View[2][1]};
 
-		for (auto& shader : m_Shaders)
+		for (auto &shader : m_Shaders)
 		{
 			// Sends the matrices to the uniform variables located in the vertex shader
 			shader->Bind();

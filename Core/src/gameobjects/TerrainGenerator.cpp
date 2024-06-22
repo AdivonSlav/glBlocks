@@ -68,7 +68,7 @@ namespace CoreGameObjects
 					break;
 
 				auto chunkPos = glm::vec3(i * CHUNK_X, 0.0f, j * CHUNK_Z);
-				auto distanceVector = camPos.xz - glm::vec2(chunkPos.x + CHUNK_X, chunkPos.z + CHUNK_Z);
+				auto distanceVector = camPos.xz() - glm::vec2(chunkPos.x + CHUNK_X, chunkPos.z + CHUNK_Z);
 				auto distance = glm::length(distanceVector);
 
 				if (distance <= LOAD_DISTANCE && !ChunkManager::IsLoaded(chunkPos))
@@ -129,7 +129,7 @@ namespace CoreGameObjects
 		for (auto loadedIt = ChunkManager::GetLoadedChunks().begin(); loadedIt != ChunkManager::GetLoadedChunks().end(); )
 		{
 			auto chunkPos = loadedIt->get()->GetPos();
-			auto distanceVector = camPos.xz - glm::vec2(chunkPos.x + CHUNK_X, chunkPos.z + CHUNK_Z);
+			auto distanceVector = camPos.xz() - glm::vec2(chunkPos.x + CHUNK_X, chunkPos.z + CHUNK_Z);
 			auto distance = glm::length(distanceVector);
 
 			if (distance <= RENDER_DISTANCE && loadedIt->get()->IsBuilt() && !loadedIt->get()->ShouldRender())

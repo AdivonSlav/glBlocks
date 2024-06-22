@@ -71,7 +71,7 @@ namespace CoreGameObjects
 		 * \param position Position of the chunk
 		 * \return Whether the provided chunk position is already being built
 		 */
-		static bool IsPositionQueuedForBuild(const glm::vec3& position) { return m_QueuedPositionsForBuilding.contains(position); }
+		static bool IsPositionQueuedForBuild(const glm::vec3& position) { return m_QueuedPositionsForBuilding.count(position) > 0; }
 
 		/**
 		 * \brief Inserts the provided position, thereby marking the chunk at that position as already being operated on by another thread (being built)

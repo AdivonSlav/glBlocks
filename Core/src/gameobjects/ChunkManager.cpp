@@ -97,7 +97,10 @@ namespace CoreGameObjects
 
 	const std::string ChunkManager::ToFilename(const glm::vec3& position)
 	{
-		return std::format("{}{}_{}.ch", WRITE_PATH, position.x, position.z);
+		// std::format is not supported with GCC11
+		//return std::format("{}{}_{}.ch", WRITE_PATH, position.x, position.z); 
+		std::string filename = WRITE_PATH + std::to_string(position.x) + "_" + std::to_string(position.y);
+		return filename;
 	}
 
 	bool ChunkManager::IsLoaded(const glm::vec3& position)

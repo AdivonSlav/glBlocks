@@ -7,20 +7,21 @@
 
 namespace CoreWindow
 {
-	Window* Window::m_Instance = new Window;
-	bool Window::m_Keys[GLFW_KEY_LAST] = { false };
-	bool Window::m_MouseButtons[GLFW_MOUSE_BUTTON_LAST] = { false };
+	Window *Window::m_Instance = new Window;
+	bool Window::m_Keys[GLFW_KEY_LAST] = {false};
+	bool Window::m_MouseButtons[GLFW_MOUSE_BUTTON_LAST] = {false};
 	bool Window::m_FirstClick = true;
 
-	void Window::Init(int width, int height, const char* title)
+	void Window::Init(int width, int height, const char *title)
 	{
+		LOG_INFO("Initializing GLFW...");
 		if (!glfwInit())
 		{
 			LOG_ERROR("Failed to initialize GLFW!")
 			return;
 		}
 
-		LOG_INFO("Initialized GLFW " <<  glfwGetVersionString())
+		LOG_INFO("Initialized GLFW " << glfwGetVersionString())
 
 		m_Width = width;
 		m_Height = height;
@@ -31,10 +32,10 @@ namespace CoreWindow
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 		// To maintain compatibility with MacOS systems
-		//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+		// glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 		// Temporarily disables resizing of the window
-		//glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+		// glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 		// For debug logging
 #ifdef BLOCKS_DEBUG
@@ -74,7 +75,7 @@ namespace CoreWindow
 		glfwSetWindowSizeCallback(m_Window, ResizeCallback);
 
 		// Centers window on screen
-		const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+		const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 		glfwSetWindowPos(m_Window, mode->width / 2.0f - width / 2.0f, mode->height / 2.0f - height / 2.0f);
 	}
 
@@ -101,7 +102,7 @@ namespace CoreWindow
 		glfwTerminate();
 	}
 
-	void Window::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+	void Window::KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 	{
 		if (key == GLFW_KEY_ESCAPE && action != GLFW_RELEASE)
 			CoreUtils::Dashboard::SetShown(!CoreUtils::Dashboard::IsShown());
@@ -110,19 +111,19 @@ namespace CoreWindow
 		m_Keys[key] = action != GLFW_RELEASE;
 	}
 
-	void Window::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+	void Window::MouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 	{
 		m_MouseButtons[button] = action != GLFW_RELEASE;
 	}
 
-	void Window::ResizeCallback(GLFWwindow* window, int width, int height)
+	void Window::ResizeCallback(GLFWwindow *window, int width, int height)
 	{
 		m_Instance->m_Width = width;
 		m_Instance->m_Height = height;
 
 		glViewport(0, 0, width, height);
 
-		for (auto& callback : m_Instance->m_CustomCallbacks.ResizeCallbacks)
+		for (auto &callback : m_Instance->m_CustomCallbacks.ResizeCallbacks)
 		{
 			callback(width, height);
 		}
@@ -146,9 +147,9 @@ namespace CoreWindow
 
 	bool Window::IsMouseButtonPressed(unsigned int button)
 	{
-		if (button >=  GLFW_MOUSE_BUTTON_LAST)
+		if (button >= GLFW_MOUSE_BUTTON_LAST)
 			return false;
-		 
+
 		return m_MouseButtons[button];
 	}
 
@@ -160,7 +161,7 @@ namespace CoreWindow
 		return !m_MouseButtons[button];
 	}
 
-	void Window::SetCursorPos(const glm::vec2& position)
+	void Window::SetCursorPos(const glm::vec2 &position)
 	{
 		glfwSetCursorPos(m_Instance->m_Window, position.x, position.y);
 	}

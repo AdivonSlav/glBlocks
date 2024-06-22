@@ -14,6 +14,7 @@ namespace CoreUtils
 		double m_ElapsedTime;
 		// Time delta between last recorded time and the current time (in seconds)
 		double m_DeltaTime;
+
 	public:
 		Timer();
 		~Timer() = default;
@@ -28,7 +29,7 @@ namespace CoreUtils
 		 */
 		void RecordLapse();
 
-		const double& GetElapsed() const { return m_ElapsedTime; }
-		const double& GetDelta() const { return m_DeltaTime; }
+		const double &GetElapsed() const { return m_ElapsedTime; }
+		const double &GetDelta() const { return m_DeltaTime; }
 	};
 }

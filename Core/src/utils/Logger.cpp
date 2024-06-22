@@ -4,7 +4,7 @@ namespace CoreUtils
 {
 
 	Logger::Logger(LogLevel level)
-		: m_Level(level)
+			: m_Level(level)
 	{
 		std::ios::sync_with_stdio(false);
 	}
@@ -16,6 +16,7 @@ namespace CoreUtils
 
 	std::string Logger::GetCurrentTime(bool onlyDate)
 	{
+#ifdef BLOCKS_PLATFORM_WINDOWS
 		auto now = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::current_zone()->to_local(std::chrono::system_clock::now()));
 
 		std::string formattedTime = std::format("{:%Y-%m-%d %T}", now);
@@ -23,10 +24,13 @@ namespace CoreUtils
 		if (onlyDate)
 			formattedTime = std::format("{:%Y-%m-%d}", now);
 
-		return formattedTime;
+		return formattedTime + " -> ";
+#elif BLOCKS_PLATFORM_LINUX
+		return "";
+#endif
 	}
 
-	void Logger::LogToFile(const std::string& logMessage)
+	void Logger::LogToFile(const std::string &logMessage)
 	{
 		std::ofstream stream(GetCurrentTime(true) + ".txt", std::fstream::out | std::fstream::app);
 
@@ -47,7 +51,8 @@ namespace CoreUtils
 	void Logger::Log()
 	{
 		std::stringstream logMessage;
-		logMessage << GetCurrentTime() << " -> " << GetLevel() << m_Stream.str() << std::endl;
+		logMessage
+				<< GetCurrentTime() << GetLevel() << m_Stream.str() << std::endl;
 #ifdef BLOCKS_DEBUG
 		std::cout << logMessage.str();
 #endif
@@ -60,13 +65,13 @@ namespace CoreUtils
 		switch (m_Level)
 		{
 		case LogLevel::INFO:
-			//system("Color 02");
+			// system("Color 02");
 			return "INFO: ";
 		case LogLevel::WARN:
-			//system("Color 06");
+			// system("Color 06");
 			return "WARN: ";
 		case LogLevel::ERROR:
-			//system("Color 04");
+			// system("Color 04");
 			return "ERROR: ";
 		}
 

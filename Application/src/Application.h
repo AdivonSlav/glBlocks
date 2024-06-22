@@ -10,17 +10,18 @@ using namespace CoreUtils;
 class Application
 {
 private:
-	Window& m_Window;
-	Renderer* m_Renderer;
+	Window &m_Window;
+	Renderer *m_Renderer;
 	Camera m_Camera;
-	Dashboard* m_Dashboard;
-	World* m_World;
+	Dashboard *m_Dashboard;
+	World *m_World;
 	Timer m_Timer;
 
 	double m_FrameRate;
 	double m_AverageFrameTime; // in milliseconds
 	unsigned int m_FrameCount;
 	double m_LastUpdate;
+
 public:
 	Application();
 	~Application();
