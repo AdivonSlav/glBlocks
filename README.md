@@ -33,5 +33,22 @@ The libraries that I used are:
 - ESC - Open dashboard
 
 ## Build instructions
+### Windows
+Simply run 'genproj.bat' which will generate the necessary project files for Visual Studio 2022 using Premake5.
+### Linux
+To compile on Linux, you need make, g++ and GLFW installed
 
-Simply run 'genproj.bat' which will generate the necessary project files for Visual Studio 2022 using Premake5. For now I'm only supporting Visual Studio 2022 and MSVC.
+For Ubuntu/Debian, run this
+```bash
+sudo apt install make g++ libglfw3 libglfw3-devel
+```
+For RHEL-based distros, run this
+```bash
+sudo dnf install make g++ glfw glfw-devel
+```
+To compile, simply run the following
+```bash
+make config=release # Release build
+make config=debug # Debug build
+```
+The binaries will be located in `bin/`
