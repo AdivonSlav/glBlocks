@@ -27,7 +27,7 @@ namespace CoreGraphics::Buffers
 	{
 		Bind();
 		glBufferData(GL_ARRAY_BUFFER, m_Size, NULL, GL_STREAM_DRAW);
-		glBufferSubData(GL_ARRAY_BUFFER, offset, m_Size, data);
+		glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 		Unbind();
 	}
 

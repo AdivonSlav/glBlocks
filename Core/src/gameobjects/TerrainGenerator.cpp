@@ -93,8 +93,8 @@ namespace CoreGameObjects
 			}
 		}
 
-		std::vector<Chunk*> chunksToBuild;
-		std::vector<Chunk*> chunksToRebuild;
+		std::vector<std::shared_ptr<Chunk>> chunksToBuild;
+		std::vector<std::shared_ptr<Chunk>> chunksToRebuild;
 
 		for (auto& loadedChunk : ChunkManager::GetLoadedChunks())
 		{
@@ -105,11 +105,11 @@ namespace CoreGameObjects
 				continue;
 
 			if (!loadedChunk->IsBuilt())
-				chunksToBuild.push_back(loadedChunk.get());
+				chunksToBuild.push_back(loadedChunk);
 			else if (loadedChunk->NeedsRebuild())
 			{
 				loadedChunk->SetNeedsRebuild(false);
-				chunksToRebuild.push_back(loadedChunk.get());
+				chunksToRebuild.push_back(loadedChunk);
 			}
 		}
 
@@ -160,8 +160,11 @@ namespace CoreGameObjects
 				}
 			}
 
-			if (distance > LOAD_DISTANCE && loadedIt->get()->IsBuilt())
+			if (distance > LOAD_DISTANCE
+				&& loadedIt->get()->IsBuilt()
+				&& !ChunkManager::IsPositionQueuedForBuild(chunkPos))
 			{
+				ChunkManager::SynchronizeObscured(loadedIt->get());
 				loadedIt = ChunkManager::GetLoadedChunks().erase(loadedIt);
 				LOG_INFO("Unloaded chunk -> " << ChunkManager::GetLoadedChunks().size());
 			}
