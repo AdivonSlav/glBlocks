@@ -94,20 +94,30 @@ namespace CoreGameObjects
 		}
 
 		std::vector<Chunk*> chunksToBuild;
+		std::vector<Chunk*> chunksToRebuild;
 
 		for (auto& loadedChunk : ChunkManager::GetLoadedChunks())
 		{
-			if (chunksToBuild.size() == ASYNC_CHUNK_BUILD_COUNT)
+			if (chunksToBuild.size() + chunksToRebuild.size() == ASYNC_CHUNK_BUILD_COUNT)
 				break;
 
-			if (ChunkManager::IsPositionQueuedForBuild(loadedChunk->GetPos()) || loadedChunk->IsBuilt())
+			if (ChunkManager::IsPositionQueuedForBuild(loadedChunk->GetPos()))
 				continue;
 
-			chunksToBuild.push_back(loadedChunk.get());
+			if (!loadedChunk->IsBuilt())
+				chunksToBuild.push_back(loadedChunk.get());
+			else if (loadedChunk->NeedsRebuild())
+			{
+				loadedChunk->SetNeedsRebuild(false);
+				chunksToRebuild.push_back(loadedChunk.get());
+			}
 		}
 
 		if (!chunksToBuild.empty())
-			ChunkManager::QueueForBuild(chunksToBuild, m_Semaphore);
+			ChunkManager::QueueForBuild(chunksToBuild, m_Semaphore, false);
+
+		if (!chunksToRebuild.empty())
+			ChunkManager::QueueForBuild(chunksToRebuild, m_Semaphore, true);
 	}
 
 	void TerrainGenerator::SynchronizeChunks()

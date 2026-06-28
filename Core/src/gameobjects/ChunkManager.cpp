@@ -80,11 +80,11 @@ namespace CoreGameObjects
 			std::scoped_lock scopedLock(semaphore);
 			std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
-			for (auto& chunk : chunks)
-			{
-				chunk->Build();
-				std::this_thread::sleep_for(std::chrono::milliseconds(20));
-			}
+		for (auto& chunk : chunks)
+		{
+			chunk->Build(rebuild);
+			std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		}
 
 			return chunks;
 		}, chunks, std::ref(semaphore), rebuild));
@@ -97,10 +97,7 @@ namespace CoreGameObjects
 
 	const std::string ChunkManager::ToFilename(const glm::vec3& position)
 	{
-		// std::format is not supported with GCC11
-		//return std::format("{}{}_{}.ch", WRITE_PATH, position.x, position.z); 
-		std::string filename = WRITE_PATH + std::to_string(position.x) + "_" + std::to_string(position.y);
-		return filename;
+		return WRITE_PATH + std::to_string(position.x) + "_" + std::to_string(position.z) + ".ch";
 	}
 
 	bool ChunkManager::IsLoaded(const glm::vec3& position)

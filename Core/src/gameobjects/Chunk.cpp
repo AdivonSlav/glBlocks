@@ -10,13 +10,13 @@ namespace CoreGameObjects
 	using namespace CoreUtils;
 
 	Chunk::Chunk()
-		: m_VAO(nullptr), m_Position(0.0f, 0.0f, 0.0f),  m_ShouldDispose(false), m_ShouldRender(false), m_IsUploaded(false), m_Built(false), m_Serialized(true), m_Visible(false), m_VertexCount(0)
+		: m_VAO(nullptr), m_Position(0.0f, 0.0f, 0.0f),  m_ShouldDispose(false), m_ShouldRender(false), m_IsUploaded(false), m_Built(false), m_Serialized(true), m_Visible(false), m_NeedsRebuild(false), m_VertexCount(0)
 	{
 		m_Model = glm::translate(glm::identity<glm::mat4>(), m_Position);
 	}
 
 	Chunk::Chunk(const glm::vec3& position)
-		: m_VAO(nullptr), m_Position(position), m_ShouldDispose(false), m_ShouldRender(false), m_IsUploaded(false), m_Built(false), m_Serialized(true), m_Visible(false),  m_VertexCount(0)
+		: m_VAO(nullptr), m_Position(position), m_ShouldDispose(false), m_ShouldRender(false), m_IsUploaded(false), m_Built(false), m_Serialized(true), m_Visible(false), m_NeedsRebuild(false), m_VertexCount(0)
 	{
 		m_Model = glm::translate(glm::identity<glm::mat4>(), m_Position);
 	}
@@ -312,12 +312,21 @@ namespace CoreGameObjects
 			}
 		}
 
+		if (rebuild)
+			m_IsUploaded = false;
+
 		m_VertexCount = m_Buffers.positions.size();
 		m_Built = true;
 	}
 
 	void Chunk::UploadToGPU()
 	{
+		if (m_VAO != nullptr)
+		{
+			UpdateGPUData();
+			return;
+		}
+
 		if (!VertexArrayManager::IsEmpty())
 		{
 			UpdateGPUData();
@@ -356,7 +365,7 @@ namespace CoreGameObjects
 
 		m_VAO->Bind();
 
-		GLuint posBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * 4 * sizeof(GLshort);
+		GLuint posBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * 4 * sizeof(GLbyte);
 		GLuint uvBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * sizeof(GLshort);
 		GLuint typeBufferSize = CHUNK_X * CHUNK_Y * CHUNK_Z * 6 * 6 * sizeof(GLbyte);
 
@@ -407,13 +416,8 @@ namespace CoreGameObjects
 				foundNeighbor = true;
 			}
 
-			//if (foundNeighbor)
-			//{
-			//	if (loadedChunk->IsBuilt() && !loadedChunk->IsUploaded() && !ChunkManager::IsPositionQueuedForBuild(chunkPos))
-			//	{
-			//		ChunkManager::QueueForBuild(loadedChunk.get(), true);
-			//	}
-			//}
+			if (foundNeighbor && loadedChunk->IsBuilt() && !ChunkManager::IsPositionQueuedForBuild(chunkPos))
+				loadedChunk->SetNeedsRebuild(true);
 		}
 	}
 
