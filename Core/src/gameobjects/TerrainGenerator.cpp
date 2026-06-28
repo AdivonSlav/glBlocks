@@ -9,15 +9,16 @@
 #define MAX_SEED 9999999999
 #define MIN_SEED 1
 
-#define LOAD_DISTANCE 124.0f // Chunks whose distance length is less than this to the camera are loaded into memory
-#define RENDER_DISTANCE 100.0f // Chunks whose distance length is less than this to the camera are uploaded to the GPU and rendered
+#define LOAD_DISTANCE 192.0f // Chunks whose distance length is less than this to the camera are loaded into memory
+#define RENDER_DISTANCE 160.0f // Chunks whose distance length is less than this to the camera are uploaded to the GPU and rendered
 
-#define CHUNK_LOAD_COUNT 5 // Max number of chunks that can be loaded into memory in a single frame
+#define CHUNK_LOAD_COUNT 8 // Max number of chunks that can be loaded into memory in a single frame
 #define ASYNC_CHUNK_BUILD_COUNT 30 // Max number of chunks that can be forwarded to another thread for building
-#define CHUNK_UPLOAD_WAIT_TIME 0.1 // The time to wait before uploading a new chunk to the GPU (in seconds)
+#define CHUNK_UPLOAD_WAIT_TIME 0.02 // The time to wait before uploading a new chunk to the GPU (in seconds)
 
 namespace CoreGameObjects
 {
+#define CHUNK_UPLOAD_COUNT 2 // Number of chunks to upload per upload interval
 	unsigned long long TerrainGenerator::m_Seed = 0;
 	double TerrainGenerator::m_LerpedSeed = 0.0;
 	double TerrainGenerator::m_LastUploadTime = 0.0;
@@ -51,73 +52,148 @@ namespace CoreGameObjects
 	void TerrainGenerator::LoadChunks()
 	{
 		auto camPos = m_Camera->GetPosition();
-		auto camPosChunks = glm::vec2(camPos.x / 16, camPos.z / 16);
-
-		int startX = camPosChunks.x - 32;
-		int endX = camPosChunks.x + 32;
-		int startZ = camPosChunks.y - 32;
-		int endZ = camPosChunks.y + 32;
-
-		int chunksLoaded = 0;
-
-		for (int i = startX; i <= endX; i++)
+		
+		int camChunkX = static_cast<int>(std::floor(camPos.x / CHUNK_X));
+		int camChunkZ = static_cast<int>(std::floor(camPos.z / CHUNK_Z));
+		
+		int radius = static_cast<int>(std::ceil(LOAD_DISTANCE / CHUNK_X)) + 1;
+		
+		struct ChunkCandidate
 		{
-			for (int j = startZ; j <= endZ; j++)
+			glm::vec3 position;
+			float distance;
+			int ring;
+		};
+		
+		std::vector<ChunkCandidate> candidates;
+		
+		for (int dx = -radius; dx <= radius; dx++)
+		{
+			for (int dz = -radius; dz <= radius; dz++)
 			{
-				if (chunksLoaded == CHUNK_LOAD_COUNT)
-					break;
-
-				auto chunkPos = glm::vec3(i * CHUNK_X, 0.0f, j * CHUNK_Z);
-				auto distanceVector = camPos.xz() - glm::vec2(chunkPos.x + CHUNK_X, chunkPos.z + CHUNK_Z);
-				auto distance = glm::length(distanceVector);
-
-				if (distance <= LOAD_DISTANCE && !ChunkManager::IsLoaded(chunkPos))
+				glm::vec3 chunkPos((camChunkX + dx) * CHUNK_X, 0.0f, (camChunkZ + dz) * CHUNK_Z);
+				
+				if (ChunkManager::IsLoaded(chunkPos))
+					continue;
+				
+				glm::vec3 chunkCenter(chunkPos.x + CHUNK_X / 2.0f, 0.0f, chunkPos.z + CHUNK_Z / 2.0f);
+				glm::vec2 distanceVector = camPos.xz() - glm::vec2(chunkCenter.x, chunkCenter.z);
+				float distance = glm::length(distanceVector);
+				
+				if (distance <= LOAD_DISTANCE)
 				{
-					std::shared_ptr<Chunk> chunk = std::make_shared<Chunk>(chunkPos);
-
-					if (ChunkManager::IsSerialized(chunkPos))
-					{
-						ChunkManager::Deserialize(chunkPos, chunk.get(), GetSeed());
-						chunk->SetSerialized(true);
-					}
-					else
-					{
-						Noisify(*chunk);
-						ChunkManager::Serialize(chunkPos, chunk.get(), GetSeed());
-					}
-
-					ChunkManager::LoadChunk(chunk);
-					chunksLoaded++;
-					LOG_INFO("Loaded chunk -> " << ChunkManager::GetLoadedChunks().size());
+					int ring = std::max(std::abs(dx), std::abs(dz));
+					candidates.push_back({chunkPos, distance, ring});
 				}
 			}
 		}
-
-		std::vector<std::shared_ptr<Chunk>> chunksToBuild;
-		std::vector<std::shared_ptr<Chunk>> chunksToRebuild;
-
-		for (auto& loadedChunk : ChunkManager::GetLoadedChunks())
+		
+		if (!candidates.empty())
 		{
-			if (chunksToBuild.size() + chunksToRebuild.size() == ASYNC_CHUNK_BUILD_COUNT)
-				break;
-
-			if (ChunkManager::IsPositionQueuedForBuild(loadedChunk->GetPos()))
-				continue;
-
-			if (!loadedChunk->IsBuilt())
-				chunksToBuild.push_back(loadedChunk);
-			else if (loadedChunk->NeedsRebuild())
+			std::sort(candidates.begin(), candidates.end(), [](const ChunkCandidate& a, const ChunkCandidate& b) {
+				if (a.ring != b.ring)
+					return a.ring < b.ring;
+				return a.distance < b.distance;
+			});
+			
+			auto seed = static_cast<unsigned int>(m_Seed ^ static_cast<unsigned long long>(camChunkX) ^ (static_cast<unsigned long long>(camChunkZ) << 32));
+			std::mt19937 rng(seed);
+			
+			int currentRing = 0;
+			auto ringBegin = candidates.begin();
+			
+			for (auto it = candidates.begin(); it != candidates.end(); ++it)
 			{
-				loadedChunk->SetNeedsRebuild(false);
-				chunksToRebuild.push_back(loadedChunk);
+				if (it->ring != currentRing)
+				{
+					auto ringEnd = it;
+					std::shuffle(ringBegin, ringEnd, rng);
+					ringBegin = it;
+					currentRing = it->ring;
+				}
+			}
+			if (ringBegin != candidates.end())
+				std::shuffle(ringBegin, candidates.end(), rng);
+			
+			int chunksLoaded = 0;
+			for (const auto& candidate : candidates)
+			{
+				if (chunksLoaded >= CHUNK_LOAD_COUNT)
+					break;
+				
+				std::shared_ptr<Chunk> chunk = std::make_shared<Chunk>(candidate.position);
+				
+				if (ChunkManager::IsSerialized(candidate.position))
+				{
+					ChunkManager::Deserialize(candidate.position, chunk.get(), GetSeed());
+					chunk->SetSerialized(true);
+				}
+				else
+				{
+					Noisify(*chunk);
+					ChunkManager::Serialize(candidate.position, chunk.get(), GetSeed());
+				}
+				
+				ChunkManager::LoadChunk(chunk);
+				chunksLoaded++;
+				LOG_INFO("Loaded chunk -> " << ChunkManager::GetLoadedChunks().size());
 			}
 		}
 
-		if (!chunksToBuild.empty())
-			ChunkManager::QueueForBuild(chunksToBuild, m_Semaphore, false);
+	std::vector<std::shared_ptr<Chunk>> chunksToBuild;
+	std::vector<std::shared_ptr<Chunk>> chunksToRebuild;
 
-		if (!chunksToRebuild.empty())
-			ChunkManager::QueueForBuild(chunksToRebuild, m_Semaphore, true);
+	for (auto& loadedChunk : ChunkManager::GetLoadedChunks())
+	{
+		if (ChunkManager::IsPositionQueuedForBuild(loadedChunk->GetPos()))
+			continue;
+
+		if (!loadedChunk->IsBuilt())
+			chunksToBuild.push_back(loadedChunk);
+		else if (loadedChunk->NeedsRebuild())
+			chunksToRebuild.push_back(loadedChunk);
+	}
+
+	std::sort(chunksToBuild.begin(), chunksToBuild.end(), [this](const std::shared_ptr<Chunk>& a, const std::shared_ptr<Chunk>& b) {
+		auto camPos = m_Camera->GetPosition();
+		glm::vec3 centerA(a->GetPos().x + CHUNK_X / 2.0f, 0.0f, a->GetPos().z + CHUNK_Z / 2.0f);
+		glm::vec3 centerB(b->GetPos().x + CHUNK_X / 2.0f, 0.0f, b->GetPos().z + CHUNK_Z / 2.0f);
+		glm::vec2 distA = camPos.xz() - glm::vec2(centerA.x, centerA.z);
+		glm::vec2 distB = camPos.xz() - glm::vec2(centerB.x, centerB.z);
+		return glm::length(distA) < glm::length(distB);
+	});
+
+	std::sort(chunksToRebuild.begin(), chunksToRebuild.end(), [this](const std::shared_ptr<Chunk>& a, const std::shared_ptr<Chunk>& b) {
+		auto camPos = m_Camera->GetPosition();
+		glm::vec3 centerA(a->GetPos().x + CHUNK_X / 2.0f, 0.0f, a->GetPos().z + CHUNK_Z / 2.0f);
+		glm::vec3 centerB(b->GetPos().x + CHUNK_X / 2.0f, 0.0f, b->GetPos().z + CHUNK_Z / 2.0f);
+		glm::vec2 distA = camPos.xz() - glm::vec2(centerA.x, centerA.z);
+		glm::vec2 distB = camPos.xz() - glm::vec2(centerB.x, centerB.z);
+		return glm::length(distA) < glm::length(distB);
+	});
+
+	std::vector<std::shared_ptr<Chunk>> chunksToQueue;
+	
+	for (const auto& chunk : chunksToBuild)
+	{
+		if (chunksToQueue.size() >= ASYNC_CHUNK_BUILD_COUNT)
+			break;
+		chunksToQueue.push_back(chunk);
+	}
+
+	for (const auto& chunk : chunksToRebuild)
+	{
+		if (chunksToQueue.size() >= ASYNC_CHUNK_BUILD_COUNT)
+			break;
+		chunk->SetNeedsRebuild(false);
+		chunksToQueue.push_back(chunk);
+	}
+
+	for (const auto& chunk : chunksToQueue)
+	{
+		bool isRebuild = (std::find(chunksToRebuild.begin(), chunksToRebuild.end(), chunk) != chunksToRebuild.end());
+		ChunkManager::QueueForBuild(chunk, isRebuild, m_Semaphore);
+	}
 	}
 
 	void TerrainGenerator::SynchronizeChunks()
@@ -139,7 +215,8 @@ namespace CoreGameObjects
 		for (auto loadedIt = ChunkManager::GetLoadedChunks().begin(); loadedIt != ChunkManager::GetLoadedChunks().end(); )
 		{
 			auto chunkPos = loadedIt->get()->GetPos();
-			auto distanceVector = camPos.xz() - glm::vec2(chunkPos.x + CHUNK_X, chunkPos.z + CHUNK_Z);
+			glm::vec3 chunkCenter(chunkPos.x + CHUNK_X / 2.0f, 0.0f, chunkPos.z + CHUNK_Z / 2.0f);
+			glm::vec2 distanceVector = camPos.xz() - glm::vec2(chunkCenter.x, chunkCenter.z);
 			auto distance = glm::length(distanceVector);
 
 			if (distance <= RENDER_DISTANCE && loadedIt->get()->IsBuilt() && !loadedIt->get()->ShouldRender())
@@ -165,6 +242,7 @@ namespace CoreGameObjects
 				&& !ChunkManager::IsPositionQueuedForBuild(chunkPos))
 			{
 				ChunkManager::SynchronizeObscured(loadedIt->get());
+				ChunkManager::RemoveChunkPosition(chunkPos);
 				loadedIt = ChunkManager::GetLoadedChunks().erase(loadedIt);
 				LOG_INFO("Unloaded chunk -> " << ChunkManager::GetLoadedChunks().size());
 			}
@@ -195,24 +273,51 @@ namespace CoreGameObjects
 
 	void TerrainGenerator::PrepareChunks(double deltaTime)
 	{
-		bool uploadedOnce = false;
 		m_LastUploadTime += deltaTime;
 
 		if (m_LastUploadTime >= CHUNK_UPLOAD_WAIT_TIME)
 		{
 			m_LastUploadTime = 0.0;
 
-			for (auto& chunk : ChunkManager::GetLoadedChunks())
-			{
-				if (uploadedOnce)
-					return;
+			auto camPos = m_Camera->GetPosition();
+			int uploadsRemaining = CHUNK_UPLOAD_COUNT;
 
-				if (chunk->IsBuilt() && chunk->ShouldRender() && !chunk->IsUploaded() && !ChunkManager::IsPositionQueuedForBuild(chunk->GetPos()))
+			while (uploadsRemaining > 0)
+			{
+				std::shared_ptr<Chunk> nearestChunk = nullptr;
+				float nearestDistance = std::numeric_limits<float>::max();
+
+				for (auto& chunk : ChunkManager::GetLoadedChunks())
 				{
-					chunk->UploadToGPU();
-					uploadedOnce = true;
+					if (chunk->IsBuilt() && chunk->ShouldRender() && !ChunkManager::IsPositionQueuedForBuild(chunk->GetPos()) && (!chunk->IsUploaded() || chunk->NeedsGPUUpdate()))
+					{
+					glm::vec3 chunkCenter(chunk->GetPos().x + CHUNK_X / 2.0f, 0.0f, chunk->GetPos().z + CHUNK_Z / 2.0f);
+					glm::vec2 distanceVector = camPos.xz() - glm::vec2(chunkCenter.x, chunkCenter.z);
+					float distance = glm::length(distanceVector);
+
+						if (distance < nearestDistance)
+						{
+							nearestDistance = distance;
+							nearestChunk = chunk;
+						}
+					}
+				}
+
+				if (!nearestChunk)
+					break;
+
+				if (!nearestChunk->IsUploaded())
+				{
+					nearestChunk->UploadToGPU();
 					LOG_INFO("Uploaded chunk to GPU");
 				}
+				else if (nearestChunk->NeedsGPUUpdate())
+				{
+					nearestChunk->UpdateGPUData();
+					nearestChunk->SetNeedsGPUUpdate(false);
+					LOG_INFO("Updated chunk GPU data");
+				}
+				uploadsRemaining--;
 			}
 		}
 	}

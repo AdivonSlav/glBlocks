@@ -6,6 +6,7 @@
 namespace CoreGameObjects
 {
 	std::vector<std::shared_ptr<Chunk>> ChunkManager::m_LoadedChunks;
+	std::unordered_set<glm::vec3> ChunkManager::m_LoadedPositions;
 	std::deque<std::future<std::vector<std::shared_ptr<Chunk>>>> ChunkManager::m_QueuedForBuilding;
 	std::unordered_set<glm::vec3> ChunkManager::m_QueuedPositionsForBuilding;
 
@@ -56,6 +57,12 @@ namespace CoreGameObjects
 	void ChunkManager::LoadChunk(const std::shared_ptr<Chunk>& chunk)
 	{
 		m_LoadedChunks.emplace_back(chunk);
+		m_LoadedPositions.insert(chunk->GetPos());
+	}
+
+	void ChunkManager::RemoveChunkPosition(const glm::vec3& position)
+	{
+		m_LoadedPositions.erase(position);
 	}
 
 	void ChunkManager::SynchronizeObscured(const Chunk* chunk)
@@ -70,6 +77,12 @@ namespace CoreGameObjects
 			chunk->GetObscuring(3)->SetObscuring(2, nullptr);
 	}
 
+	void ChunkManager::QueueForBuild(std::shared_ptr<Chunk> chunk, bool rebuild, CoreUtils::Semaphore& semaphore)
+	{
+		std::vector<std::shared_ptr<Chunk>> chunks = { chunk };
+		QueueForBuild(chunks, semaphore, rebuild);
+	}
+
 	void ChunkManager::QueueForBuild(std::vector<std::shared_ptr<Chunk>>& chunks, CoreUtils::Semaphore& semaphore, bool rebuild)
 	{
 		for (auto& chunk : chunks)
@@ -79,12 +92,10 @@ namespace CoreGameObjects
 			[](std::vector<std::shared_ptr<Chunk>> chunks, Semaphore& semaphore, bool rebuild)
 			{
 				std::scoped_lock scopedLock(semaphore);
-				std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
 				for (auto& chunk : chunks)
 				{
 					chunk->Build(rebuild);
-					std::this_thread::sleep_for(std::chrono::milliseconds(20));
 				}
 
 				return chunks;
@@ -103,13 +114,7 @@ namespace CoreGameObjects
 
 	bool ChunkManager::IsLoaded(const glm::vec3& position)
 	{
-		for (const auto& loadedChunk : m_LoadedChunks)
-		{
-			if (loadedChunk->GetPos() == position)
-				return true;
-		}
-
-		return false;
+		return m_LoadedPositions.count(position) > 0;
 	}
 
 	Chunk* ChunkManager::GetLoadedChunk(const glm::vec3& position)

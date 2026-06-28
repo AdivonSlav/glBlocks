@@ -50,6 +50,7 @@ namespace CoreGameObjects
 		bool m_Serialized;
 		bool m_Visible;
 		bool m_NeedsRebuild;
+		bool m_NeedsGPUUpdate;
 		unsigned int m_VertexCount;
 	private:
 		/**
@@ -109,6 +110,7 @@ namespace CoreGameObjects
 		bool Serialized() const { return m_Serialized; }
 		bool IsVisible() const { return m_Visible; }
 		bool NeedsRebuild() const { return m_NeedsRebuild; }
+		bool NeedsGPUUpdate() const { return m_NeedsGPUUpdate; }
 		unsigned int GetVertCount() const { return m_VertexCount; }
 
 		void SetBlock(int x, int y, int z, BlockType type);
@@ -119,6 +121,7 @@ namespace CoreGameObjects
 		void SetSerialized(bool value) { m_Serialized = value; }
 		void SetUploaded(bool value) { m_IsUploaded = value; }
 		void SetNeedsRebuild(bool value) { m_NeedsRebuild = value; }
+		void SetNeedsGPUUpdate(bool value) { m_NeedsGPUUpdate = value; }
 
 		bool operator==(const Chunk& chunk) { return this->GetPos() == chunk.GetPos(); }
 	};

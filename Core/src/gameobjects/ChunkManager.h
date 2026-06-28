@@ -14,6 +14,7 @@ namespace CoreGameObjects
 	{
 	private:
 		static std::vector<std::shared_ptr<Chunk>> m_LoadedChunks;
+		static std::unordered_set<glm::vec3> m_LoadedPositions;
 		static std::deque<std::future<std::vector<std::shared_ptr<Chunk>>>> m_QueuedForBuilding;
 		static std::unordered_set<glm::vec3> m_QueuedPositionsForBuilding;
 
@@ -45,6 +46,7 @@ namespace CoreGameObjects
 		 * \param chunk Chunk to be loaded
 		 */
 		static void LoadChunk(const std::shared_ptr<Chunk>& chunk);
+		static void RemoveChunkPosition(const glm::vec3& position);
 
 		/**
 		 * \brief Checks the obscuring neighbors of the passed chunk and nullpoints this chunk for them. Used just before deallocation to ensure that the deallocated chunk is no longer a neighbor
@@ -58,6 +60,7 @@ namespace CoreGameObjects
 		 * \param semaphore A semaphore that prevents the spawning of too many concurrent threads
 		 * \param rebuild Whether the chunks need to be rebuilt or not
 		 */
+		static void QueueForBuild(std::shared_ptr<Chunk> chunk, bool rebuild, CoreUtils::Semaphore& semaphore);
 		static void QueueForBuild(std::vector<std::shared_ptr<Chunk>>& chunks, CoreUtils::Semaphore& semaphore, bool rebuild = false);
 
 		/**
