@@ -1,11 +1,18 @@
 #pragma once
 
 #include "../CoreAPI.h"
+#include <array>
 
 #include "Shader.h"
 
 namespace CoreGraphics
 {
+	struct FrustumPlane
+	{
+		glm::vec3 normal;
+		float distance;
+	};
+
 	class CORE_API Camera
 	{
 	private:
@@ -31,6 +38,8 @@ namespace CoreGraphics
 		bool m_FirstInput;
 
 		glm::vec2 m_LastMousePos;
+
+		std::array<FrustumPlane, 6> m_FrustumPlanes;
 
 	public:
 		Camera();
@@ -66,7 +75,10 @@ namespace CoreGraphics
 		const glm::vec3 &GetPosition() const { return m_Position; }
 		const glm::vec3 &GetWorldRight() const { return m_RightWorld; }
 		const glm::vec3 &GetWorldUp() const { return m_UpDirWorld; }
+		const std::array<FrustumPlane, 6>& GetFrustumPlanes() const { return m_FrustumPlanes; }
 
 		void SetPosition(float x, float y, float z) { m_Position = glm::vec3(x, y, z); }
+
+		void UpdateFrustumPlanes();
 	};
 }

@@ -8,7 +8,7 @@ out vec2 texCoords;
 out vec3 normal;
 out vec3 fragPos;
 out vec3 clearColor;
-out int enableFog;
+flat out int enableFog;
 
 uniform mat4 uView;
 uniform mat4 uProjection;

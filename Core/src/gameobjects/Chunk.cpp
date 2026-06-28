@@ -429,32 +429,26 @@ namespace CoreGameObjects
 			return;
 		}
 
-		glm::vec3 center = glm::vec3(m_Position.x + CHUNK_X / 2.0f, CHUNK_Y / 2.0f, m_Position.z + CHUNK_Z / 2.0f);
+		const glm::vec3 min = m_Position;
+		const glm::vec3 max = m_Position + glm::vec3(CHUNK_X, CHUNK_Y, CHUNK_Z);
 
-		// We multiply the center coordinate of the chunk with the MVP in order to figure out where the chunk center would be on the screen
-		glm::vec4 coordinates = camera.GetViewProjection() * GetModel() * glm::vec4(center, 1.0f);
-		// Dividing X and Y by W, we get those coordinates in NDC
-		coordinates.x /= coordinates.w;
-		coordinates.y /= coordinates.w;
-
-		// The diameter of a sphere that could encompass an entire chunk
-		float diameter = std::sqrt(CHUNK_X * CHUNK_X +  CHUNK_Y * CHUNK_Y + CHUNK_Z * CHUNK_Z);
-
-		if (coordinates.z < -diameter)
+		for (const auto& plane : camera.GetFrustumPlanes())
 		{
-			m_Visible = false;
-			return;
-		}
+			glm::vec3 positive = min;
 
-		// We turn the diameter into the same coordinate space as X and Y
-		diameter /= std::fabs(coordinates.w);
+			if (plane.normal.x >= 0.0f)
+				positive.x = max.x;
+			if (plane.normal.y >= 0.0f)
+				positive.y = max.y;
+			if (plane.normal.z >= 0.0f)
+				positive.z = max.z;
 
-		if (std::fabs(coordinates.x) > 1 + diameter || fabsf(coordinates.y) > 1 + diameter)
-		{
-			m_Visible = false;
-			return;
+			if (glm::dot(plane.normal, positive) + plane.distance < 0.0f)
+			{
+				m_Visible = false;
+				return;
+			}
 		}
-			
 
 		m_Visible = true;
 	}

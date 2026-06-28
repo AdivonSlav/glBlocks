@@ -9,6 +9,12 @@ using namespace CoreWindow;
 
 namespace CoreGraphics
 {
+	static FrustumPlane NormalizePlane(const glm::vec4& plane)
+	{
+		float length = glm::length(glm::vec3(plane));
+		return { glm::vec3(plane) / length, plane.w / length };
+	}
+
 	Camera::Camera() {}
 
 	Camera::Camera(glm::vec3 position)
@@ -36,10 +42,14 @@ namespace CoreGraphics
 
 	void Camera::OnUpdate(double deltaTime)
 	{
+		CheckInput(deltaTime);
+
 		m_Right = glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), m_Orientation));
+		m_UpDir = glm::normalize(glm::cross(m_Orientation, m_Right));
 
 		m_View = glm::lookAt(m_Position, m_Position + m_Orientation, m_UpDir);
 		m_ViewProjection = m_Perspective * m_View;
+		UpdateFrustumPlanes();
 
 		m_RightWorld = {m_View[0][0], m_View[1][0], m_View[2][0]};
 		m_UpDirWorld = {m_View[0][1], m_View[1][1], m_View[2][1]};
@@ -52,14 +62,25 @@ namespace CoreGraphics
 			shader->SetMat4<float>("uView", m_View);
 			shader->Unbind();
 		}
-
-		CheckInput(deltaTime);
 	}
 
 	void Camera::OnResize(int width, int height)
 	{
 		m_Perspective = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 1000.0f);
 		m_ViewProjection = m_Perspective * m_View;
+		UpdateFrustumPlanes();
+	}
+
+	void Camera::UpdateFrustumPlanes()
+	{
+		const glm::mat4& m = m_ViewProjection;
+
+		m_FrustumPlanes[0] = NormalizePlane(glm::vec4(m[0][3] + m[0][0], m[1][3] + m[1][0], m[2][3] + m[2][0], m[3][3] + m[3][0]));
+		m_FrustumPlanes[1] = NormalizePlane(glm::vec4(m[0][3] - m[0][0], m[1][3] - m[1][0], m[2][3] - m[2][0], m[3][3] - m[3][0]));
+		m_FrustumPlanes[2] = NormalizePlane(glm::vec4(m[0][3] + m[0][1], m[1][3] + m[1][1], m[2][3] + m[2][1], m[3][3] + m[3][1]));
+		m_FrustumPlanes[3] = NormalizePlane(glm::vec4(m[0][3] - m[0][1], m[1][3] - m[1][1], m[2][3] - m[2][1], m[3][3] - m[3][1]));
+		m_FrustumPlanes[4] = NormalizePlane(glm::vec4(m[0][3] + m[0][2], m[1][3] + m[1][2], m[2][3] + m[2][2], m[3][3] + m[3][2]));
+		m_FrustumPlanes[5] = NormalizePlane(glm::vec4(m[0][3] - m[0][2], m[1][3] - m[1][2], m[2][3] - m[2][2], m[3][3] - m[3][2]));
 	}
 
 	void Camera::CheckInput(double deltaTime)
